@@ -33,8 +33,14 @@ The critical path follows the user journey: onboard → get scored matches → b
   3. User can complete the 8–10 swipe-based Vibe Quiz with no text input, and normalized lifestyle scales (noise, cleanliness, sleep, social, WFH) are written to their profile.
   4. User can add name, 2–3 photos, and 3 vibe tags.
   5. On finishing onboarding the user reaches a first-matches screen (`onboardingCompleted` / `quizCompleted` set true).
-**Plans:** TBD
+**Plans:** 4 plans
 **UI hint:** yes
+
+Plans:
+- [ ] 01-01-PLAN.md — DB migration (init) + seed (cities, districts, 10 quiz questions IDs 1–10, 22 vibe tags) + Walking Skeleton proof
+- [ ] 01-02-PLAN.md — Backend: OnboardingModule (8 endpoints), GeoModule (2 endpoints), VibeTagsModule (1 endpoint), AppModule registration
+- [ ] 01-03-PLAN.md — Frontend: steps 0–3 (ScenarioStep, LocationStep, BudgetStep, DealbreakersStep), useOnboarding hook, HomeView gate
+- [ ] 01-04-PLAN.md — Frontend: steps 4–6 (QuizStep, ProfileStep, DoneStep), QUIZ_QUESTIONS constant, vibe-tags API
 
 ### Phase 2: Matching Engine
 **Goal:** Replace mock profiles with a real matching pipeline that computes Match Score = Hard(35%) + Lifestyle(30%) + Vibe(25%) + Behavioral(10%), zeroes out hard-conflict candidates, and updates behavioral signals from user actions.
@@ -116,7 +122,7 @@ The critical path follows the user journey: onboard → get scored matches → b
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Onboarding | 0/0 | Not started | - |
+| 1. Onboarding | 0/4 | Planned | - |
 | 2. Matching Engine | 0/0 | Not started | - |
 | 3. Discovery & Profiles | 0/0 | Not started | - |
 | 4. Chat & Agreement | 0/0 | Not started | - |
@@ -126,3 +132,4 @@ The critical path follows the user journey: onboard → get scored matches → b
 
 ---
 *Roadmap created: 2026-06-07*
+*Updated: 2026-06-07 — Phase 1 planned (4 plans, 3 waves)*

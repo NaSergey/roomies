@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 1 of 7 (Onboarding)
-Plan: 0 of 0 in current phase
-Status: Ready to plan (discuss complete)
-Last activity: 2026-06-07 — Phase 1 discuss complete; 1-CONTEXT.md written with 8 decisions
+Plan: 0 of 4 in current phase
+Status: Ready to execute (planning complete)
+Last activity: 2026-06-07 — Phase 1 planning complete; 4 plan files + SKELETON.md created
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -65,8 +65,8 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-07
-Stopped at: Phase 1 discuss complete. 1-CONTEXT.md with 8 locked decisions written.
-Resume file: None — next step is `/gsd-plan-phase 1`.
+Stopped at: Phase 1 planning complete. 4 plans + SKELETON.md written and verified.
+Resume file: None — next step is `/gsd-execute-phase 1`.
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
 - Routing: state-машина на `/` + Telegram BackButton API
