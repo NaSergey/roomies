@@ -17,9 +17,9 @@
 
 ### Matching & Discovery
 
-- [ ] **MATCH-01**: Система вычисляет Match Score = Hard (35%) + Lifestyle (30%) + Vibe (25%) + Behavioral (10%)
-- [ ] **MATCH-02**: Если любой hard-фактор (локация, бюджет, курение, питомцы) конфликтует — score = 0, кандидат не показывается
-- [ ] **MATCH-03**: Lifestyle compatibility рассчитывается по нормализованным шкалам 0–1 из Vibe Quiz с penalty за сильные расхождения
+- [x] **MATCH-01**: Система вычисляет Match Score = Hard (35%) + Lifestyle (30%) + Vibe (25%) + Behavioral (10%)
+- [x] **MATCH-02**: Если любой hard-фактор (локация, бюджет, курение, питомцы) конфликтует — score = 0, кандидат не показывается
+- [x] **MATCH-03**: Lifestyle compatibility рассчитывается по нормализованным шкалам 0–1 из Vibe Quiz с penalty за сильные расхождения
 - [ ] **MATCH-04**: Vibe compatibility считается через cosine similarity embedding-вектора из ответов квиза + вайб-теги
 - [ ] **MATCH-05**: Behavioral signals обновляют модель в реальном времени (лайки, начатые диалоги, ответы, feedback)
 - [ ] **MATCH-06**: Пользователь видит ленту карточек с % совместимости и 2–3 причинами мэтча
@@ -114,11 +114,11 @@
 | ONBOARD-05 | Phase 1 | Complete |
 | ONBOARD-06 | Phase 1 | Complete |
 | ONBOARD-07 | Phase 1 | Complete |
-| MATCH-01 | Phase 2 | Pending |
-| MATCH-02 | Phase 2 | Pending |
-| MATCH-03 | Phase 2 | Pending |
-| MATCH-04 | Phase 2 | Pending |
-| MATCH-05 | Phase 2 | Pending |
+| MATCH-01 | Phase 2 | Complete |
+| MATCH-02 | Phase 2 | Complete |
+| MATCH-03 | Phase 2 | Complete |
+| MATCH-04 | Phase 3 | Pending |
+| MATCH-05 | Phase 3 | Pending |
 | MATCH-06 | Phase 3 | Pending |
 | MATCH-07 | Phase 3 | Pending |
 | MATCH-08 | Phase 3 | Pending |

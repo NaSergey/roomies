@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ScenarioType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -106,8 +106,14 @@ export class FeedService {
         sleepSchedule: true,
         socialLevel: true,
         workFromHome: true,
+        onboardingCompleted: true,
+        isActive: true,
       },
     });
+
+    if (!me.onboardingCompleted || !me.isActive) {
+      throw new ForbiddenException('Complete onboarding to access the feed');
+    }
 
     // Step 2 — Get already swiped IDs
     const swiped = await this.prisma.swipe.findMany({

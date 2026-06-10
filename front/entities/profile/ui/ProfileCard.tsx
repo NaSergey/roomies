@@ -17,7 +17,7 @@ interface ProfileCardProps {
 export function ProfileCard({ profile, priority, overlay }: ProfileCardProps) {
   const photoSrc = profile.photos[0] ?? '';
   const budgetLabel =
-    profile.budgetMin && profile.budgetMax
+    profile.budgetMin != null && profile.budgetMax != null
       ? `${(profile.budgetMin / 1000).toFixed(0)}–${(profile.budgetMax / 1000).toFixed(0)}к ₽`
       : '';
   const tagLabels = profile.vibeTags.map((t) => t.label);

@@ -47,23 +47,27 @@ export function SwipeDeck() {
 
       try {
         const result = await postSwipe(currentProfile.id, action);
-        if (result.matched) {
+        if (result.matched && result.matchId != null) {
           setMatchState({
             candidateName: currentProfile.name,
-            matchId: result.matchId ?? 0,
+            matchId: result.matchId,
           });
         }
-      } catch {
-        // Swipe animation already played — silently ignore API errors in Phase 2
+      } catch (err) {
+        console.error('[SwipeDeck] postSwipe failed:', err);
       }
     },
     [visible, swipe],
   );
 
   const handleReset = useCallback(async () => {
-    const fresh = await getFeed();
-    setProfiles(fresh);
-    reset(); // resets the deck index to 0 in useSwipeDeck
+    try {
+      const fresh = await getFeed();
+      setProfiles(fresh);
+      reset();
+    } catch (err) {
+      console.error('[SwipeDeck] handleReset failed:', err);
+    }
   }, [reset]);
 
   if (loading) {
