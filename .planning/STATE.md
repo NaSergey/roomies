@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 1 of 7 (Onboarding)
-Plan: 0 of 4 in current phase
-Status: Ready to execute (planning complete)
-Last activity: 2026-06-07 — Phase 1 planning complete; 4 plan files + SKELETON.md created
+Plan: 1 of 4 in current phase (01-01 in progress — awaiting human action)
+Status: Executing — blocked at checkpoint:human-action (migration + DB setup)
+Last activity: 2026-06-10 — Plan 01-01 seed.ts committed; awaiting Postgres migration
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█░░░░░░░░░] 10%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
+- Total plans completed: 0 (01-01 in progress)
 - Average duration: —
 - Total execution time: 0 hours
 
@@ -27,7 +27,7 @@ Progress: [░░░░░░░░░░] 0%
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| Phase 1 | 0/4 | — | — |
 
 **Recent Trend:**
 - Last 5 plans: —
@@ -48,11 +48,14 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- Run `npx prisma migrate dev --name init` from `roomies back/` after starting PostgreSQL on port 5433
+- Run `npx prisma db seed` after migration to populate reference data
+- Verify `npm run start:dev` starts backend cleanly and `POST /auth/telegram` returns 401
 
 ### Blockers/Concerns
 
-None yet.
+- PostgreSQL not running on localhost:5433 — migration blocked until DB is started
+- Backend port is 4000 (not 3000) per `.env` PORT setting
 
 ## Deferred Items
 
@@ -64,9 +67,9 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-07
-Stopped at: Phase 1 planning complete. 4 plans + SKELETON.md written and verified.
-Resume file: None — next step is `/gsd-execute-phase 1`.
+Last session: 2026-06-10
+Stopped at: Plan 01-01 — checkpoint:human-action (Task 1: Prisma migration + DB setup). seed.ts committed (1343dfc). Awaiting "migration done" signal.
+Resume file: .planning/phases/1/01-01-SUMMARY.md
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
 - Routing: state-машина на `/` + Telegram BackButton API
