@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Plan 02-01 — COMPLETE. seedFakeProfiles(), 25 fake users seeded idempotently (d9bc6ac). DB ready for matching engine. Next: 02-02 FeedModule+SwipeModule.
+stopped_at: Plan 02-02 — COMPLETE. FeedModule (GET /feed, lifestyle scoring, hard-conflict filter, scenario compat) + SwipeModule (POST /swipes, mutual-like Match creation, user1Id < user2Id) built and registered. Build green. Next: 02-03 frontend wiring.
 last_updated: "2026-06-10T11:20:03.214Z"
 last_activity: 2026-06-10
 progress:
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 2 of 7 (Matching Engine)
-Plan: 1 of 3 in current phase (02-01 COMPLETE, 02-02 and 02-03 — ready to execute)
-Status: Executing — Plan 02-01 complete
+Plan: 2 of 3 in current phase (02-01 COMPLETE, 02-02 COMPLETE, 02-03 — ready to execute)
+Status: Executing — Plan 02-02 complete
 Last activity: 2026-06-10
 
 Progress: [███████░░░] 71%
@@ -72,6 +72,9 @@ Recent decisions affecting current work:
 - [Phase ?]: HomeView gate uses early return pattern: if authenticated && !onboardingCompleted return <OnboardingFlow> before main render
 - [02-01]: Deterministic FAKE_USERS array (not Math.random()) prevents re-seed churn and makes git diffs reviewable
 - [02-01]: District count guard (>=5 Moscow districts) prevents silent out-of-bounds on misconfigured DB
+- [02-02]: FeedModule/SwipeModule import AuthModule (not global) — same pattern as OnboardingModule
+- [02-02]: Scenario compat map is exhaustive Record<ScenarioType, ScenarioType[]> — TypeScript enforces all keys
+- [02-02]: matchScore in Match record stored as 0.5 placeholder; real score computed on-the-fly in GET /feed
 
 ### Pending Todos
 
@@ -91,8 +94,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-10T12:20:00.000Z
-Stopped at: Plan 02-01 — COMPLETE. seedFakeProfiles(), 25 fake users seeded idempotently (d9bc6ac). DB ready for matching engine. Next: 02-02 FeedModule+SwipeModule.
+Last session: 2026-06-10T13:00:00.000Z
+Stopped at: Plan 02-02 — COMPLETE. FeedModule (GET /feed, lifestyle scoring, hard-conflict filter) + SwipeModule (POST /swipes, mutual-like Match creation) built and registered. Build green (fd0e5b8, 44c7af9). Next: 02-03 frontend wiring.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
