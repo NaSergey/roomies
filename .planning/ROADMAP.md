@@ -57,7 +57,7 @@ Plans:
 Plans:
 - [x] 02-01-PLAN.md — Fake profiles seed: 25 completed users with varied scenarios, lifestyle scales, quiz answers, districts, vibe tags (Wave 0 — standalone) (COMPLETE: seedFakeProfiles() added, 25 fake users seeded, idempotent, d9bc6ac)
 - [x] 02-02-PLAN.md — Backend: FeedModule (GET /feed with lifestyle scoring + hard filters) + SwipeModule (POST /swipes with mutual-like Match creation) (Wave 1) (COMPLETE: GET /feed + POST /swipes, build green, fd0e5b8 + 44c7af9)
-- [ ] 02-03-PLAN.md — Frontend wiring: getFeed()/postSwipe() API functions, RoomieProfile type update, SwipeDeck real data, match overlay (Wave 2)
+- [x] 02-03-PLAN.md — Frontend wiring: getFeed()/postSwipe() API functions, RoomieProfile type update, SwipeDeck real data, match overlay (Wave 2) (COMPLETE: SwipeDeck on real feed, postSwipe on each action, match overlay, TypeScript clean, 7c8a6b8 + 0e422ac)
 
 ### Phase 3: Discovery & Profiles
 **Goal:** The swipe feed serves real scored candidates from the DB with compatibility % and match reasons; users can swipe with all four actions, see a match screen on mutual like, open a detailed candidate profile, filter the feed, and edit their own profile (incl. Roomie Score).
@@ -128,7 +128,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Onboarding | 4/4 | Complete | 2026-06-10 |
-| 2. Matching Engine | 2/3 | In Progress | - |
+| 2. Matching Engine | 3/3 | Complete | 2026-06-10 |
 | 3. Discovery & Profiles | 0/0 | Not started | - |
 | 4. Chat & Agreement | 0/0 | Not started | - |
 | 5. Squad Mode | 0/0 | Not started | - |

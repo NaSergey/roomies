@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Plan 02-02 — COMPLETE. FeedModule (GET /feed, lifestyle scoring, hard-conflict filter, scenario compat) + SwipeModule (POST /swipes, mutual-like Match creation, user1Id < user2Id) built and registered. Build green. Next: 02-03 frontend wiring.
-last_updated: "2026-06-10T11:20:03.214Z"
+stopped_at: Plan 02-03 — COMPLETE. SwipeDeck wired to real GET /feed + POST /swipes. ProfileCard updated for API shape. Match overlay on mutual like. MOCK_PROFILES removed. TypeScript clean. Phase 2 COMPLETE.
+last_updated: "2026-06-10T14:00:00.000Z"
 last_activity: 2026-06-10
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
-  percent: 71
+  completed_plans: 6
+  percent: 86
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Пользователь получает первые качественные совпадения по вайбу за 3 минуты онбординга и понимает, почему ему показали именно этого человека.
-**Current focus:** Phase 2 — Matching Engine
+**Current focus:** Phase 3 — Discovery & Profiles (Phase 2 COMPLETE)
 
 ## Current Position
 
 Phase: 2 of 7 (Matching Engine)
-Plan: 2 of 3 in current phase (02-01 COMPLETE, 02-02 COMPLETE, 02-03 — ready to execute)
-Status: Executing — Plan 02-02 complete
+Plan: 3 of 3 in current phase (02-01 COMPLETE, 02-02 COMPLETE, 02-03 COMPLETE)
+Status: Phase 2 COMPLETE — ready to execute Phase 3
 Last activity: 2026-06-10
 
-Progress: [███████░░░] 71%
+Progress: [████████░░] 86%
 
 ## Performance Metrics
 
@@ -75,6 +75,9 @@ Recent decisions affecting current work:
 - [02-02]: FeedModule/SwipeModule import AuthModule (not global) — same pattern as OnboardingModule
 - [02-02]: Scenario compat map is exhaustive Record<ScenarioType, ScenarioType[]> — TypeScript enforces all keys
 - [02-02]: matchScore in Match record stored as 0.5 placeholder; real score computed on-the-fly in GET /feed
+- [02-03]: feed.ts imports apiFetch from './client' directly (not barrel) to prevent circular dependency feed.ts → index.ts → feed.ts
+- [02-03]: handleSwipe is async but SwipeHandler type is sync void — TS allows this; animation fires immediately without awaiting the API call
+- [02-03]: ProfileCard renders house emoji placeholder when photos[] is empty — prevents broken image elements for seed users with no photos
 
 ### Pending Todos
 
@@ -94,8 +97,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-10T13:00:00.000Z
-Stopped at: Plan 02-02 — COMPLETE. FeedModule (GET /feed, lifestyle scoring, hard-conflict filter) + SwipeModule (POST /swipes, mutual-like Match creation) built and registered. Build green (fd0e5b8, 44c7af9). Next: 02-03 frontend wiring.
+Last session: 2026-06-10T14:00:00.000Z
+Stopped at: Plan 02-03 — COMPLETE. Phase 2 COMPLETE (02-01, 02-02, 02-03). SwipeDeck on real GET /feed + POST /swipes, match overlay working. Ready for Phase 3.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
