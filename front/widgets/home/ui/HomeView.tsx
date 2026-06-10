@@ -1,24 +1,48 @@
 'use client';
 
-import { useState } from 'react';
-import { MOCK_PROFILES } from '@/entities/profile';
+import { useEffect, useState } from 'react';
 import { AuthStatusChip, useTelegramAuth } from '@/features/auth';
-import { OnboardingFlow } from '@/features/onboarding';
+import { OnboardingFlow, getOnboardingStatus } from '@/features/onboarding';
 import { useTelegramWebApp } from '@/shared/lib/telegram';
 import { SwipeDeck } from '@/widgets/swipe-deck';
 
-// Композиция For You: шапка (back · For You · settings) + колода свайпа.
-// Без бизнес-логики — состояние тянется хуками фич.
+type AppState = 'loading' | 'onboarding' | 'main';
+
 export function HomeView() {
   useTelegramWebApp();
   const auth = useTelegramAuth();
-  const [onboardingCompleted, setOnboardingCompleted] = useState(false);
+  const [appState, setAppState] = useState<AppState>('loading');
 
-  // When auth is complete and onboarding not done — show full-screen OnboardingFlow
-  if (auth.status === 'authenticated' && !onboardingCompleted) {
+  useEffect(() => {
+    if (auth.status !== 'authenticated') return;
+    let cancelled = false;
+    getOnboardingStatus()
+      .then((status) => {
+        if (cancelled) return;
+        setAppState(status.onboardingCompleted ? 'main' : 'onboarding');
+      })
+      .catch(() => {
+        if (!cancelled) setAppState('onboarding');
+      });
+    return () => { cancelled = true; };
+  }, [auth.status]);
+
+  if (auth.status === 'error') {
     return (
-      <OnboardingFlow onComplete={() => setOnboardingCompleted(true)} />
+      <main className="mx-auto flex h-dvh w-full max-w-md flex-col items-center justify-center px-4">
+        <p className="text-sm" style={{ color: 'var(--rose)' }}>
+          Ошибка авторизации: {auth.error}
+        </p>
+      </main>
     );
+  }
+
+  if (appState === 'loading') {
+    return <SplashScreen />;
+  }
+
+  if (appState === 'onboarding') {
+    return <OnboardingFlow onComplete={() => setAppState('main')} />;
   }
 
   return (
@@ -38,14 +62,38 @@ export function HomeView() {
         </div>
       </header>
 
-      {auth.status === 'error' && (
-        <div className="rounded-2xl bg-rose-100 px-3 py-2 text-xs text-rose-700">
-          Авторизация: {auth.error}
-        </div>
-      )}
-
-      <SwipeDeck profiles={MOCK_PROFILES} />
+      <SwipeDeck />
     </main>
+  );
+}
+
+function SplashScreen() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
+  return (
+    <div
+      className="flex h-dvh w-full flex-col items-center justify-center bg-background transition-opacity duration-500"
+      style={{ opacity: visible ? 1 : 0 }}
+    >
+      <div className="flex flex-col items-center gap-3">
+        <div className="text-6xl" aria-hidden="true">🏠</div>
+        <h1 className="text-3xl font-bold tracking-tight text-(--text)">roomies</h1>
+        <div className="mt-3 flex gap-2">
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              className="h-2 w-2 animate-bounce rounded-full bg-accent"
+              style={{ animationDelay: `${i * 0.15}s` }}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 
