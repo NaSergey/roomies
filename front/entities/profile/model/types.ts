@@ -1,0 +1,19 @@
+export interface RoomieProfile {
+  id: number;
+  name: string;
+  // Real API fields
+  scenario: string;
+  budgetMin: number | null;
+  budgetMax: number | null;
+  photos: string[];
+  vibeTags: { id: number; label: string }[];
+  districts: { id: number; name: string }[];
+  lifestyleScales: {
+    noiseLevel: number | null;
+    cleanliness: number | null;
+    sleepSchedule: number | null;
+    socialLevel: number | null;
+    workFromHome: number | null;
+  } | null;
+  matchScore: number;
+}
