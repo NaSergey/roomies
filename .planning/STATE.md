@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready_to_execute
-stopped_at: Phase 2 planned — 3 plans (02-01 seed, 02-02 backend FeedModule+SwipeModule, 02-03 frontend wiring). Verification passed. Ready to execute.
-last_updated: "2026-06-10T12:00:00.000Z"
+status: executing
+stopped_at: Plan 02-01 — COMPLETE. seedFakeProfiles(), 25 fake users seeded idempotently (d9bc6ac). DB ready for matching engine. Next: 02-02 FeedModule+SwipeModule.
+last_updated: "2026-06-10T11:20:03.214Z"
 last_activity: 2026-06-10
 progress:
   total_phases: 7
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
-  percent: 57
+  completed_plans: 5
+  percent: 71
 ---
 
 # Project State
@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 2 of 7 (Matching Engine)
-Plan: 0 of 3 in current phase (02-01, 02-02, 02-03 — PLANNED, ready to execute)
-Status: Phase 2 planned — ready to execute
+Plan: 1 of 3 in current phase (02-01 COMPLETE, 02-02 and 02-03 — ready to execute)
+Status: Executing — Plan 02-01 complete
 Last activity: 2026-06-10
 
-Progress: [██████████] 100%
+Progress: [███████░░░] 71%
 
 ## Performance Metrics
 
@@ -70,6 +70,8 @@ Recent decisions affecting current work:
 - [01-02]: photoUrls marked @IsOptional in ProfileDto — empty array is valid, falls back to telegramPhotoUrl.
 - [Phase ?]: OnboardingState.onboardingCompleted boolean field enables mount-effect dispatch to immediately signal HomeView to skip to SwipeDeck for returning users
 - [Phase ?]: HomeView gate uses early return pattern: if authenticated && !onboardingCompleted return <OnboardingFlow> before main render
+- [02-01]: Deterministic FAKE_USERS array (not Math.random()) prevents re-seed churn and makes git diffs reviewable
+- [02-01]: District count guard (>=5 Moscow districts) prevents silent out-of-bounds on misconfigured DB
 
 ### Pending Todos
 
@@ -89,8 +91,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-10T07:28:24.278Z
-Stopped at: Plan 01-04 — COMPLETE. QuizStep, ProfileStep, DoneStep, QUIZ_QUESTIONS, getVibeTags (d2a5e00, c22bd93). Full 7-step onboarding flow navigable. TypeScript compiles. Phase 1 ALL PLANS COMPLETE.
+Last session: 2026-06-10T12:20:00.000Z
+Stopped at: Plan 02-01 — COMPLETE. seedFakeProfiles(), 25 fake users seeded idempotently (d9bc6ac). DB ready for matching engine. Next: 02-02 FeedModule+SwipeModule.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)

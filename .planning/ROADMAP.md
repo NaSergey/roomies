@@ -52,7 +52,12 @@ Plans:
   2. When any hard factor (location, budget, smoking, pets) conflicts, the candidate scores 0 and is excluded from results.
   3. Lifestyle compatibility is derived from the 0–1 quiz scales with a penalty for large divergences, and Vibe compatibility uses cosine similarity over the quiz embedding vector plus vibe tags.
   4. User actions (like, message, reply, feedback) append `BehavioralEvent` rows that feed the behavioral component of future scores.
-**Plans:** TBD
+**Plans:** 3 plans
+
+Plans:
+- [x] 02-01-PLAN.md — Fake profiles seed: 25 completed users with varied scenarios, lifestyle scales, quiz answers, districts, vibe tags (Wave 0 — standalone) (COMPLETE: seedFakeProfiles() added, 25 fake users seeded, idempotent, d9bc6ac)
+- [ ] 02-02-PLAN.md — Backend: FeedModule (GET /feed with lifestyle scoring + hard filters) + SwipeModule (POST /swipes with mutual-like Match creation) (Wave 1)
+- [ ] 02-03-PLAN.md — Frontend wiring: getFeed()/postSwipe() API functions, RoomieProfile type update, SwipeDeck real data, match overlay (Wave 2)
 
 ### Phase 3: Discovery & Profiles
 **Goal:** The swipe feed serves real scored candidates from the DB with compatibility % and match reasons; users can swipe with all four actions, see a match screen on mutual like, open a detailed candidate profile, filter the feed, and edit their own profile (incl. Roomie Score).
@@ -122,8 +127,8 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Onboarding | 2/4 | Executing (01-03 next) | - |
-| 2. Matching Engine | 0/0 | Not started | - |
+| 1. Onboarding | 4/4 | Complete | 2026-06-10 |
+| 2. Matching Engine | 1/3 | In Progress | - |
 | 3. Discovery & Profiles | 0/0 | Not started | - |
 | 4. Chat & Agreement | 0/0 | Not started | - |
 | 5. Squad Mode | 0/0 | Not started | - |
@@ -132,4 +137,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-06-07*
-*Updated: 2026-06-10 — Plan 01-02 complete: OnboardingModule (8 endpoints), GeoModule (2 endpoints), VibeTagsModule (1 endpoint), AppModule registration, build green, 11 unit tests passing*
+*Updated: 2026-06-10 — Phase 2 planned: 3 plans (02-01 seed, 02-02 backend FeedModule+SwipeModule, 02-03 frontend wiring)*
