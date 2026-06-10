@@ -13,3 +13,4 @@ export {
 } from './auth';
 export { pingBackend } from './health';
 export { getCities, getDistricts, type City, type District } from './geo';
+export { getVibeTags, type VibeTag } from './vibe-tags';

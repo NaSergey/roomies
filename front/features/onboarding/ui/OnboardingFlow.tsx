@@ -4,7 +4,10 @@ import { useCallback, useEffect } from 'react';
 import { useOnboarding } from '../model/use-onboarding';
 import { BudgetStep } from './steps/BudgetStep';
 import { DealbreakersStep } from './steps/DealbreakersStep';
+import { DoneStep } from './steps/DoneStep';
 import { LocationStep } from './steps/LocationStep';
+import { ProfileStep } from './steps/ProfileStep';
+import { QuizStep } from './steps/QuizStep';
 import { ScenarioStep } from './steps/ScenarioStep';
 
 interface OnboardingFlowProps {
@@ -18,6 +21,9 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     submitLocation,
     submitBudget,
     submitDealbreakers,
+    submitQuiz,
+    submitProfile,
+    onComplete: completeOnboarding,
   } = useOnboarding();
 
   const stableOnComplete = useCallback(onComplete, [onComplete]);
@@ -29,6 +35,11 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       stableOnComplete();
     }
   }, [state.onboardingCompleted, stableOnComplete]);
+
+  const handleDoneComplete = useCallback(() => {
+    completeOnboarding();
+    stableOnComplete();
+  }, [completeOnboarding, stableOnComplete]);
 
   function dismissError() {
     // error is cleared on next submit — no explicit dismiss needed in this flow
@@ -47,14 +58,19 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
         return (
           <DealbreakersStep state={state} onSubmit={submitDealbreakers} />
         );
-      default:
+      case 4:
         return (
-          <div className="flex flex-1 items-center justify-center">
-            <p className="text-base text-(--text-muted)">
-              TODO Шаг {state.step}
-            </p>
-          </div>
+          <QuizStep
+            state={state}
+            onSubmit={(answers) => submitQuiz({ answers })}
+          />
         );
+      case 5:
+        return <ProfileStep state={state} onSubmit={submitProfile} />;
+      case 6:
+        return <DoneStep onComplete={handleDoneComplete} />;
+      default:
+        return null;
     }
   }
 
