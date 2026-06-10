@@ -37,7 +37,7 @@ The critical path follows the user journey: onboard → get scored matches → b
 **UI hint:** yes
 
 Plans:
-- [~] 01-01-PLAN.md — DB migration (init) + seed (cities, districts, 10 quiz questions IDs 1–10, 22 vibe tags) + Walking Skeleton proof (seed.ts committed; migration pending human action)
+- [x] 01-01-PLAN.md — DB migration (init) + seed (cities, districts, 10 quiz questions IDs 1–10, 22 vibe tags) + Walking Skeleton proof (COMPLETE: migration applied, seed verified, POST /auth/telegram → 401 on port 4000)
 - [ ] 01-02-PLAN.md — Backend: OnboardingModule (8 endpoints), GeoModule (2 endpoints), VibeTagsModule (1 endpoint), AppModule registration
 - [ ] 01-03-PLAN.md — Frontend: steps 0–3 (ScenarioStep, LocationStep, BudgetStep, DealbreakersStep), useOnboarding hook, HomeView gate
 - [ ] 01-04-PLAN.md — Frontend: steps 4–6 (QuizStep, ProfileStep, DoneStep), QUIZ_QUESTIONS constant, vibe-tags API
@@ -122,7 +122,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Onboarding | 0/4 | Executing (01-01 in progress) | - |
+| 1. Onboarding | 1/4 | Executing (01-02 next) | - |
 | 2. Matching Engine | 0/0 | Not started | - |
 | 3. Discovery & Profiles | 0/0 | Not started | - |
 | 4. Chat & Agreement | 0/0 | Not started | - |
@@ -132,4 +132,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-06-07*
-*Updated: 2026-06-10 — Phase 1 execution started; 01-01 seed.ts committed, awaiting migration*
+*Updated: 2026-06-10 — Plan 01-01 complete: migration applied, seed verified (7 cities, 28+ districts, 10 quiz questions IDs 1-10, 22 vibe tags), skeleton confirmed (POST /auth/telegram → 401 on port 4000)*
