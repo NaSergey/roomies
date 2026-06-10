@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+stopped_at: Plan 01-02 — COMPLETE. OnboardingModule (ecff786), GeoModule + VibeTagsModule + AppModule (0c2388f). Build green. 11 tests passing. Ready for Plan 01-03.
+last_updated: "2026-06-10T07:16:28.782Z"
+last_activity: 2026-06-10
+progress:
+  total_phases: 7
+  completed_phases: 0
+  total_plans: 4
+  completed_plans: 3
+  percent: 75
+---
+
 # Project State
 
 ## Project Reference
@@ -10,15 +26,16 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 1 of 7 (Onboarding)
-Plan: 3 of 4 in current phase (01-01, 01-02 complete, ready for 01-03)
-Status: Executing — Plan 01-02 complete, ready to start Plan 01-03
-Last activity: 2026-06-10 — Plan 01-02 complete: OnboardingModule (8 endpoints), GeoModule (2 endpoints), VibeTagsModule (1 endpoint), npm run build green, 11 unit tests passing
+Plan: 4 of 4 in current phase (01-01, 01-02 complete, ready for 01-03)
+Status: Ready to execute
+Last activity: 2026-06-10
 
-Progress: [███░░░░░░░] 28%
+Progress: [████████░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 2 (01-01, 01-02 complete)
 - Average duration: ~35 min
 - Total execution time: ~70 min
@@ -30,10 +47,12 @@ Progress: [███░░░░░░░] 28%
 | Phase 1 | 2/4 | ~70 min | ~35 min |
 
 **Recent Trend:**
+
 - Last 5 plans: 01-01 (45 min), 01-02 (25 min)
 - Trend: improving
 
 *Updated after each plan completion*
+| Phase 1 P01-03 | 40 | 2 tasks | 13 files |
 
 ## Accumulated Context
 
@@ -48,6 +67,8 @@ Recent decisions affecting current work:
 - [01-02]: computeScales returns null (not 0) for scales with no answers — preserves semantic meaning.
 - [01-02]: onboardingStep set to absolute value (not increment) — prevents corruption on re-submission.
 - [01-02]: photoUrls marked @IsOptional in ProfileDto — empty array is valid, falls back to telegramPhotoUrl.
+- [Phase ?]: OnboardingState.onboardingCompleted boolean field enables mount-effect dispatch to immediately signal HomeView to skip to SwipeDeck for returning users
+- [Phase ?]: HomeView gate uses early return pattern: if authenticated && !onboardingCompleted return <OnboardingFlow> before main render
 
 ### Pending Todos
 
@@ -67,11 +88,12 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-10
+Last session: 2026-06-10T07:16:28.772Z
 Stopped at: Plan 01-02 — COMPLETE. OnboardingModule (ecff786), GeoModule + VibeTagsModule + AppModule (0c2388f). Build green. 11 tests passing. Ready for Plan 01-03.
-Resume file: .planning/phases/1/01-03-PLAN.md
+Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
+
 - Routing: state-машина на `/` + Telegram BackButton API
 - Quiz UX: A/B кнопки-чипы (не свайп), визуал-первый
 - Quiz вопросы: хардкод на фронте (10 вопросов, seed IDs)
