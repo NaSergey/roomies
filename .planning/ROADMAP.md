@@ -12,7 +12,7 @@ The critical path follows the user journey: onboard → get scored matches → b
 
 ## Phases
 
-- [ ] **Phase 1: Onboarding** — User completes the 7-step flow (incl. Vibe Quiz) and lands on first matches.
+- [x] **Phase 1: Onboarding** — User completes the 7-step flow (incl. Vibe Quiz) and lands on first matches. (COMPLETE: all 4 plans executed)
 - [ ] **Phase 2: Matching Engine** — Real Match Score (Hard/Lifestyle/Vibe/Behavioral) replaces mock data.
 - [ ] **Phase 3: Discovery & Profiles** — Real feed with compatibility %, filters, candidate profile, editable own profile.
 - [ ] **Phase 4: Chat & Agreement** — Matched users chat, schedule calls, and negotiate a Roomie Agreement.
@@ -39,8 +39,8 @@ The critical path follows the user journey: onboard → get scored matches → b
 Plans:
 - [x] 01-01-PLAN.md — DB migration (init) + seed (cities, districts, 10 quiz questions IDs 1–10, 22 vibe tags) + Walking Skeleton proof (COMPLETE: migration applied, seed verified, POST /auth/telegram → 401 on port 4000)
 - [x] 01-02-PLAN.md — Backend: OnboardingModule (8 endpoints), GeoModule (2 endpoints), VibeTagsModule (1 endpoint), AppModule registration (COMPLETE: npm run build green, 11 unit tests passing)
-- [ ] 01-03-PLAN.md — Frontend: steps 0–3 (ScenarioStep, LocationStep, BudgetStep, DealbreakersStep), useOnboarding hook, HomeView gate
-- [ ] 01-04-PLAN.md — Frontend: steps 4–6 (QuizStep, ProfileStep, DoneStep), QUIZ_QUESTIONS constant, vibe-tags API
+- [x] 01-03-PLAN.md — Frontend: steps 0–3 (ScenarioStep, LocationStep, BudgetStep, DealbreakersStep), useOnboarding hook, HomeView gate (COMPLETE: all 4 steps built, useOnboarding hook with submitScenario/Location/Budget/Dealbreakers, OnboardingFlow scaffold wired)
+- [x] 01-04-PLAN.md — Frontend: steps 4–6 (QuizStep, ProfileStep, DoneStep), QUIZ_QUESTIONS constant, vibe-tags API (COMPLETE: 10-question A/B quiz, vibe tag picker, spring-animated Done screen, full 7-step flow navigable)
 
 ### Phase 2: Matching Engine
 **Goal:** Replace mock profiles with a real matching pipeline that computes Match Score = Hard(35%) + Lifestyle(30%) + Vibe(25%) + Behavioral(10%), zeroes out hard-conflict candidates, and updates behavioral signals from user actions.

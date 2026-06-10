@@ -157,6 +157,10 @@ None — no external service configuration required.
 - `OnboardingFlow` only needs the 3 new step components imported and wired — the router switch just needs cases 4, 5, 6
 - HomeView gate and all shared infrastructure is complete
 
+## Self-Check: PASSED
+
+All 11 created files verified present on disk. Both task commits (db3663d, 92591b2) confirmed in git log.
+
 ---
 *Phase: 1-onboarding*
 *Completed: 2026-06-10*
