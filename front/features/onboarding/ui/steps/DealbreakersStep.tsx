@@ -165,12 +165,12 @@ function ToggleRow({
         <span className="ml-3 text-base font-medium text-(--text)">{label}</span>
       </div>
       <div
-        className="relative h-7 w-12 rounded-full transition-colors duration-200"
+        className="relative h-7 w-12 shrink-0 rounded-full transition-colors duration-200"
         style={{ background: checked ? 'var(--accent)' : 'var(--surface-2)' }}
       >
         <span
-          className="absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform duration-200"
-          style={{ transform: checked ? 'translateX(20px)' : 'translateX(4px)' }}
+          className="absolute left-0.5 top-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform duration-200"
+          style={{ transform: checked ? 'translateX(20px)' : 'translateX(0px)' }}
         />
       </div>
     </button>

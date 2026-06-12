@@ -1,0 +1,688 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// ПЕРЕЧИСЛЕНИЯ
+// ============================================================
+
+enum ScenarioType {
+  looking_housing_roomie
+  has_housing_seeking_roomie
+  looking_roomie_find_housing
+  squad
+}
+
+enum GuestsPreference {
+  rarely
+  sometimes
+  often
+}
+
+enum SwipeAction {
+  like
+  super_like
+  save
+  pass
+}
+
+enum MessageType {
+  text
+  voice
+  system
+  call_invite
+}
+
+enum VerificationType {
+  phone
+  selfie
+  student_email
+}
+
+enum VerificationStatus {
+  pending
+  verified
+  rejected
+}
+
+enum ReportReason {
+  spam
+  fake
+  abuse
+  suspicious
+  other
+}
+
+enum ReportStatus {
+  pending
+  reviewed
+  resolved
+}
+
+enum AgreementStatus {
+  draft
+  accepted
+  declined
+}
+
+enum SquadRole {
+  leader
+  member
+}
+
+enum SquadInviteStatus {
+  pending
+  accepted
+  declined
+  expired
+}
+
+enum CallStatus {
+  pending
+  accepted
+  declined
+  expired
+}
+
+// ============================================================
+// ГЕОГРАФИЯ
+// ============================================================
+
+model City {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique @db.VarChar(100)
+  countryCode String     @default("RU") @db.Char(2) @map("country_code")
+  districts   District[]
+  users       User[]
+  squads      Squad[]
+
+  @@map("cities")
+}
+
+model District {
+  id             Int             @id @default(autoincrement())
+  cityId         Int             @map("city_id")
+  name           String          @db.VarChar(100)
+  city           City            @relation(fields: [cityId], references: [id])
+  userDistricts  UserDistrict[]
+  squadDistricts SquadDistrict[]
+
+  @@index([cityId])
+  @@map("districts")
+}
+
+// ============================================================
+// ПОЛЬЗОВАТЕЛИ
+// ============================================================
+
+model User {
+  id        Int       @id @default(autoincrement())
+
+  // Telegram-аккаунт (основной идентификатор для входа через Mini App).
+  // BigInt — Telegram user id может превышать диапазон Int32.
+  telegramId       BigInt  @unique @map("telegram_id")
+  telegramUsername String? @map("telegram_username") @db.VarChar(64)
+  telegramPhotoUrl String? @map("telegram_photo_url")
+  languageCode     String? @map("language_code") @db.VarChar(10)
+
+  email     String?   @unique @db.VarChar(255)
+  phone     String?   @unique @db.VarChar(20)
+  name      String    @db.VarChar(100)
+  birthDate DateTime? @map("birth_date") @db.Date
+
+  scenario ScenarioType
+  cityId   Int?         @map("city_id")
+  city     City?        @relation(fields: [cityId], references: [id])
+
+  // Бюджет и сроки (жёсткие фильтры)
+  budgetMin          Int?      @map("budget_min")
+  budgetMax          Int?      @map("budget_max")
+  moveInDate         DateTime? @map("move_in_date") @db.Date
+  stayDurationMonths Int?      @map("stay_duration_months")
+
+  // Непереговорные условия
+  smokingOk  Boolean          @default(false) @map("smoking_ok")
+  petsOk     Boolean          @default(false) @map("pets_ok")
+  guestsPref GuestsPreference @default(sometimes) @map("guests_pref")
+
+  // Шкалы образа жизни 0.0–1.0 (рассчитываются из Vibe Quiz)
+  noiseLevel    Decimal? @map("noise_level")    @db.Decimal(3, 2)
+  cleanliness   Decimal? @map("cleanliness")    @db.Decimal(3, 2)
+  sleepSchedule Decimal? @map("sleep_schedule") @db.Decimal(3, 2)
+  socialLevel   Decimal? @map("social_level")   @db.Decimal(3, 2)
+  workFromHome  Decimal? @map("work_from_home")  @db.Decimal(3, 2)
+
+  // Доверие и заполненность профиля
+  roomieScore       Int     @default(0)     @map("roomie_score")
+  isPhoneVerified   Boolean @default(false) @map("is_phone_verified")
+  isSelfieVerified  Boolean @default(false) @map("is_selfie_verified")
+  isStudentVerified Boolean @default(false) @map("is_student_verified")
+
+  // Прогресс онбординга
+  onboardingStep      Int     @default(0)     @map("onboarding_step") @db.SmallInt
+  onboardingCompleted Boolean @default(false) @map("onboarding_completed")
+  quizCompleted       Boolean @default(false) @map("quiz_completed")
+
+  boostedUntil DateTime? @map("boosted_until")
+  isActive     Boolean   @default(true) @map("is_active")
+  lastSeenAt   DateTime? @map("last_seen_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  // Связи
+  photos             UserPhoto[]
+  vibeTags           UserVibeTag[]
+  districts          UserDistrict[]
+  quizAnswers        UserQuizAnswer[]
+  vibeEmbedding      VibeEmbedding?
+  swipesGiven        Swipe[]            @relation("SwipeActor")
+  swipesReceived     Swipe[]            @relation("SwipeTarget")
+  matchesAsUser1     Match[]            @relation("MatchUser1")
+  matchesAsUser2     Match[]            @relation("MatchUser2")
+  messagesSent       Message[]
+  chatReads          ChatRead[]
+  callInvites        CallInvite[]
+  agreements         RoomieAgreement[]
+  squadsCreated      Squad[]
+  squadMembers       SquadMember[]
+  squadInvitesGiven  SquadInvite[]      @relation("SquadInviteSender")
+  squadInvitesGot    SquadInvite[]      @relation("SquadInviteRecipient")
+  behavioralGiven    BehavioralEvent[]  @relation("BehavioralActor")
+  behavioralReceived BehavioralEvent[]  @relation("BehavioralTarget")
+  feedback           PostMatchFeedback[]
+  verifications      Verification[]
+  reportsGiven       Report[]           @relation("ReportReporter")
+  reportsReceived    Report[]           @relation("ReportReported")
+  blocksGiven        Block[]            @relation("BlockBlocker")
+  blocksReceived     Block[]            @relation("BlockBlocked")
+  boosts             Boost[]
+  purchases          Purchase[]
+  pushTokens         PushToken[]
+  notificationPrefs  NotificationPreference?
+
+  @@index([cityId])
+  @@index([scenario])
+  @@index([budgetMin, budgetMax])
+  @@index([moveInDate])
+  @@index([isActive, lastSeenAt(sort: Desc)])
+  @@index([smokingOk, petsOk, guestsPref])
+  @@map("users")
+}
+
+// ============================================================
+// ФОТО ПОЛЬЗОВАТЕЛЯ
+// ============================================================
+
+model UserPhoto {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @map("user_id")
+  url          String
+  displayOrder Int      @default(0) @map("display_order") @db.SmallInt
+  createdAt    DateTime @default(now()) @map("created_at")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_photos")
+}
+
+// ============================================================
+// ВАЙБ-ТЕГИ
+// ============================================================
+
+model VibeTag {
+  id    Int           @id @default(autoincrement())
+  label String        @unique @db.VarChar(50)
+  users UserVibeTag[]
+
+  @@map("vibe_tags")
+}
+
+model UserVibeTag {
+  userId Int     @map("user_id")
+  tagId  Int     @map("tag_id")
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tag    VibeTag @relation(fields: [tagId], references: [id])
+
+  @@id([userId, tagId])
+  @@map("user_vibe_tags")
+}
+
+// ============================================================
+// ПРЕДПОЧТИТЕЛЬНЫЕ РАЙОНЫ
+// ============================================================
+
+model UserDistrict {
+  userId     Int      @map("user_id")
+  districtId Int      @map("district_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  district   District @relation(fields: [districtId], references: [id])
+
+  @@id([userId, districtId])
+  @@index([districtId])
+  @@map("user_districts")
+}
+
+// ============================================================
+// ВАЙБ-КВИЗ
+// ============================================================
+
+model QuizQuestion {
+  id           Int              @id @default(autoincrement())
+  category     String           @db.VarChar(50)
+  questionText String           @map("question_text") @db.VarChar(255)
+  // Варианты: [{"code": "movie", "label": "Фильм", "featureVector": [0.2, 0.8, ...]}]
+  options      Json
+  displayOrder Int              @map("display_order") @db.SmallInt
+  isActive     Boolean          @default(true) @map("is_active")
+  answers      UserQuizAnswer[]
+
+  @@map("quiz_questions")
+}
+
+model UserQuizAnswer {
+  id          Int          @id @default(autoincrement())
+  userId      Int          @map("user_id")
+  questionId  Int          @map("question_id")
+  // Код выбранного варианта (напр. "movie", "chill")
+  optionCode  String       @map("option_code") @db.VarChar(50)
+  // Нормализованное значение 0.0–1.0 для шкалы образа жизни
+  answerValue Decimal      @map("answer_value") @db.Decimal(3, 2)
+  answeredAt  DateTime     @default(now()) @map("answered_at")
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question    QuizQuestion @relation(fields: [questionId], references: [id])
+
+  @@unique([userId, questionId])
+  @@index([userId])
+  @@map("user_quiz_answers")
+}
+
+// Агрегированный вектор для cosine similarity (обновляется после квиза).
+// При подключении pgvector тип Float[] заменяется на Unsupported("vector(N)").
+model VibeEmbedding {
+  userId    Int      @id @map("user_id")
+  vector    Float[]
+  updatedAt DateTime @updatedAt @map("updated_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("vibe_embeddings")
+}
+
+// ============================================================
+// СВАЙПЫ
+// ============================================================
+
+model Swipe {
+  id        Int         @id @default(autoincrement())
+  actorId   Int         @map("actor_id")
+  targetId  Int         @map("target_id")
+  action    SwipeAction
+  createdAt DateTime    @default(now()) @map("created_at")
+  actor     User        @relation("SwipeActor",  fields: [actorId],  references: [id], onDelete: Cascade)
+  target    User        @relation("SwipeTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@unique([actorId, targetId])
+  @@index([actorId, createdAt(sort: Desc)])
+  @@index([targetId, action])
+  @@map("swipes")
+}
+
+// ============================================================
+// МЭТЧИ
+// ============================================================
+
+model Match {
+  id      Int @id @default(autoincrement())
+  // ВАЖНО: в слое приложения всегда гарантировать user1Id < user2Id перед вставкой
+  // (Prisma не поддерживает CHECK-ограничения — см. migrations/add_constraints.sql)
+  user1Id Int @map("user1_id")
+  user2Id Int @map("user2_id")
+
+  matchScore      Decimal  @map("match_score")      @db.Decimal(5, 4)
+  hardScore       Decimal? @map("hard_score")       @db.Decimal(5, 4)
+  lifestyleScore  Decimal? @map("lifestyle_score")  @db.Decimal(5, 4)
+  vibeScore       Decimal? @map("vibe_score")       @db.Decimal(5, 4)
+  behavioralScore Decimal? @map("behavioral_score") @db.Decimal(5, 4)
+
+  // Читаемые причины совпадения для UI («Почему вы совпали»)
+  // [{ "code": "quiet_evenings", "text": "Оба за тишину после 23:00" }]
+  matchReasons Json? @map("match_reasons")
+  matchRisks   Json? @map("match_risks")
+
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user1    User                @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2    User                @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  chat     Chat?
+  feedback PostMatchFeedback[]
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id, matchScore(sort: Desc)])
+  @@index([user2Id, matchScore(sort: Desc)])
+  @@map("matches")
+}
+
+// ============================================================
+// ЧАТЫ И СООБЩЕНИЯ
+// ============================================================
+
+model Chat {
+  id        Int      @id @default(autoincrement())
+  matchId   Int      @unique @map("match_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  match       Match             @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  messages    Message[]
+  reads       ChatRead[]
+  callInvites CallInvite[]
+  agreements  RoomieAgreement[]
+
+  @@map("chats")
+}
+
+model Message {
+  id          BigInt      @id @default(autoincrement())
+  chatId      Int         @map("chat_id")
+  senderId    Int         @map("sender_id")
+  content     String?
+  messageType MessageType @default(text) @map("message_type")
+  // Дополнительные данные: для голосовых — длительность, для созвона — ссылка
+  metadata    Json?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  editedAt    DateTime?   @map("edited_at")
+  deletedAt   DateTime?   @map("deleted_at")
+
+  chat   Chat @relation(fields: [chatId],   references: [id], onDelete: Cascade)
+  sender User @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt(sort: Desc)])
+  @@map("messages")
+}
+
+// Отметка прочтения на уровне участника чата (точнее, чем флаг isRead на каждом сообщении).
+// Хранит момент времени последнего просмотренного сообщения для каждого участника.
+model ChatRead {
+  chatId     Int      @map("chat_id")
+  userId     Int      @map("user_id")
+  lastReadAt DateTime @default(now()) @map("last_read_at")
+
+  chat Chat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([chatId, userId])
+  @@map("chat_reads")
+}
+
+model CallInvite {
+  id            Int        @id @default(autoincrement())
+  chatId        Int        @map("chat_id")
+  proposerId    Int        @map("proposer_id")
+  // Предложенные слоты: ["2026-05-14T16:00:00Z", "2026-05-15T10:00:00Z"]
+  proposedTimes Json       @map("proposed_times")
+  confirmedTime DateTime?  @map("confirmed_time")
+  status        CallStatus @default(pending)
+  createdAt     DateTime   @default(now()) @map("created_at")
+
+  chat     Chat @relation(fields: [chatId],     references: [id], onDelete: Cascade)
+  proposer User @relation(fields: [proposerId], references: [id])
+
+  @@map("call_invites")
+}
+
+// ============================================================
+// СОГЛАШЕНИЕ СОСЕДЕЙ
+// ============================================================
+
+model RoomieAgreement {
+  id          Int             @id @default(autoincrement())
+  chatId      Int             @map("chat_id")
+  status      AgreementStatus @default(draft)
+  createdById Int             @map("created_by")
+  createdAt   DateTime        @default(now()) @map("created_at")
+  acceptedAt  DateTime?       @map("accepted_at")
+
+  chat      Chat            @relation(fields: [chatId],      references: [id], onDelete: Cascade)
+  createdBy User            @relation(fields: [createdById], references: [id])
+  items     AgreementItem[]
+
+  @@map("roomie_agreements")
+}
+
+model AgreementItem {
+  id          Int             @id @default(autoincrement())
+  agreementId Int             @map("agreement_id")
+  // Категория: тишина | уборка | гости | коммуналка | общие зоны
+  category    String          @db.VarChar(50)
+  ruleText    String          @map("rule_text")
+  agreed      Boolean         @default(false)
+  agreement   RoomieAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  @@map("agreement_items")
+}
+
+// ============================================================
+// SQUAD-РЕЖИМ
+// ============================================================
+
+model Squad {
+  id          Int      @id @default(autoincrement())
+  name        String?  @db.VarChar(100)
+  cityId      Int?     @map("city_id")
+  budgetMin   Int?     @map("budget_min")
+  budgetMax   Int?     @map("budget_max")
+  maxMembers  Int      @default(4) @map("max_members") @db.SmallInt
+  createdById Int      @map("created_by")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  city      City?           @relation(fields: [cityId],      references: [id])
+  createdBy User            @relation(fields: [createdById], references: [id])
+  members   SquadMember[]
+  districts SquadDistrict[]
+  invites   SquadInvite[]
+
+  @@map("squads")
+}
+
+model SquadMember {
+  squadId  Int       @map("squad_id")
+  userId   Int       @map("user_id")
+  role     SquadRole @default(member)
+  joinedAt DateTime  @default(now()) @map("joined_at")
+
+  squad Squad @relation(fields: [squadId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId],  references: [id], onDelete: Cascade)
+
+  @@id([squadId, userId])
+  @@index([userId])
+  @@map("squad_members")
+}
+
+model SquadDistrict {
+  squadId    Int @map("squad_id")
+  districtId Int @map("district_id")
+
+  squad    Squad    @relation(fields: [squadId],    references: [id], onDelete: Cascade)
+  district District @relation(fields: [districtId], references: [id])
+
+  @@id([squadId, districtId])
+  @@map("squad_districts")
+}
+
+// Приглашение пользователя в squad (через поиск или ссылку).
+model SquadInvite {
+  id          Int               @id @default(autoincrement())
+  squadId     Int               @map("squad_id")
+  senderId    Int               @map("sender_id")
+  recipientId Int               @map("recipient_id")
+  status      SquadInviteStatus @default(pending)
+  createdAt   DateTime          @default(now()) @map("created_at")
+  resolvedAt  DateTime?         @map("resolved_at")
+
+  squad     Squad @relation(fields: [squadId],     references: [id], onDelete: Cascade)
+  sender    User  @relation("SquadInviteSender",    fields: [senderId],    references: [id])
+  recipient User  @relation("SquadInviteRecipient", fields: [recipientId], references: [id])
+
+  @@index([recipientId, status])
+  @@index([squadId, status])
+  @@map("squad_invites")
+}
+
+// ============================================================
+// ПОВЕДЕНЧЕСКИЕ СИГНАЛЫ
+// ============================================================
+
+model BehavioralEvent {
+  id        BigInt   @id @default(autoincrement())
+  actorId   Int      @map("actor_id")
+  targetId  Int      @map("target_id")
+  // Тип события: liked | super_liked | messaged | replied | called | saved | feedback_positive
+  eventType String   @map("event_type") @db.VarChar(30)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  actor  User @relation("BehavioralActor",  fields: [actorId],  references: [id], onDelete: Cascade)
+  target User @relation("BehavioralTarget", fields: [targetId], references: [id], onDelete: Cascade)
+
+  @@index([actorId, createdAt(sort: Desc)])
+  @@index([targetId, eventType])
+  @@map("behavioral_events")
+}
+
+// ============================================================
+// ФИДБЕК ПОСЛЕ МЭТЧА («вайб совпал?» — 1 тап)
+// ============================================================
+
+model PostMatchFeedback {
+  id          Int      @id @default(autoincrement())
+  matchId     Int      @map("match_id")
+  userId      Int      @map("user_id")
+  vibeMatched Boolean  @map("vibe_matched")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId],  references: [id], onDelete: Cascade)
+
+  @@unique([matchId, userId])
+  @@map("post_match_feedback")
+}
+
+// ============================================================
+// ВЕРИФИКАЦИЯ
+// ============================================================
+
+model Verification {
+  id          Int                @id @default(autoincrement())
+  userId      Int                @map("user_id")
+  type        VerificationType
+  status      VerificationStatus @default(pending)
+  // Ссылка на внешнее хранилище (напр. S3-ключ для селфи), PII в БД не хранится
+  externalRef String?            @map("external_ref")
+  verifiedAt  DateTime?          @map("verified_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type])
+  @@map("verifications")
+}
+
+// ============================================================
+// БЕЗОПАСНОСТЬ — ЖАЛОБЫ И БЛОКИРОВКИ
+// ============================================================
+
+model Report {
+  id          Int          @id @default(autoincrement())
+  reporterId  Int          @map("reporter_id")
+  reportedId  Int          @map("reported_id")
+  reason      ReportReason
+  description String?
+  status      ReportStatus @default(pending)
+  createdAt   DateTime     @default(now()) @map("created_at")
+
+  reporter User @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reported User @relation("ReportReported", fields: [reportedId], references: [id], onDelete: Cascade)
+
+  @@index([reportedId, status])
+  @@map("reports")
+}
+
+model Block {
+  blockerId Int      @map("blocker_id")
+  blockedId Int      @map("blocked_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  blocker User @relation("BlockBlocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("BlockBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("blocks")
+}
+
+// ============================================================
+// ПЛАТНЫЕ ФУНКЦИИ
+// ============================================================
+
+model Boost {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  startedAt DateTime @default(now()) @map("started_at")
+  expiresAt DateTime @map("expires_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt(sort: Desc)])
+  @@map("boosts")
+}
+
+model Purchase {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @map("user_id")
+  productType String   @map("product_type") @db.VarChar(50)
+  amountCents Int      @map("amount_cents")
+  currency    String   @default("RUB") @db.Char(3)
+  store       String   @db.VarChar(20)
+  storeTxId   String?  @unique @map("store_tx_id")
+  purchasedAt DateTime @default(now()) @map("purchased_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("purchases")
+}
+
+// ============================================================
+// PUSH-УВЕДОМЛЕНИЯ
+// ============================================================
+
+model PushToken {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  token      String   @unique
+  // Платформа: ios | android | web
+  platform   String   @db.VarChar(10)
+  createdAt  DateTime @default(now()) @map("created_at")
+  lastSeenAt DateTime @default(now()) @map("last_seen_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_tokens")
+}
+
+model NotificationPreference {
+  userId       Int     @id @map("user_id")
+  newMatch     Boolean @default(true)  @map("new_match")
+  newMessage   Boolean @default(true)  @map("new_message")
+  callReminder Boolean @default(true)  @map("call_reminder")
+  nearbyPeople Boolean @default(true)  @map("nearby_people")
+  marketing    Boolean @default(false) @map("marketing")
+
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}

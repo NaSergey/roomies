@@ -12,6 +12,8 @@ import { EmptyState } from './EmptyState';
 export function SwipeDeck() {
   const [profiles, setProfiles] = useState<RoomieProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [feedError, setFeedError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const [matchState, setMatchState] = useState<{
     candidateName: string;
     matchId: number;
@@ -23,9 +25,15 @@ export function SwipeDeck() {
       .then((candidates) => {
         if (cancelled) return;
         setProfiles(candidates);
+        setFeedError(null);
       })
-      .catch(() => {
-        if (!cancelled) setProfiles([]);
+      .catch((err) => {
+        if (cancelled) return;
+        console.error('[SwipeDeck] getFeed failed:', err);
+        const msg: string =
+          err instanceof Error ? err.message : String(err);
+        setFeedError(msg);
+        setProfiles([]);
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -33,7 +41,7 @@ export function SwipeDeck() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [retryKey]);
 
   const { visible, exitDirection, isEmpty, swipe, reset } = useSwipeDeck(profiles);
 
@@ -82,6 +90,23 @@ export function SwipeDeck() {
             />
           ))}
         </div>
+      </div>
+    );
+  }
+
+  if (feedError) {
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
+        <p className="text-3xl">⚠️</p>
+        <p className="text-sm font-semibold text-(--text)">Не удалось загрузить ленту</p>
+        <p className="text-xs text-muted">{feedError}</p>
+        <button
+          type="button"
+          onClick={() => { setFeedError(null); setLoading(true); setRetryKey((k) => k + 1); }}
+          className="mt-2 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-(--text-on-accent)"
+        >
+          Повторить
+        </button>
       </div>
     );
   }

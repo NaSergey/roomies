@@ -58,26 +58,29 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
       </div>
 
       <div>
-        <div className="flex items-center gap-3">
-          <span className="text-sm text-(--text-muted)">от</span>
-          <input
-            type="number"
-            value={budgetMin}
-            onChange={(e) => setBudgetMin(e.target.value)}
-            placeholder="20 000"
-            className="h-14 flex-1 rounded-2xl bg-surface px-4 text-center text-base text-(--text)"
-            style={{ boxShadow: 'var(--shadow-button)' }}
-          />
-          <span className="text-sm text-(--text-muted)">до</span>
-          <input
-            type="number"
-            value={budgetMax}
-            onChange={(e) => setBudgetMax(e.target.value)}
-            placeholder="50 000"
-            className="h-14 flex-1 rounded-2xl bg-surface px-4 text-center text-base text-(--text)"
-            style={{ boxShadow: 'var(--shadow-button)' }}
-          />
-          <span className="text-sm text-(--text-muted)">₽</span>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-muted">от, ₽</label>
+            <input
+              type="number"
+              value={budgetMin}
+              onChange={(e) => setBudgetMin(e.target.value)}
+              placeholder="20 000"
+              className="h-14 w-full rounded-2xl bg-surface px-4 text-center text-base text-(--text)"
+              style={{ boxShadow: 'var(--shadow-button)' }}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-muted">до, ₽</label>
+            <input
+              type="number"
+              value={budgetMax}
+              onChange={(e) => setBudgetMax(e.target.value)}
+              placeholder="50 000"
+              className="h-14 w-full rounded-2xl bg-surface px-4 text-center text-base text-(--text)"
+              style={{ boxShadow: 'var(--shadow-button)' }}
+            />
+          </div>
         </div>
         {budgetError && (
           <p

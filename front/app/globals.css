@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+:root {
+  /* Фиксированная светлая палитра по референсу. Telegram themeParams игнорируем. */
+
+  /* Фоны */
+  --bg: #f6f6f1;          /* основной — тёплый off-white */
+  --surface: #ffffff;     /* карточки/чипы поверх bg */
+  --surface-2: #f0efe9;   /* приглушённый, для второстепенных блоков */
+
+  /* Текст */
+  --text: #14140f;        /* почти чёрный */
+  --text-muted: #6f6f68;
+  --text-on-accent: #14140f;
+
+  /* Акценты */
+  --accent: #c8f36a;          /* лаймовый — primary brand */
+  --accent-hover: #bce85b;
+  --lavender: #d6cffa;        /* мягкая лаванда — secondary */
+  --peach: #ffd7a8;           /* персиковый — для message-кнопки */
+  --rose: #ff6b85;            /* розово-красный — like/сердце */
+  --rose-soft: #ffd9e0;
+
+  /* Контролы */
+  --ctrl-dark: #14140f;       /* тёмный круг (X) */
+  --ctrl-dark-on: #ffffff;
+
+  /* Тени */
+  --shadow-card: 0 20px 40px -16px rgba(20, 20, 15, 0.25);
+  --shadow-button: 0 8px 18px -8px rgba(20, 20, 15, 0.25);
+
+  --background: var(--bg);
+  --foreground: var(--text);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-lavender: var(--lavender);
+  --color-peach: var(--peach);
+  --color-rose: var(--rose);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-muted: var(--text-muted);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html,
+body {
+  height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans, system-ui), Arial, Helvetica, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
