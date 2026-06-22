@@ -74,8 +74,8 @@ Plans:
 **UI hint:** yes
 
 Plans:
-- [ ] 03-01-PLAN.md — Backend: extend GET /feed (matchReasons, matchRisks, smokingOk/petsOk/guestsPref fields + filter query params via FeedQueryDto) + fix SwipeActionDto add 'save' (Wave 1)
-- [ ] 03-02-PLAN.md — Backend: new ProfileModule — GET /profile/me (own data + Roomie Score) + PATCH /profile (edit name, photos, tags, budget, districts, dealbreakers), register in AppModule (Wave 1)
+- [x] 03-01-PLAN.md — Backend: extend GET /feed (matchReasons, matchRisks, smokingOk/petsOk/guestsPref fields + filter query params via FeedQueryDto) + fix SwipeActionDto add 'save' (Wave 1) (COMPLETE 2026-06-22)
+- [x] 03-02-PLAN.md — Backend: new ProfileModule — GET /profile/me (own data + Roomie Score) + PATCH /profile (edit name, photos, tags, budget, districts, dealbreakers), register in AppModule (Wave 1) (COMPLETE 2026-06-22)
 - [ ] 03-03-PLAN.md — Frontend types + API layer + hooks: extend RoomieProfile/FeedCandidate, new profile.ts API, useFeedQuery(params), useSwipeMutation all 4 actions, useProfileQuery/usePatchProfile, shared UI VibeScaleBar/RulesSection/MatchReasonsList (Wave 2)
 - [ ] 03-04-PLAN.md — Frontend SwipeDeck wiring: FilterSheet extended (onApply + district/dealbreaker rows), DeckToolbar activeCount fix, ProfileCard single ★ N% badge, SwipeDeck queryParams + onCardTap, ActionButtons onSave/onSuperLike (Wave 3)
 - [ ] 03-05-PLAN.md — Frontend: CandidateProfileSheet widget with 4 sections (ВАЙБ ДОМА, ПРАВИЛА, О СЕБЕ, ПОЧЕМУ ВЫ СОВПАЛИ) + Like/Pass/Save/SuperLike action buttons (Wave 3)
