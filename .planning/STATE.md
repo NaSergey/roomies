@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 3 context gathered (03-CONTEXT.md). Ready to plan Phase 3 — Discovery & Profiles. Key decisions locked — candidate profile as bottom sheet on tap, backend generates match reasons, single Match Score % on card.
+stopped_at: Phase 3 EXECUTING — Wave 1 starting (03-01, 03-02 in parallel)
 last_updated: "2026-06-22T00:00:00.000Z"
 last_activity: 2026-06-22
 progress:
   total_phases: 7
-  completed_phases: 1
-  total_plans: 7
-  completed_plans: 6
-  percent: 86
+  completed_phases: 2
+  total_plans: 13
+  completed_plans: 7
+  percent: 54
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Пользователь получает первые качественные совпадения по вайбу за 3 минуты онбординга и понимает, почему ему показали именно этого человека.
-**Current focus:** Phase 3 — Discovery & Profiles (Phase 2 COMPLETE)
+**Current focus:** Phase 3 — Discovery & Profiles (EXECUTING)
 
 ## Current Position
 
-Phase: 2 of 7 (Matching Engine)
-Plan: 3 of 3 in current phase (02-01 COMPLETE, 02-02 COMPLETE, 02-03 COMPLETE)
-Status: Phase 2 COMPLETE — ready to execute Phase 3
-Last activity: 2026-06-10
+Phase: 3 of 7 (Discovery & Profiles)
+Plan: 0 of 6 in current phase (executing Wave 1: 03-01, 03-02)
+Status: Phase 3 EXECUTING — Wave 1 in progress
+Last activity: 2026-06-22
 
 Progress: [████████░░] 86%
 
@@ -87,20 +87,15 @@ Recent decisions affecting current work:
 
 - None — Plan 01-02 fully complete, TypeScript build clean, all unit tests pass
 
-### Uncommitted Work (ahead of roadmap)
+### Committed Work (Phase 3 foundation — 2026-06-22)
 
-Реализованная, но НЕ закоммиченная ad-hoc работа поверх Phase 2 (UX/инфра, в основном территория Phase 3). Полный инвентарь: **.planning/UNCOMMITTED-WORK.md**. Кратко:
+Ad-hoc work committed before Phase 3 execution (commits 241d30b..627ce99):
+- Infra: docker-compose.yml, AGENTS.md, dev-tunnel fix
+- Backend: feed.service.ts age + SQL hard-filters; seed improvements + bulk seed
+- Frontend: React Query, TelegramProvider, BottomNav, SwipeDeck perf, ProfileCard neobrutalism
+- Frontend: DeckToolbar + FilterSheet UI (not yet wired to API — Phase 3 plan 03-04 will finish this)
 
-- Telegram fullscreen фикс (mobile-only, версионные гейты) + `TelegramProvider`
-- BottomNav (3 вкладки; чат/профиль — заглушки)
-- React Query (`shared/lib/query`, `useFeedQuery`/`useSwipeMutation`)
-- Лента: панель фильтров + буст (⚠️ UI, фильтры локальные — нет связи с API)
-- Свайп: механика «колоды» (следующая видна/растёт при драге) + перф (императивный драг, `memo`, GPU-слой)
-- ProfileCard: возраст, скоры-наклейки, нео-брутализм
-- Backend: `age` из `birthDate` + жёсткие SQL-фильтры ленты; `seed-bulk-users.ts` (1000 юзеров)
-- Инфра: `docker-compose.yml`, `dev-tunnel.ps1` фикс, `AGENTS.md`
-
-При планировании Phase 3 — не дублировать готовое; довести хвосты (фильтры→API, буст, ProfileView, upload).
+See .planning/UNCOMMITTED-WORK.md for full inventory.
 
 ## Deferred Items
 
