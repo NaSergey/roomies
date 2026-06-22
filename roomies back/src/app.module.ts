@@ -7,6 +7,7 @@ import { FeedModule } from './feed/feed.module';
 import { GeoModule } from './geo/geo.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ProfileModule } from './profile/profile.module';
 import { SwipeModule } from './swipe/swipe.module';
 import { VibeTagsModule } from './vibe-tags/vibe-tags.module';
 
@@ -20,6 +21,7 @@ import { VibeTagsModule } from './vibe-tags/vibe-tags.module';
     VibeTagsModule,
     FeedModule,
     SwipeModule,
+    ProfileModule,
   ],
   controllers: [AppController],
   providers: [AppService],
