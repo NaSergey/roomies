@@ -56,6 +56,7 @@ export class SwipeService {
               lifestyleScore: null,
               vibeScore: null,
               behavioralScore: null,
+              chat: { create: {} },
             },
             update: {},
           });
