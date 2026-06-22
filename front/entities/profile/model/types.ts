@@ -16,4 +16,9 @@ export interface RoomieProfile {
     workFromHome: number | null;
   } | null;
   matchScore: number;
+  smokingOk: boolean;
+  petsOk: boolean;
+  guestsPref: 'rarely' | 'sometimes' | 'often';
+  matchReasons: string[];
+  matchRisks?: string[];
 }

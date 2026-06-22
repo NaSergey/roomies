@@ -14,4 +14,5 @@ export {
 export { pingBackend } from './health';
 export { getCities, getDistricts, type City, type District } from './geo';
 export { getVibeTags, type VibeTag } from './vibe-tags';
-export { getFeed, postSwipe, type FeedCandidate, type SwipeResult } from './feed';
+export { getFeed, postSwipe, type FeedCandidate, type FeedQueryParams, type SwipeResult } from './feed';
+export { getMe, patchProfile, type MyProfile, type UpdateProfilePayload } from './profile';
