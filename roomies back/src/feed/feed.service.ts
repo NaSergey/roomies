@@ -1,10 +1,22 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ScenarioType } from '@prisma/client';
+import { Prisma, ScenarioType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+
+function calculateAge(birthDate: Date | null): number | undefined {
+  if (!birthDate) return undefined;
+  const now = new Date();
+  let age = now.getFullYear() - birthDate.getFullYear();
+  const hadBirthdayThisYear =
+    now.getMonth() > birthDate.getMonth() ||
+    (now.getMonth() === birthDate.getMonth() && now.getDate() >= birthDate.getDate());
+  if (!hadBirthdayThisYear) age--;
+  return age;
+}
 
 type UserWithScores = {
   id: number;
   name: string;
+  birthDate: Date | null;
   scenario: ScenarioType;
   budgetMin: number | null;
   budgetMax: number | null;
@@ -132,6 +144,18 @@ export class FeedService {
     const compatibleScenarios = scenarioCompat[me.scenario];
 
     // Step 4 — Query candidates
+    // Жёсткие фильтры (курение / животные / бюджет) применяем прямо в SQL.
+    // Иначе take:100 мог бы набрать первые 100 кандидатов по id, которые затем
+    // целиком отсеялись бы в JS (hasHardConflict) — и лента оказалась бы пустой,
+    // хотя дальше по списку есть десятки подходящих профилей.
+    const budgetFilter: Prisma.UserWhereInput[] = [];
+    if (me.budgetMax != null) {
+      budgetFilter.push({ OR: [{ budgetMin: null }, { budgetMin: { lte: me.budgetMax } }] });
+    }
+    if (me.budgetMin != null) {
+      budgetFilter.push({ OR: [{ budgetMax: null }, { budgetMax: { gte: me.budgetMin } }] });
+    }
+
     const candidates = await this.prisma.user.findMany({
       where: {
         id: { not: userId, notIn: swipedIds },
@@ -139,10 +163,14 @@ export class FeedService {
         scenario: { in: compatibleScenarios },
         onboardingCompleted: true,
         isActive: true,
+        smokingOk: me.smokingOk,
+        petsOk: me.petsOk,
+        AND: budgetFilter,
       },
       select: {
         id: true,
         name: true,
+        birthDate: true,
         scenario: true,
         budgetMin: true,
         budgetMax: true,
@@ -184,6 +212,7 @@ export class FeedService {
     return top20.map((c) => ({
       id: c.id,
       name: c.name,
+      age: calculateAge(c.birthDate),
       scenario: c.scenario,
       budgetMin: c.budgetMin,
       budgetMax: c.budgetMax,

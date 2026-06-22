@@ -730,6 +730,16 @@ const FAKE_USERS: FakeUser[] = [
   },
 ];
 
+// Детерминированная дата рождения 18–30 лет из telegramId (целевая аудитория проекта).
+function birthDateFromSeed(telegramId: bigint): Date {
+  const ageYears = 18 + Number(telegramId % 13n);
+  const dayOffset = Number(telegramId % 365n);
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - ageYears);
+  date.setDate(date.getDate() - dayOffset);
+  return date;
+}
+
 // Compact helper: derives deterministic quiz answers from lifestyle scale values.
 function makeQuizAnswers(n: number, c: number, sl: number, so: number, w: number) {
   return [
@@ -868,6 +878,7 @@ async function seedFakeProfiles(): Promise<void> {
         create: {
           telegramId: fake.telegramId,
           name: fake.name,
+          birthDate: birthDateFromSeed(fake.telegramId),
           scenario: fake.scenario,
           cityId: moscowId,
           budgetMin: fake.budgetMin,
@@ -886,6 +897,7 @@ async function seedFakeProfiles(): Promise<void> {
         },
         update: {
           name: fake.name,
+          birthDate: birthDateFromSeed(fake.telegramId),
           scenario: fake.scenario,
           cityId: moscowId,
           budgetMin: fake.budgetMin,
