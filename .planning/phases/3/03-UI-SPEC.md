@@ -1,10 +1,11 @@
 ---
 phase: 3
 slug: discovery-profiles
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-22
+reviewed_at: 2026-06-22
 ---
 
 # Phase 3 — UI Design Contract: Discovery & Profiles
@@ -49,7 +50,7 @@ All values must be multiples of 4.
 Exceptions:
 - Action buttons: h-[60px] w-[60px] (like/pass), h-[56px] w-[104px] (message oval) — from ActionButtons.tsx
 - Sheet handle: h-1 w-10 — from FilterSheet.tsx
-- Thumbnail strip: h-[66px] w-[54px] — from ProfileCard.tsx
+- Thumbnail strip: h-[64px] w-[52px] — Changed from ProfileCard.tsx's h-[66px]/w-[54px] to h-[64px]/w-[52px] — Phase 3 aligns thumbnails to 4px grid.
 
 ---
 
@@ -57,13 +58,14 @@ Exceptions:
 
 | Role | Size | Weight | Line Height | Class | Usage |
 |------|------|--------|-------------|-------|-------|
-| Display / Card name | 30px (`text-3xl`) | 900 `font-black` | 1.0 `leading-none` | `text-3xl font-black leading-none` | Name on swipe card (ProfileCard) |
+| Display / Numbers / Score | 24px (`text-2xl`) | 900 `font-black` | 1.0 `leading-none` | `text-2xl font-black leading-none` | Age display (Outfit font), sheet heading, score value |
 | Heading | 18px (`text-lg`) | 900 `font-black` | 1.2 | `text-lg font-black` | Sheet section headings, modal title |
 | Body | 14px (`text-sm`) | 400 normal | 1.5 | `text-sm` | Body text, descriptions, reasons |
 | Label / Caption | 12px (`text-xs`) | 900 `font-black` | 1.0 | `text-xs font-black uppercase tracking-widest` | Section headers in FilterSheet / ProfileSheet |
-| Age (numbers only) | 20px (`text-xl`) | 800 `font-extrabold` | — | `font-age text-xl font-extrabold` | Age display (Outfit font) |
 
 Weights used: 400 (normal) + 900 (black). Семибольд (600) не используется в проекте — не вводить.
+
+> Footnote: `text-3xl` (30px, font-black) is used only in the existing `ProfileCard.tsx` (name on swipe card) — that component is not modified in Phase 3. It is not a new typography token for this phase.
 
 ---
 
@@ -79,7 +81,7 @@ Weights used: 400 (normal) + 900 (black). Семибольд (600) не испо
 | Tag lime | `#c8f36a` | Vibe tag chip 1 |
 | Tag blue | `#a8d8ff` | Vibe tag chip 2; верификация-стикер |
 | Tag pink | `#ffb8d4` | Vibe tag chip 3 |
-| Message oval | `#7dd8e0` | ActionButtons message button — бирюзовый |
+| Message oval | `#7dd8e0` | ActionButtons message button — бирюзовый. Inherited from existing `front/features/swipe-profile/ui/ActionButtons.tsx` — not a new color token. |
 | Destructive / risk | `#ff6b85` (`--rose`) | Текст мягкого риска (matchRisks), destructive hints |
 | Text primary | `#14140f` (`--text`) | Весь основной текст |
 | Text muted | `#6f6f68` (`--text-muted`) | Вторичные подписи, placeholder |
@@ -90,7 +92,7 @@ Accent (`#c8f36a`) зарезервирован исключительно дл�
 2. Кнопка «Нравится / Лайк» в ActionButtons
 3. Активная вкладка BottomNav (скользящий индикатор)
 4. Активные чипы фильтров
-5. Кнопка «Сохранить» в редактировании профиля (PROF-01)
+5. Кнопка «Сохранить профиль» в редактировании профиля (PROF-01)
 6. Счётчик активных фильтров на DeckToolbar
 
 ---
@@ -133,7 +135,7 @@ Bottom sheet с полным профилем кандидата. Открыва
 │  ▬ (handle: h-1 w-10 bg-[#d0d0cc])  │  ← pt-4
 │                                      │
 │  [фото 80x80 rounded-2xl border-2]  │
-│  Имя, 24                             │  ← text-xl font-black
+│  Имя, 24                             │  ← text-2xl font-black
 │  ★ 87%  [стикер лайм, -rotate-3]    │  ← MATCH_PCT badge
 │                                      │
 │  ─ ВАЙБ ДОМА ───────────────────     │  ← section header: uppercase xs font-black text-muted
@@ -184,9 +186,9 @@ Drag-to-close: при потягивании шторки вниз более ч
 
 ```
 Фото: h-20 w-20 rounded-2xl border-2 border-black shadow-[3px_3px_0_rgba(20,20,15,0.9)] object-cover
-Имя: text-xl font-black text-[#14140f]
-Возраст: font-age text-lg font-extrabold text-[#14140f] (через запятую после имени)
-Match %: стикер → rounded-md border-2 border-black bg-[#c8f36a] px-2 py-0.5 text-sm font-black -rotate-2 shadow-[2px_2px_0_rgba(20,20,15,0.9)]
+Имя: text-2xl font-black text-[#14140f]
+Возраст: font-age text-2xl font-black text-[#14140f] (через запятую после имени)
+Match %: стикер → rounded-md border-2 border-black bg-[#c8f36a] px-2 py-1 text-sm font-black -rotate-2 shadow-[2px_2px_0_rgba(20,20,15,0.9)]
          Формат: «★ 87%»
 ```
 
@@ -209,8 +211,8 @@ Layout хедера: `flex gap-4 items-start px-5 pt-2 pb-4`
 ```
 Контейнер: flex items-center gap-3
 Иконка: 20px emoji или inline SVG
-Метка: text-sm font-bold text-[#14140f] w-[100px] shrink-0
-Трек: flex-1 h-2.5 rounded-full bg-[#f0efe9] border border-black overflow-hidden
+Метка: text-sm font-black text-[#14140f] w-[100px] shrink-0
+Трек: flex-1 h-2 rounded-full bg-[#f0efe9] border-2 border-black overflow-hidden
 Заполнение: h-full rounded-full transition-all duration-500
   — 0–40%: bg-[#ffd9e0] (розовый — расхождение)
   — 40–70%: bg-[#ffd7a8] (персиковый — нейтрально)
@@ -245,7 +247,7 @@ Layout хедера: `flex gap-4 items-start px-5 pt-2 pb-4`
 
 Каждый пункт — chip:
 ```
-rounded-full border-2 border-black px-3 py-1.5 text-sm font-bold
+rounded-full border-2 border-black px-3 py-2 text-sm font-black
 — Соответствует: bg-[#c8f36a] text-[#14140f] shadow-[2px_2px_0_rgba(20,20,15,0.9)]
 — Не соответствует / нейтрально: bg-white text-[#6f6f68]
 ```
@@ -283,13 +285,13 @@ Layout: `flex flex-wrap gap-2`
 Причины:
 ```
 Каждая строка: flex items-start gap-2 text-sm text-[#14140f]
-Иконка: «✨» inline, text-base
-Текст: font-medium leading-snug
+Иконка: «✨» inline, text-sm
+Текст: font-normal leading-snug
 ```
 
 Риск (если есть):
 ```
-rounded-full border-2 border-black bg-[#ffd9e0] px-3 py-1.5 text-xs font-bold text-[#14140f]
+rounded-full border-2 border-black bg-[#ffd9e0] px-3 py-2 text-xs font-black text-[#14140f]
 shadow-[2px_2px_0_rgba(20,20,15,0.9)]
 Префикс: «⚠️ »
 ```
@@ -309,7 +311,7 @@ shadow-[2px_2px_0_rgba(20,20,15,0.9)]
 ```
 absolute left-0 top-0 z-[2] -rotate-[5deg]
 rounded-md border-2 border-black bg-[#c8f36a]
-px-2 py-0.5 text-sm font-black text-[#14140f]
+px-2 py-1 text-sm font-black text-[#14140f]
 shadow-[4px_4px_0_rgba(20,20,15,0.9)]
 ```
 
@@ -393,7 +395,7 @@ export interface DeckFilters {
 
 ```
 ┌──────────────────────────────────┐
-│  ПРОФИЛЬ           [Изменить]    │  ← h3 font-black + кнопка (text-sm font-bold underline)
+│  ПРОФИЛЬ           [Изменить]    │  ← h3 font-black + кнопка (text-sm font-black underline)
 │                                  │
 │  [фото 96x96 rounded-2xl]       │
 │  Имя, Возраст                    │  ← text-2xl font-black
@@ -416,7 +418,7 @@ export interface DeckFilters {
 
 Контейнер: `flex flex-col gap-6 overflow-y-auto px-5 py-4` с `pb-[max(2rem,env(safe-area-inset-bottom))]`.
 
-Кнопка «Изменить»: открывает `ProfileEditSheet`. Стиль: `text-sm font-bold underline underline-offset-2 text-[#14140f]`.
+Кнопка «Изменить»: открывает `ProfileEditSheet`. Стиль: `text-sm font-black underline underline-offset-2 text-[#14140f]`.
 
 ---
 
@@ -457,7 +459,7 @@ h-3 w-full rounded-full border border-black bg-white overflow-hidden
 
 Советы:
 ```
-text-sm font-bold text-[#14140f]
+text-sm font-black text-[#14140f]
 Выполнен: ✓ + зачёркнутый текст (line-through) + chip bg-[#c8f36a]
 Не выполнен: ○ + обычный текст + chip bg-[#fff3a0]
 ```
@@ -484,7 +486,7 @@ Bottom sheet для редактирования собственного про
 
 **Фото** (PROF-01):
 ```
-Горизонтальный скролл превью: h-[80px] w-[64px] rounded-xl border-2 border-black object-cover
+Горизонтальный скролл превью: h-[64px] w-[52px] rounded-xl border-2 border-black object-cover
 Кнопка «+ Добавить»: border-dashed (exception: border-2 border-dashed border-black bg-[#f0efe9])
   — MVP: URL-input (text input с placeholder «https://...')
   — Физический upload: деferred
@@ -493,7 +495,7 @@ Bottom sheet для редактирования собственного про
 **Имя**:
 ```
 <input type="text">
-border-2 border-black rounded-xl px-4 py-3 text-base font-bold bg-white
+border-2 border-black rounded-xl px-4 py-3 text-sm font-black bg-white
 focus:outline-none focus:ring-2 focus:ring-[#c8f36a]
 ```
 
@@ -520,7 +522,7 @@ Row label="КУРЕНИЕ"  / Row label="ПИТОМЦЫ" / Row label="ГОСТИ
 Chip-мультивыбор (1 значение из набора)
 ```
 
-CTA «Сохранить»:
+CTA «Сохранить профиль»:
 ```
 w-full rounded-full border-2 border-black bg-accent py-3 font-black text-[#14140f]
 shadow-[3px_3px_0_rgba(20,20,15,0.9)]
@@ -578,7 +580,7 @@ active:translate-x-[1px] active:translate-y-[1px]
 ### ProfileEditSheet save (PROF-01)
 
 1. Пользователь редактирует поля (локальный form state в sheet).
-2. «Сохранить»: `PATCH /profile` → optimistic update в `useQuery(['profile/me'])`.
+2. «Сохранить профиль»: `PATCH /profile` → optimistic update в `useQuery(['profile/me'])`.
 3. Закрытие sheet после успешного ответа.
 4. Хаптик: `haptic('success')`.
 5. Ошибка сети: toast-подобное сообщение (inline в sheet, под CTA: `text-xs text-[#ff6b85]`).
@@ -617,7 +619,7 @@ active:translate-x-[1px] active:translate-y-[1px]
 | FilterSheet CTA | «Применить» |
 | FilterSheet сброс | «Сбросить» |
 | ProfileView edit | «Изменить» |
-| ProfileEditSheet CTA | «Сохранить» |
+| ProfileEditSheet CTA | «Сохранить профиль» |
 | ProfileEditSheet отмена | «Отмена» (кнопка header справа) |
 
 ### Заголовки секций (все uppercase)
@@ -668,7 +670,7 @@ active:translate-x-[1px] active:translate-y-[1px]
 
 | Требование | Реализация |
 |------------|-----------|
-| Touch targets | Минимум 44x44px — Like/Pass: 60x60px, чипы: min h-8 с py-1.5 |
+| Touch targets | Минимум 44x44px — Like/Pass: 60x60px, чипы: min h-8 с py-2 |
 | ARIA roles | Sheet: `role="dialog"`, `aria-modal="true"`, `aria-label="Профиль кандидата"` |
 | Focus trap | При открытии sheet — focus на первый интерактивный элемент (Like button) |
 | Close on Escape | `useEffect` keydown Escape → dismiss (как в FilterSheet) |

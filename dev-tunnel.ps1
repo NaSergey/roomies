@@ -40,7 +40,10 @@ Start-Sleep -Seconds 2
 Write-Host "==> [2/3] Starting cloudflare tunnel for backend (port 4000)..." -ForegroundColor Cyan
 
 $backLogFile = "$env:TEMP\cf-back-roomies.log"
-if (Test-Path $backLogFile) { Remove-Item $backLogFile -Force }
+# Kill stale cloudflared processes before removing the log they may hold open
+Get-Process -Name "cloudflared" -ErrorAction SilentlyContinue | Stop-Process -Force
+Start-Sleep -Milliseconds 500
+if (Test-Path $backLogFile) { Remove-Item $backLogFile -Force -ErrorAction SilentlyContinue }
 
 $cfBackProc = Start-Process $cloudflaredExe `
     -ArgumentList "tunnel", "--url", "http://localhost:4000" `
