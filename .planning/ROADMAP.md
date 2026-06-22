@@ -70,8 +70,16 @@ Plans:
   3. User can open a candidate's detailed profile with "Вайб дома", "Правила", "О себе", and a "Почему вы совпали" block (2–3 reasons plus a soft risk if present).
   4. User can open filters and adjust budget, districts, dealbreakers, and vibe scales, and the feed updates accordingly.
   5. User can edit their own profile (photos, name, vibe tags, dealbreakers, budget, districts) and see their Roomie Score with how to improve it.
-**Plans:** TBD
+**Plans:** 6 plans
 **UI hint:** yes
+
+Plans:
+- [ ] 03-01-PLAN.md — Backend: extend GET /feed (matchReasons, matchRisks, smokingOk/petsOk/guestsPref fields + filter query params via FeedQueryDto) + fix SwipeActionDto add 'save' (Wave 1)
+- [ ] 03-02-PLAN.md — Backend: new ProfileModule — GET /profile/me (own data + Roomie Score) + PATCH /profile (edit name, photos, tags, budget, districts, dealbreakers), register in AppModule (Wave 1)
+- [ ] 03-03-PLAN.md — Frontend types + API layer + hooks: extend RoomieProfile/FeedCandidate, new profile.ts API, useFeedQuery(params), useSwipeMutation all 4 actions, useProfileQuery/usePatchProfile, shared UI VibeScaleBar/RulesSection/MatchReasonsList (Wave 2)
+- [ ] 03-04-PLAN.md — Frontend SwipeDeck wiring: FilterSheet extended (onApply + district/dealbreaker rows), DeckToolbar activeCount fix, ProfileCard single ★ N% badge, SwipeDeck queryParams + onCardTap, ActionButtons onSave/onSuperLike (Wave 3)
+- [ ] 03-05-PLAN.md — Frontend: CandidateProfileSheet widget with 4 sections (ВАЙБ ДОМА, ПРАВИЛА, О СЕБЕ, ПОЧЕМУ ВЫ СОВПАЛИ) + Like/Pass/Save/SuperLike action buttons (Wave 3)
+- [ ] 03-06-PLAN.md — Frontend: ProfileView (replace stub), RoomieScoreCard, ProfileEditSheet with full form + PATCH /profile mutation (Wave 4)
 
 ### Phase 4: Chat & Agreement
 **Goal:** Matched users hold a full conversation — smart-chip starters, text messages, call scheduling with slot proposals, and a quiet-chat nudge — and can negotiate a Roomie Agreement covering house rules.
@@ -129,7 +137,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Onboarding | 4/4 | Complete | 2026-06-10 |
 | 2. Matching Engine | 3/3 | Complete | 2026-06-10 |
-| 3. Discovery & Profiles | 0/0 | Not started | - |
+| 3. Discovery & Profiles | 0/6 | Planning | - |
 | 4. Chat & Agreement | 0/0 | Not started | - |
 | 5. Squad Mode | 0/0 | Not started | - |
 | 6. Trust, Notifications & Feedback | 0/0 | Not started | - |
@@ -138,3 +146,4 @@ Plans:
 ---
 *Roadmap created: 2026-06-07*
 *Updated: 2026-06-10 — Phase 2 planned: 3 plans (02-01 seed, 02-02 backend FeedModule+SwipeModule, 02-03 frontend wiring)*
+*Updated: 2026-06-22 — Phase 3 planned: 6 plans (03-01 backend feed ext, 03-02 backend profile module, 03-03 frontend types+hooks+shared UI, 03-04 swipe deck wiring, 03-05 CandidateProfileSheet, 03-06 ProfileView+edit)*
