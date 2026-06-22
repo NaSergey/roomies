@@ -4,6 +4,7 @@ export enum SwipeActionDto {
   like = 'like',
   pass = 'pass',
   super_like = 'super_like',
+  save = 'save',
 }
 
 export class CreateSwipeDto {
