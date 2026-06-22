@@ -2,7 +2,6 @@
 
 import Image from 'next/image';
 import { memo, type ReactNode } from 'react';
-import { GradientBackground } from '@/shared/ui/gradient-background';
 import type { RoomieProfile } from '../model/types';
 
 interface ProfileCardProps {
@@ -11,38 +10,13 @@ interface ProfileCardProps {
   overlay?: ReactNode;
 }
 
-const SCORE_META = [
-  { bg: 'bg-[#ffd6e8]', icon: '💎', rot: '-rotate-6' },
-  { bg: 'bg-[#fff3a0]', icon: '⭐', rot: 'rotate-3' },
-  { bg: 'bg-[#ffd6e8]', icon: '🕐', rot: '-rotate-2' },
-];
-
-// Цвета тегов-стикеров взяты прямо из градиента рамки (лайм / голубой / розовый),
-// чтобы инфо «срасталось» с рваной рамкой.
 const TAG_COLORS = ['bg-[#c8f36a]', 'bg-[#a8d8ff]', 'bg-[#ffb8d4]'];
-
-// Единый «стикерный» язык: чёрная обводка + жёсткая смещённая тень.
 const HARD_SHADOW = 'shadow-[4px_4px_0_rgba(20,20,15,0.9)]';
-
-const SCALE_LABELS: Record<string, string> = {
-  cleanliness:   'Чистота',
-  sleepSchedule: 'Режим',
-  socialLevel:   'Общение',
-  noiseLevel:    'Шум',
-  workFromHome:  'Дома',
-};
 
 function ProfileCardBase({ profile, priority, overlay }: ProfileCardProps) {
   const [mainPhoto, ...thumbPhotos] = profile.photos;
   const tagLabels = profile.vibeTags.map((t) => t.label);
   const matchPct  = Math.round(profile.matchScore * 100);
-
-  const scores = profile.lifestyleScales
-    ? (Object.entries(profile.lifestyleScales) as [string, number | null][])
-        .filter(([, v]) => v != null)
-        .slice(0, 3)
-        .map(([key, v]) => ({ label: SCALE_LABELS[key] ?? key, pct: Math.round((v as number) * 100) }))
-    : [];
 
   return (
     <div className="relative h-full w-full">
@@ -77,10 +51,10 @@ function ProfileCardBase({ profile, priority, overlay }: ProfileCardProps) {
         </div>
       </div>
 
-      {/* Match-бейдж (рамка-стикер) */}
-      <GradientBackground className={`absolute left-0 top-0 z-[2] -rotate-[5deg] ${HARD_SHADOW}`}>
-        {matchPct}%
-      </GradientBackground>
+      {/* Match-бейдж (стикер) */}
+      <span className={`absolute left-0 top-0 z-[2] -rotate-[5deg] rounded-xl border-2 border-black bg-accent px-2 py-1 text-sm font-black text-[#14140f] ${HARD_SHADOW}`}>
+        ★ {matchPct}%
+      </span>
 
       {/* Верификация — стикер */}
       <div
@@ -103,28 +77,7 @@ function ProfileCardBase({ profile, priority, overlay }: ProfileCardProps) {
         </div>
       )}
 
-      {/* ── Низ карточки: скоры (справа) над стеклянной инфо-панелью.
-          Один нижний якорь + flex — без фиксированных пикселей, чтобы низ
-          не уезжал под экран на разных размерах. ── */}
       <div className="absolute inset-x-3 bottom-24 z-[4] flex flex-col gap-2">
-        {/* Скоры — наклейки вертикальной колонкой справа, каждая под наклоном */}
-        {scores.length > 0 && (
-          <div className="flex flex-col items-end gap-2">
-            {scores.map((s, i) => {
-              const meta = SCORE_META[i] ?? SCORE_META[0];
-              return (
-                <span
-                  key={s.label}
-                  className={`flex items-center gap-0.5 rounded-md border-2 border-black px-1.5 py-0.5 text-[11px] font-black leading-none text-[#14140f] shadow-[2px_2px_0_rgba(20,20,15,0.9)] ${meta.rot} ${meta.bg}`}
-                >
-                  <span>{meta.icon}</span>
-                  <span>{s.pct}%</span>
-                </span>
-              );
-            })}
-          </div>
-        )}
-
         {/* Инфо — стеклянная панель, сливается с фото */}
         <div className="flex flex-col gap-2 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(to_top,rgba(12,12,10,0.80)_0%,rgba(12,12,10,0.46)_100%)] px-4 py-3 shadow-[0_12px_28px_-10px_rgba(0,0,0,0.55)] backdrop-blur-md">
           {/* Имя + возраст — на всю ширину панели */}

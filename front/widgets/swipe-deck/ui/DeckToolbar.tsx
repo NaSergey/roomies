@@ -16,6 +16,13 @@ const FILTER_LABELS: Partial<Record<string, string>> = {
   low: 'до 20 тыс.',
   mid: '20–35 тыс.',
   high: '35 тыс.+',
+  'smokingOk:false': '🚭 Не курят',
+  'smokingOk:true': '🚬 Курение ок',
+  'petsOk:true': '🐾 Питомцы',
+  'petsOk:false': '🚫 Без питомцев',
+  'guestsPref:often': 'Гости часто',
+  'guestsPref:sometimes': 'Гости иногда',
+  'guestsPref:rarely': 'Гости редко',
 };
 
 interface DeckToolbarProps {
@@ -25,22 +32,36 @@ interface DeckToolbarProps {
   onBoost: () => void;
 }
 
-// Считаем количество активных (не-default) фильтров для бейджа.
-function activeCount(f: DeckFilters) {
-  return (Object.keys(f) as (keyof DeckFilters)[]).filter(
-    (k) => f[k] !== DEFAULT_FILTERS[k],
-  ).length;
+function isFilterActive(k: keyof DeckFilters, f: DeckFilters): boolean {
+  if (k === 'districtIds') return f.districtIds.length > 0;
+  return f[k] !== DEFAULT_FILTERS[k];
 }
 
-// Активные фильтры в виде горизонтально прокручиваемых чипов.
+function activeCount(f: DeckFilters) {
+  return (Object.keys(f) as (keyof DeckFilters)[]).filter((k) => isFilterActive(k, f)).length;
+}
+
 function ActiveChips({ filters }: { filters: DeckFilters }) {
-  const chips = (Object.entries(filters) as [keyof DeckFilters, string][])
-    .filter(([k, v]) => v !== DEFAULT_FILTERS[k])
-    .map(([, v]) => FILTER_LABELS[v] ?? v);
+  const chips: string[] = [];
+  (Object.keys(filters) as (keyof DeckFilters)[]).forEach((k) => {
+    if (!isFilterActive(k, filters)) return;
+    if (k === 'districtIds') {
+      chips.push(`${filters.districtIds.length} район${filters.districtIds.length === 1 ? '' : 'а'}`);
+    } else if (k === 'smokingOk') {
+      chips.push(FILTER_LABELS[`smokingOk:${filters.smokingOk}`] ?? '');
+    } else if (k === 'petsOk') {
+      chips.push(FILTER_LABELS[`petsOk:${filters.petsOk}`] ?? '');
+    } else if (k === 'guestsPref') {
+      chips.push(FILTER_LABELS[`guestsPref:${filters.guestsPref}`] ?? '');
+    } else {
+      const v = filters[k] as string;
+      chips.push(FILTER_LABELS[v] ?? v);
+    }
+  });
 
   return (
     <>
-      {chips.map((label) => (
+      {chips.filter(Boolean).map((label) => (
         <span
           key={label}
           className="shrink-0 rounded-full border-2 border-black bg-white px-2.5 py-0.5 text-xs font-bold text-[#14140f] shadow-[2px_2px_0_rgba(20,20,15,0.9)]"

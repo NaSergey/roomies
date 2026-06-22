@@ -1,49 +1,78 @@
 'use client';
 
-interface ActionButtonsProps {
+export interface ActionButtonsProps {
   onPass: () => void;
   onLike: () => void;
-  onMessage?: () => void;
+  onSave?: () => void;
+  onSuperLike?: () => void;
 }
 
-export function ActionButtons({ onPass, onLike, onMessage }: ActionButtonsProps) {
+export function ActionButtons({ onPass, onLike, onSave, onSuperLike }: ActionButtonsProps) {
   return (
-    <div className="flex items-center justify-center gap-4 pb-2 pt-1">
+    <div className="flex items-center justify-center gap-3 pb-2 pt-1">
 
       {/* Pass — белый круг с лицом */}
       <button
         type="button"
         onClick={onPass}
-        aria-label="Pass"
+        aria-label="Пропустить"
         className="flex h-[60px] w-[60px] items-center justify-center rounded-full border-2 border-black bg-white transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95"
         style={{ boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
       >
         <FacePassIcon />
       </button>
 
-      {/* Message — овал, бирюзовый */}
+      {/* Save — закладка, персиковый */}
       <button
         type="button"
-        onClick={onMessage ?? (() => {})}
-        aria-label="Message"
-        disabled={!onMessage}
-        className="flex h-[56px] w-[104px] items-center justify-center rounded-full border-2 border-black transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95 disabled:opacity-50"
-        style={{ background: '#7dd8e0', boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
+        onClick={onSave}
+        aria-label="Сохранить"
+        disabled={!onSave}
+        className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-2 border-black transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95 disabled:opacity-40"
+        style={{ background: '#ffd7a8', boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
       >
-        <ChatBubblesIcon />
+        <BookmarkIcon />
+      </button>
+
+      {/* SuperLike — звезда, небесно-голубой */}
+      <button
+        type="button"
+        onClick={onSuperLike}
+        aria-label="Супер лайк"
+        disabled={!onSuperLike}
+        className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-2 border-black transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95 disabled:opacity-40"
+        style={{ background: '#a8d8ff', boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
+      >
+        <StarIcon />
       </button>
 
       {/* Like — лаймовый круг, жест рукой */}
       <button
         type="button"
         onClick={onLike}
-        aria-label="Like"
+        aria-label="Лайк"
         className="flex h-[60px] w-[60px] items-center justify-center rounded-full border-2 border-black transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95"
         style={{ background: '#c8f36a', boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
       >
         <RockOnIcon />
       </button>
     </div>
+  );
+}
+
+function BookmarkIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function StarIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
   );
 }
 
@@ -57,23 +86,6 @@ function FacePassIcon() {
       <path d="M5,24 Q17,14 29,24" stroke="#f87171" strokeWidth="2.2" fill="none" strokeLinecap="round" />
       <path d="M7,26 Q17,17 27,26" stroke="#fb923c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
       <path d="M9,28 Q17,20 25,28" stroke="#facc15" strokeWidth="1.4" fill="none" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function ChatBubblesIcon() {
-  return (
-    <svg width="36" height="28" viewBox="0 0 36 28" fill="none" aria-hidden>
-      {/* Основной пузырь */}
-      <rect x="1" y="1" width="22" height="16" rx="8" fill="white" opacity="0.9" />
-      {/* Три точки */}
-      <circle cx="7" cy="9" r="2" fill="#555" />
-      <circle cx="12" cy="9" r="2" fill="#555" />
-      <circle cx="17" cy="9" r="2" fill="#555" />
-      {/* Маленький пузырь */}
-      <rect x="13" y="12" width="16" height="11" rx="6" fill="white" opacity="0.7" />
-      <circle cx="19" cy="17" r="1.4" fill="#555" />
-      <circle cx="23" cy="17" r="1.4" fill="#555" />
     </svg>
   );
 }

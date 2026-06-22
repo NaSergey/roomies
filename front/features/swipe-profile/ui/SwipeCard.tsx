@@ -19,8 +19,7 @@ interface SwipeCardProps {
   exitDirection: SwipeDirection | null;  // на верхней карте — вылет
   enterDirection: SwipeDirection | null; // на следующей карте — «дорастание» до верхней
   onSwipe: SwipeHandler;
-  // Верхняя карта получает доступ к DOM следующей, чтобы в реальном времени
-  // «подращивать» её во время драга (готова встать на место).
+  onCardTap?: () => void;
   getPeerEl?: () => HTMLDivElement | null;
 }
 
@@ -38,7 +37,7 @@ function clamp(v: number, min: number, max: number) {
 }
 
 export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function SwipeCard(
-  { profile, isTop, stackIndex, exitDirection, enterDirection, onSwipe, getPeerEl },
+  { profile, isTop, stackIndex, exitDirection, enterDirection, onSwipe, onCardTap, getPeerEl },
   forwardedRef,
 ) {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -56,9 +55,11 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
   );
 
   const xRef = useRef(0);
+  const yRef = useRef(0);
   const draggingRef = useRef(false);
   const pointerIdRef = useRef(-1);
   const startXRef = useRef(0);
+  const startYRef = useRef(0);
   const startTimeRef = useRef(0);
 
   const isExiting = isTop && exitDirection !== null;
@@ -134,6 +135,7 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
     draggingRef.current = true;
     pointerIdRef.current = e.pointerId;
     startXRef.current = e.clientX;
+    startYRef.current = e.clientY;
     startTimeRef.current = performance.now();
     const el = cardRef.current;
     if (el) el.style.transition = 'none';
@@ -145,6 +147,7 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
   function handlePointerMove(e: PointerEvent<HTMLDivElement>) {
     if (!draggingRef.current || e.pointerId !== pointerIdRef.current) return;
     xRef.current = e.clientX - startXRef.current;
+    yRef.current = e.clientY - startYRef.current;
     paintDrag();
   }
 
@@ -153,8 +156,14 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
     draggingRef.current = false;
 
     const x = xRef.current;
+    const y = yRef.current;
     const dt = Math.max(1, performance.now() - startTimeRef.current);
     const velocity = (x / dt) * 1000; // px/s
+
+    if (Math.abs(x) < 10 && Math.abs(y) < 10) {
+      onCardTap?.();
+      return;
+    }
 
     let direction: SwipeDirection | null = null;
     if (x > SWIPE_THRESHOLD || velocity > VELOCITY_THRESHOLD) direction = 'right';

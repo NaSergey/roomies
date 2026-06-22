@@ -1,35 +1,61 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { ActionButtons, SwipeCard, useSwipeDeck, useFeedQuery, useSwipeMutation } from '@/features/swipe-profile';
+import {
+  ActionButtons,
+  SwipeCard,
+  useSwipeDeck,
+  useFeedQuery,
+  useSwipeMutation,
+  type FeedQueryParams,
+} from '@/features/swipe-profile';
 import type { SwipeDirection } from '@/features/swipe-profile';
+import type { FeedCandidate } from '@/shared/lib/api';
+import { CandidateProfileSheet } from '@/widgets/candidate-profile';
 import { DeckToolbar } from './DeckToolbar';
 import { EmptyState } from './EmptyState';
 import { FilterSheet, DEFAULT_FILTERS } from './FilterSheet';
 import type { DeckFilters } from './FilterSheet';
 
+function filtersToQueryParams(f: DeckFilters): FeedQueryParams {
+  const params: FeedQueryParams = {};
+  if (f.budget === 'low') { params.budgetMax = 20000; }
+  if (f.budget === 'mid') { params.budgetMin = 20000; params.budgetMax = 35000; }
+  if (f.budget === 'high') { params.budgetMin = 35000; }
+  if (f.districtIds.length > 0) params.districtIds = f.districtIds;
+  if (f.smokingOk !== null) params.smokingOk = f.smokingOk;
+  if (f.petsOk !== null) params.petsOk = f.petsOk;
+  if (f.guestsPref !== null) params.guestsPref = f.guestsPref;
+  return params;
+}
+
 export function SwipeDeck() {
   const [filters, setFilters] = useState<DeckFilters>(DEFAULT_FILTERS);
+  const [queryParams, setQueryParams] = useState<FeedQueryParams>({});
   const [filterOpen, setFilterOpen] = useState(false);
   const [boosted, setBoosted] = useState(false);
   const [matchState, setMatchState] = useState<{ candidateName: string; matchId: number } | null>(null);
+  const [selectedProfile, setSelectedProfile] = useState<FeedCandidate | null>(null);
 
-  const { data: profiles = [], isLoading, isError, error, refetch } = useFeedQuery();
+  const { data: profiles = [], isLoading, isError, error, refetch } = useFeedQuery(queryParams);
   const swipeMutation = useSwipeMutation();
 
-  // DOM-ноды карт по profile.id — чтобы верхняя карта могла «подращивать»
-  // следующую во время драга (см. getPeerEl ниже).
   const cardEls = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
   const { visible, exitDirection, enterDirection, isEmpty, swipe, reset } = useSwipeDeck(profiles);
 
-  const handleSwipe = useCallback(
-    async (direction: SwipeDirection) => {
+  const handleApplyFilters = useCallback((f: DeckFilters) => {
+    setFilters(f);
+    setQueryParams(filtersToQueryParams(f));
+  }, []);
+
+  const handleAction = useCallback(
+    async (action: 'like' | 'pass' | 'save' | 'super_like') => {
       const currentProfile = visible[0];
       if (!currentProfile) return;
 
-      const action = direction === 'right' ? 'like' : 'pass';
-      if (!swipe(direction)) return; // анимация ещё идёт — не отправляем дубль
+      const swipeDir: SwipeDirection = action === 'pass' ? 'left' : 'right';
+      if (!swipe(swipeDir)) return;
 
       const result = await swipeMutation.mutateAsync({ targetId: currentProfile.id, action });
       if (result.matched && result.matchId != null) {
@@ -37,6 +63,11 @@ export function SwipeDeck() {
       }
     },
     [visible, swipe, swipeMutation],
+  );
+
+  const handleSwipe = useCallback(
+    (direction: SwipeDirection) => handleAction(direction === 'right' ? 'like' : 'pass'),
+    [handleAction],
   );
 
   const handleReset = useCallback(async () => {
@@ -107,6 +138,7 @@ export function SwipeDeck() {
               exitDirection={i === 0 ? exitDirection : null}
               enterDirection={i === 1 ? enterDirection : null}
               onSwipe={handleSwipe}
+              onCardTap={i === 0 ? () => setSelectedProfile(profiles.find(p => p.id === profile.id) ?? null) : undefined}
               getPeerEl={
                 i === 0
                   ? () => {
@@ -121,12 +153,32 @@ export function SwipeDeck() {
 
         {!isEmpty && (
           <div className="absolute inset-x-0 bottom-3 z-20 flex justify-center">
-            <ActionButtons onPass={() => handleSwipe('left')} onLike={() => handleSwipe('right')} />
+            <ActionButtons
+              onPass={() => handleAction('pass')}
+              onLike={() => handleAction('like')}
+              onSave={() => handleAction('save')}
+              onSuperLike={() => handleAction('super_like')}
+            />
           </div>
         )}
 
-        <FilterSheet open={filterOpen} filters={filters} onChange={setFilters} onClose={() => setFilterOpen(false)} />
+        <FilterSheet
+          open={filterOpen}
+          filters={filters}
+          onChange={setFilters}
+          onApply={handleApplyFilters}
+          onClose={() => setFilterOpen(false)}
+        />
       </div>
+
+      <CandidateProfileSheet
+        candidate={selectedProfile}
+        onClose={() => setSelectedProfile(null)}
+        onPass={() => { setSelectedProfile(null); handleAction('pass'); }}
+        onLike={() => { setSelectedProfile(null); handleAction('like'); }}
+        onSave={() => { setSelectedProfile(null); handleAction('save'); }}
+        onSuperLike={() => { setSelectedProfile(null); handleAction('super_like'); }}
+      />
     </div>
   );
 }

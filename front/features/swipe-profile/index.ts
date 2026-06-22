@@ -1,5 +1,6 @@
 export { SwipeCard } from './ui/SwipeCard';
 export { ActionButtons } from './ui/ActionButtons';
+export type { ActionButtonsProps } from './ui/ActionButtons';
 export { useSwipeDeck, SWIPE_EXIT_DURATION_MS } from './model/use-swipe-deck';
 export { useFeedQuery, useSwipeMutation, feedKeys } from './model/use-feed-query';
 export type { FeedQueryParams } from './model/use-feed-query';
