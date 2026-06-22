@@ -1,7 +1,7 @@
 export interface RoomieProfile {
   id: number;
   name: string;
-  // Real API fields
+  age?: number;
   scenario: string;
   budgetMin: number | null;
   budgetMax: number | null;

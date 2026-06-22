@@ -1,136 +1,218 @@
 'use client';
 
-import { useRef, useState, type PointerEvent } from 'react';
-import { ProfileCard, type RoomieProfile } from '@/entities/profile';
 import {
-  SWIPE_EXIT_DURATION_MS,
-} from '../model/use-swipe-deck';
+  forwardRef,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type PointerEvent,
+} from 'react';
+import { ProfileCard, type RoomieProfile } from '@/entities/profile';
+import { SWIPE_EXIT_DURATION_MS } from '../model/use-swipe-deck';
 import type { SwipeDirection, SwipeHandler } from '../model/types';
 
 interface SwipeCardProps {
   profile: RoomieProfile;
   isTop: boolean;
-  stackIndex: number; // 0 — верх стопки, 1 — следующая, и т.д.
-  exitDirection: SwipeDirection | null;
+  stackIndex: number; // 0 — верхняя, 1 — следующая (видна за ней), 2+ — запас (скрыт)
+  exitDirection: SwipeDirection | null;  // на верхней карте — вылет
+  enterDirection: SwipeDirection | null; // на следующей карте — «дорастание» до верхней
   onSwipe: SwipeHandler;
+  // Верхняя карта получает доступ к DOM следующей, чтобы в реальном времени
+  // «подращивать» её во время драга (готова встать на место).
+  getPeerEl?: () => HTMLDivElement | null;
 }
 
-const SWIPE_THRESHOLD = 120; // px
+const SWIPE_THRESHOLD = 110; // px
 const VELOCITY_THRESHOLD = 500; // px/s
-// Пружинистый возврат и плавный «приход» соседних карт в верх стопки.
-const SPRING_TRANSITION = 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)';
-// Быстрый вылет за экран без овершута.
+const EXIT_DISTANCE = 600; // px — куда улетает свайпнутая карта
+const PEER_REST_SCALE = 0.92; // масштаб следующей карты в покое (за верхней)
+
+const SPRING = 'transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1)';
 const EXIT_TRANSITION = `transform ${SWIPE_EXIT_DURATION_MS}ms ease-out, opacity ${SWIPE_EXIT_DURATION_MS}ms ease-out`;
+const ENTER_TRANSITION = `transform ${SWIPE_EXIT_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
 }
 
-export function SwipeCard({
-  profile,
-  isTop,
-  stackIndex,
-  exitDirection,
-  onSwipe,
-}: SwipeCardProps) {
-  const [x, setX] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStart = useRef({ pointerId: -1, startX: 0, startTime: 0 });
+export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function SwipeCard(
+  { profile, isTop, stackIndex, exitDirection, enterDirection, onSwipe, getPeerEl },
+  forwardedRef,
+) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const likeRef = useRef<HTMLDivElement>(null);
+  const nopeRef = useRef<HTMLDivElement>(null);
+
+  // Сливаем внутренний ref с проброшенным наружу (для координации соседних карт).
+  const setRefs = useCallback(
+    (el: HTMLDivElement | null) => {
+      cardRef.current = el;
+      if (typeof forwardedRef === 'function') forwardedRef(el);
+      else if (forwardedRef) (forwardedRef as { current: HTMLDivElement | null }).current = el;
+    },
+    [forwardedRef],
+  );
+
+  const xRef = useRef(0);
+  const draggingRef = useRef(false);
+  const pointerIdRef = useRef(-1);
+  const startXRef = useRef(0);
+  const startTimeRef = useRef(0);
 
   const isExiting = isTop && exitDirection !== null;
+  const isEntering = stackIndex === 1 && enterDirection !== null;
   const dragEnabled = isTop && !isExiting;
+
+  // Применяем трансформ ПРЯМО в DOM (без React-ререндера на кадр). React style ниже
+  // намеренно не содержит transform/opacity, чтобы ререндеры не сбрасывали анимацию.
+  const paintDrag = () => {
+    const x = xRef.current;
+    const rot = clamp(x * 0.055, -16, 16);
+    const el = cardRef.current;
+    if (el) el.style.transform = `translate3d(${x}px,0,0) rotate(${rot}deg)`;
+    if (likeRef.current) likeRef.current.style.opacity = `${clamp((x - 40) / 90, 0, 1)}`;
+    if (nopeRef.current) nopeRef.current.style.opacity = `${clamp((-x - 40) / 90, 0, 1)}`;
+
+    // Следующая карта подрастает пропорционально драгу — видно, что она готова
+    // встать на место. По мере оттягивания верхней открывается слева/справа.
+    const peer = getPeerEl?.();
+    if (peer) {
+      const p = clamp(Math.abs(x) / SWIPE_THRESHOLD, 0, 1);
+      const scale = PEER_REST_SCALE + (1 - PEER_REST_SCALE) * p;
+      peer.style.transform = `translate3d(0,0,0) scale(${scale})`;
+    }
+  };
+
+  // ── ВЪЕЗД: следующая карта дорастает до полного размера и становится верхней.
+  useLayoutEffect(() => {
+    if (!isEntering) return;
+    const el = cardRef.current;
+    if (!el) return;
+    el.style.transition = ENTER_TRANSITION;
+    el.style.transform = 'translate3d(0,0,0) scale(1)';
+    el.style.opacity = '1';
+  }, [isEntering]);
+
+  // ── ВЫЛЕТ: верхняя карта улетает из текущего (возможно, перетащенного) положения.
+  useLayoutEffect(() => {
+    if (!isExiting) return;
+    const el = cardRef.current;
+    if (!el) return;
+    const dx = exitDirection === 'right' ? EXIT_DISTANCE : -EXIT_DISTANCE;
+    const dr = exitDirection === 'right' ? 28 : -28;
+    el.style.transition = EXIT_TRANSITION;
+    el.style.transform = `translate3d(${dx}px,0,0) rotate(${dr}deg)`;
+    el.style.opacity = '0';
+  }, [isExiting, exitDirection]);
+
+  // ── ПОКОЙ: верхняя — центр/полный размер; следующая — за ней, уменьшена и видна;
+  //    запасные (2+) — скрыты (предзагружены, чтобы не было рывка при появлении).
+  useLayoutEffect(() => {
+    if (isExiting || isEntering) return;
+    const el = cardRef.current;
+    if (!el) return;
+    xRef.current = 0;
+    el.style.transition = 'none';
+    if (isTop) {
+      el.style.transform = 'translate3d(0,0,0) scale(1)';
+      el.style.opacity = '1';
+    } else if (stackIndex === 1) {
+      el.style.transform = `translate3d(0,0,0) scale(${PEER_REST_SCALE})`;
+      el.style.opacity = '1';
+    } else {
+      el.style.transform = `translate3d(0,0,0) scale(${PEER_REST_SCALE})`;
+      el.style.opacity = '0';
+    }
+    if (likeRef.current) likeRef.current.style.opacity = '0';
+    if (nopeRef.current) nopeRef.current.style.opacity = '0';
+  }, [isTop, stackIndex, isExiting, isEntering]);
 
   function handlePointerDown(e: PointerEvent<HTMLDivElement>) {
     if (!dragEnabled) return;
-    dragStart.current = {
-      pointerId: e.pointerId,
-      startX: e.clientX,
-      startTime: Date.now(),
-    };
-    setIsDragging(true);
+    draggingRef.current = true;
+    pointerIdRef.current = e.pointerId;
+    startXRef.current = e.clientX;
+    startTimeRef.current = performance.now();
+    const el = cardRef.current;
+    if (el) el.style.transition = 'none';
+    const peer = getPeerEl?.();
+    if (peer) peer.style.transition = 'none'; // следующая следует за драгом мгновенно
     e.currentTarget.setPointerCapture(e.pointerId);
   }
 
   function handlePointerMove(e: PointerEvent<HTMLDivElement>) {
-    if (!isDragging || e.pointerId !== dragStart.current.pointerId) return;
-    setX(e.clientX - dragStart.current.startX);
+    if (!draggingRef.current || e.pointerId !== pointerIdRef.current) return;
+    xRef.current = e.clientX - startXRef.current;
+    paintDrag();
   }
 
   function handlePointerEnd(e: PointerEvent<HTMLDivElement>) {
-    if (!isDragging || e.pointerId !== dragStart.current.pointerId) return;
-    setIsDragging(false);
+    if (!draggingRef.current || e.pointerId !== pointerIdRef.current) return;
+    draggingRef.current = false;
 
-    const dt = Math.max(1, Date.now() - dragStart.current.startTime);
+    const x = xRef.current;
+    const dt = Math.max(1, performance.now() - startTimeRef.current);
     const velocity = (x / dt) * 1000; // px/s
 
     let direction: SwipeDirection | null = null;
     if (x > SWIPE_THRESHOLD || velocity > VELOCITY_THRESHOLD) direction = 'right';
-    else if (x < -SWIPE_THRESHOLD || velocity < -VELOCITY_THRESHOLD)
-      direction = 'left';
+    else if (x < -SWIPE_THRESHOLD || velocity < -VELOCITY_THRESHOLD) direction = 'left';
 
     if (direction) {
-      // Парент через onSwipe выставит exitDirection → анимация вылета.
-      // x не сбрасываем — иначе будет «дёрг» к нулю перед exit-анимацией.
+      // Верхняя → exit, следующая → enter (дорастает) через ре-рендер по props.
       onSwipe(direction);
     } else {
-      // Не дотянули порог — пружиним обратно.
-      setX(0);
+      // Недотянули — пружиним: верхняя в центр, следующая обратно в покой.
+      const el = cardRef.current;
+      xRef.current = 0;
+      if (el) {
+        el.style.transition = SPRING;
+        el.style.transform = 'translate3d(0,0,0) rotate(0deg)';
+      }
+      if (likeRef.current) likeRef.current.style.opacity = '0';
+      if (nopeRef.current) nopeRef.current.style.opacity = '0';
+      const peer = getPeerEl?.();
+      if (peer) {
+        peer.style.transition = SPRING;
+        peer.style.transform = `translate3d(0,0,0) scale(${PEER_REST_SCALE})`;
+      }
     }
   }
 
-  // Композиция трансформов: глубина стопки + активная позиция верхней карты.
-  const stackTransform = `translateY(${stackIndex * 12}px) scale(${1 - stackIndex * 0.04})`;
-
-  let activeTransform: string;
-  let opacity = 1;
-  let transition: string;
-
-  if (isExiting) {
-    const dx = exitDirection === 'right' ? 600 : -600;
-    const dr = exitDirection === 'right' ? 30 : -30;
-    activeTransform = `translateX(${dx}px) rotate(${dr}deg) ${stackTransform}`;
-    opacity = 0;
-    transition = EXIT_TRANSITION;
-  } else if (isTop) {
-    const rotate = clamp(x * 0.06, -18, 18);
-    activeTransform = `translateX(${x}px) rotate(${rotate}deg) ${stackTransform}`;
-    transition = isDragging ? 'none' : SPRING_TRANSITION;
-  } else {
-    activeTransform = stackTransform;
-    transition = SPRING_TRANSITION;
-  }
-
-  // Оверлеи LIKE/NOPE появляются по мере драга и исчезают на exit/spring-back.
-  const likeOpacity = isTop && !isExiting ? clamp((x - 40) / 100, 0, 1) : 0;
-  const nopeOpacity = isTop && !isExiting ? clamp((-x - 40) / 100, 0, 1) : 0;
-
-  const overlay = isTop ? (
-    <>
-      <div
-        style={{ opacity: likeOpacity }}
-        className="absolute top-8 left-6 rounded-xl border-4 border-emerald-400 px-4 py-2 text-2xl font-black uppercase tracking-wider text-emerald-400 -rotate-12 pointer-events-none transition-opacity duration-150"
-      >
-        Like
-      </div>
-      <div
-        style={{ opacity: nopeOpacity }}
-        className="absolute top-8 right-6 rounded-xl border-4 border-rose-500 px-4 py-2 text-2xl font-black uppercase tracking-wider text-rose-500 rotate-12 pointer-events-none transition-opacity duration-150"
-      >
-        Nope
-      </div>
-    </>
-  ) : null;
+  const overlay = useMemo(
+    () => (
+      <>
+        <div
+          ref={likeRef}
+          style={{ opacity: 0 }}
+          className="absolute top-8 left-6 rounded-xl border-4 border-emerald-400 px-4 py-2 text-2xl font-black uppercase tracking-wider text-emerald-400 -rotate-12 pointer-events-none"
+        >
+          Like
+        </div>
+        <div
+          ref={nopeRef}
+          style={{ opacity: 0 }}
+          className="absolute top-8 right-6 rounded-xl border-4 border-rose-500 px-4 py-2 text-2xl font-black uppercase tracking-wider text-rose-500 rotate-12 pointer-events-none"
+        >
+          Nope
+        </div>
+      </>
+    ),
+    [],
+  );
 
   return (
     <div
-      className="absolute inset-0 touch-none select-none"
+      ref={setRefs}
+      className="absolute inset-0 touch-none select-none [backface-visibility:hidden]"
       style={{
-        transform: activeTransform,
-        opacity,
-        transition,
         zIndex: 10 - stackIndex,
-        cursor: dragEnabled ? (isDragging ? 'grabbing' : 'grab') : 'default',
-        willChange: dragEnabled ? 'transform' : undefined,
+        cursor: dragEnabled ? 'grab' : 'default',
+        // Обе видимые карты держим на GPU-слое: тяжёлый SVG-фильтр растеризуется
+        // один раз, scale/translate идут через композитор (нет ре-растеризации).
+        willChange: stackIndex <= 1 ? 'transform' : 'auto',
       }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -140,4 +222,4 @@ export function SwipeCard({
       <ProfileCard profile={profile} priority={isTop} overlay={overlay} />
     </div>
   );
-}
+});

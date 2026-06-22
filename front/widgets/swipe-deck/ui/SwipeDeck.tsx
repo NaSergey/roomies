@@ -1,49 +1,27 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import type { RoomieProfile } from '@/entities/profile';
-import { ActionButtons, SwipeCard, useSwipeDeck } from '@/features/swipe-profile';
+import { useCallback, useRef, useState } from 'react';
+import { ActionButtons, SwipeCard, useSwipeDeck, useFeedQuery, useSwipeMutation } from '@/features/swipe-profile';
 import type { SwipeDirection } from '@/features/swipe-profile';
-import { getFeed, postSwipe } from '@/shared/lib/api';
+import { DeckToolbar } from './DeckToolbar';
 import { EmptyState } from './EmptyState';
+import { FilterSheet, DEFAULT_FILTERS } from './FilterSheet';
+import type { DeckFilters } from './FilterSheet';
 
-// Виджет: композиция фичи свайпа в полноценную колоду с кнопками и пустым состоянием.
-// Самостоятельно загружает данные из GET /feed и отправляет POST /swipes на каждый свайп.
 export function SwipeDeck() {
-  const [profiles, setProfiles] = useState<RoomieProfile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [feedError, setFeedError] = useState<string | null>(null);
-  const [retryKey, setRetryKey] = useState(0);
-  const [matchState, setMatchState] = useState<{
-    candidateName: string;
-    matchId: number;
-  } | null>(null);
+  const [filters, setFilters] = useState<DeckFilters>(DEFAULT_FILTERS);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [boosted, setBoosted] = useState(false);
+  const [matchState, setMatchState] = useState<{ candidateName: string; matchId: number } | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
-    getFeed()
-      .then((candidates) => {
-        if (cancelled) return;
-        setProfiles(candidates);
-        setFeedError(null);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error('[SwipeDeck] getFeed failed:', err);
-        const msg: string =
-          err instanceof Error ? err.message : String(err);
-        setFeedError(msg);
-        setProfiles([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [retryKey]);
+  const { data: profiles = [], isLoading, isError, error, refetch } = useFeedQuery();
+  const swipeMutation = useSwipeMutation();
 
-  const { visible, exitDirection, isEmpty, swipe, reset } = useSwipeDeck(profiles);
+  // DOM-ноды карт по profile.id — чтобы верхняя карта могла «подращивать»
+  // следующую во время драга (см. getPeerEl ниже).
+  const cardEls = useRef<Map<number, HTMLDivElement | null>>(new Map());
+
+  const { visible, exitDirection, enterDirection, isEmpty, swipe, reset } = useSwipeDeck(profiles);
 
   const handleSwipe = useCallback(
     async (direction: SwipeDirection) => {
@@ -51,60 +29,41 @@ export function SwipeDeck() {
       if (!currentProfile) return;
 
       const action = direction === 'right' ? 'like' : 'pass';
-      swipe(direction); // triggers animation immediately (optimistic)
+      if (!swipe(direction)) return; // анимация ещё идёт — не отправляем дубль
 
-      try {
-        const result = await postSwipe(currentProfile.id, action);
-        if (result.matched && result.matchId != null) {
-          setMatchState({
-            candidateName: currentProfile.name,
-            matchId: result.matchId,
-          });
-        }
-      } catch (err) {
-        console.error('[SwipeDeck] postSwipe failed:', err);
+      const result = await swipeMutation.mutateAsync({ targetId: currentProfile.id, action });
+      if (result.matched && result.matchId != null) {
+        setMatchState({ candidateName: currentProfile.name, matchId: result.matchId });
       }
     },
-    [visible, swipe],
+    [visible, swipe, swipeMutation],
   );
 
   const handleReset = useCallback(async () => {
-    try {
-      const fresh = await getFeed();
-      setProfiles(fresh);
-      reset();
-    } catch (err) {
-      console.error('[SwipeDeck] handleReset failed:', err);
-    }
-  }, [reset]);
+    await refetch();
+    reset();
+  }, [reset, refetch]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="flex gap-2">
           {[0, 1, 2].map((i) => (
-            <span
-              key={i}
-              className="h-2 w-2 animate-bounce rounded-full bg-accent"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            />
+            <span key={i} className="h-2 w-2 animate-bounce rounded-full bg-accent" style={{ animationDelay: `${i * 0.15}s` }} />
           ))}
         </div>
       </div>
     );
   }
 
-  if (feedError) {
+  if (isError) {
+    const msg = error instanceof Error ? error.message : String(error);
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 px-4 text-center">
         <p className="text-3xl">⚠️</p>
         <p className="text-sm font-semibold text-(--text)">Не удалось загрузить ленту</p>
-        <p className="text-xs text-muted">{feedError}</p>
-        <button
-          type="button"
-          onClick={() => { setFeedError(null); setLoading(true); setRetryKey((k) => k + 1); }}
-          className="mt-2 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-(--text-on-accent)"
-        >
+        <p className="text-xs text-muted">{msg}</p>
+        <button type="button" onClick={() => refetch()} className="mt-2 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-(--text-on-accent)">
           Повторить
         </button>
       </div>
@@ -112,21 +71,21 @@ export function SwipeDeck() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-4">
+    <div className="flex flex-1 flex-col gap-2">
+      <DeckToolbar
+        filters={filters}
+        boosted={boosted}
+        onOpenFilters={() => setFilterOpen(true)}
+        onBoost={() => setBoosted((b) => !b)}
+      />
+
       <div className="relative flex-1">
         {matchState && (
-          <div
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 rounded-2xl"
-            style={{ background: 'rgba(0,0,0,0.75)' }}
-          >
+          <div className="absolute inset-0 z-50 flex flex-col items-center justify-center gap-4 rounded-2xl" style={{ background: 'rgba(0,0,0,0.75)' }}>
             <p className="text-4xl">🏠</p>
             <h2 className="text-2xl font-bold text-white">It&apos;s a match!</h2>
             <p className="text-base text-white/80">{matchState.candidateName}</p>
-            <button
-              type="button"
-              onClick={() => setMatchState(null)}
-              className="mt-2 rounded-full bg-accent px-6 py-2 text-sm font-semibold text-white"
-            >
+            <button type="button" onClick={() => setMatchState(null)} className="mt-2 rounded-full bg-accent px-6 py-2 text-sm font-semibold text-white">
               Начать общение
             </button>
           </div>
@@ -138,22 +97,36 @@ export function SwipeDeck() {
           visible.map((profile, i) => (
             <SwipeCard
               key={profile.id}
+              ref={(el) => {
+                if (el) cardEls.current.set(profile.id, el);
+                else cardEls.current.delete(profile.id);
+              }}
               profile={profile}
               isTop={i === 0}
               stackIndex={i}
               exitDirection={i === 0 ? exitDirection : null}
+              enterDirection={i === 1 ? enterDirection : null}
               onSwipe={handleSwipe}
+              getPeerEl={
+                i === 0
+                  ? () => {
+                      const next = visible[1];
+                      return next ? cardEls.current.get(next.id) ?? null : null;
+                    }
+                  : undefined
+              }
             />
           ))
         )}
-      </div>
 
-      {!isEmpty && (
-        <ActionButtons
-          onPass={() => handleSwipe('left')}
-          onLike={() => handleSwipe('right')}
-        />
-      )}
+        {!isEmpty && (
+          <div className="absolute inset-x-0 bottom-3 z-20 flex justify-center">
+            <ActionButtons onPass={() => handleSwipe('left')} onLike={() => handleSwipe('right')} />
+          </div>
+        )}
+
+        <FilterSheet open={filterOpen} filters={filters} onChange={setFilters} onClose={() => setFilterOpen(false)} />
+      </div>
     </div>
   );
 }
