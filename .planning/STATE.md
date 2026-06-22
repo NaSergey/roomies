@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Plan 02-03 — COMPLETE. SwipeDeck wired to real GET /feed + POST /swipes. ProfileCard updated for API shape. Match overlay on mutual like. MOCK_PROFILES removed. TypeScript clean. Phase 2 COMPLETE.
-last_updated: "2026-06-10T14:00:00.000Z"
-last_activity: 2026-06-10
+stopped_at: Phase 3 context gathered (03-CONTEXT.md). Ready to plan Phase 3 — Discovery & Profiles. Key decisions locked — candidate profile as bottom sheet on tap, backend generates match reasons, single Match Score % on card.
+last_updated: "2026-06-22T00:00:00.000Z"
+last_activity: 2026-06-22
 progress:
   total_phases: 7
   completed_phases: 1
@@ -86,6 +86,21 @@ Recent decisions affecting current work:
 ### Blockers/Concerns
 
 - None — Plan 01-02 fully complete, TypeScript build clean, all unit tests pass
+
+### Uncommitted Work (ahead of roadmap)
+
+Реализованная, но НЕ закоммиченная ad-hoc работа поверх Phase 2 (UX/инфра, в основном территория Phase 3). Полный инвентарь: **.planning/UNCOMMITTED-WORK.md**. Кратко:
+
+- Telegram fullscreen фикс (mobile-only, версионные гейты) + `TelegramProvider`
+- BottomNav (3 вкладки; чат/профиль — заглушки)
+- React Query (`shared/lib/query`, `useFeedQuery`/`useSwipeMutation`)
+- Лента: панель фильтров + буст (⚠️ UI, фильтры локальные — нет связи с API)
+- Свайп: механика «колоды» (следующая видна/растёт при драге) + перф (императивный драг, `memo`, GPU-слой)
+- ProfileCard: возраст, скоры-наклейки, нео-брутализм
+- Backend: `age` из `birthDate` + жёсткие SQL-фильтры ленты; `seed-bulk-users.ts` (1000 юзеров)
+- Инфра: `docker-compose.yml`, `dev-tunnel.ps1` фикс, `AGENTS.md`
+
+При планировании Phase 3 — не дублировать готовое; довести хвосты (фильтры→API, буст, ProfileView, upload).
 
 ## Deferred Items
 
