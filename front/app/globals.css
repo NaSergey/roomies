@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 :root {
+  --tg-safe-top: 0px;
+
   /* Фиксированная светлая палитра по референсу. Telegram themeParams игнорируем. */
 
   /* Фоны */
-  --bg: #f6f6f1;          /* основной — тёплый off-white */
+  --bg: linear-gradient(170deg, #e1ddf8 0%, #9bb1f7 100%); /* фон всей страницы */
   --surface: #ffffff;     /* карточки/чипы поверх bg */
   --surface-2: #f0efe9;   /* приглушённый, для второстепенных блоков */
 
@@ -43,7 +45,8 @@
   --color-surface: var(--surface);
   --color-surface-2: var(--surface-2);
   --color-muted: var(--text-muted);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-golos);
+  --font-age: var(--font-outfit);
   --font-mono: var(--font-geist-mono);
 }
 

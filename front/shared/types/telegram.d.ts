@@ -28,6 +28,22 @@ declare global {
     destructive_text_color?: string;
   }
 
+  type TelegramPlatform =
+    | 'ios'
+    | 'android'
+    | 'tdesktop'
+    | 'macos'
+    | 'web'
+    | 'weba'
+    | 'unknown';
+
+  interface TelegramSafeAreaInset {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  }
+
   interface TelegramWebApp {
     initData: string;
     initDataUnsafe: {
@@ -35,12 +51,23 @@ declare global {
       auth_date?: number;
       hash?: string;
     };
+    platform: TelegramPlatform;
+    version: string;
+    isVersionAtLeast: (version: string) => boolean;
+    safeAreaInset: TelegramSafeAreaInset;
+    contentSafeAreaInset: TelegramSafeAreaInset;
     colorScheme: 'light' | 'dark';
     themeParams: TelegramWebAppThemeParams;
     viewportHeight: number;
     viewportStableHeight: number;
+    isExpanded?: boolean;
+    isFullscreen?: boolean;
     ready: () => void;
     expand: () => void;
+    requestFullscreen?: () => void;
+    exitFullscreen?: () => void;
+    disableVerticalSwipes?: () => void;
+    enableVerticalSwipes?: () => void;
     close: () => void;
     HapticFeedback?: {
       impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;

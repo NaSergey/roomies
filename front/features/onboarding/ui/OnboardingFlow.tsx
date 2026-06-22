@@ -75,7 +75,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   }
 
   return (
-    <main className="mx-auto flex h-dvh w-full max-w-md flex-col">
+    <main className="mx-auto flex h-full w-full max-w-md flex-col">
       {state.error && (
         <div
           role="alert"
