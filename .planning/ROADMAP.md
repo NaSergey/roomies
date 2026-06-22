@@ -14,7 +14,7 @@ The critical path follows the user journey: onboard → get scored matches → b
 
 - [x] **Phase 1: Onboarding** — User completes the 7-step flow (incl. Vibe Quiz) and lands on first matches. (COMPLETE: all 4 plans executed)
 - [ ] **Phase 2: Matching Engine** — Real Match Score (Hard/Lifestyle/Vibe/Behavioral) replaces mock data.
-- [ ] **Phase 3: Discovery & Profiles** — Real feed with compatibility %, filters, candidate profile, editable own profile.
+- [x] **Phase 3: Discovery & Profiles** — Real feed with compatibility %, filters, candidate profile, editable own profile. (COMPLETE 2026-06-22)
 - [ ] **Phase 4: Chat & Agreement** — Matched users chat, schedule calls, and negotiate a Roomie Agreement.
 - [ ] **Phase 5: Squad Mode** — Users create/join squads and search together as a group.
 - [ ] **Phase 6: Trust, Notifications & Feedback** — Verification, reports/blocks, push notifications, post-match feedback.
@@ -77,9 +77,9 @@ Plans:
 - [x] 03-01-PLAN.md — Backend: extend GET /feed (matchReasons, matchRisks, smokingOk/petsOk/guestsPref fields + filter query params via FeedQueryDto) + fix SwipeActionDto add 'save' (Wave 1) (COMPLETE 2026-06-22)
 - [x] 03-02-PLAN.md — Backend: new ProfileModule — GET /profile/me (own data + Roomie Score) + PATCH /profile (edit name, photos, tags, budget, districts, dealbreakers), register in AppModule (Wave 1) (COMPLETE 2026-06-22)
 - [x] 03-03-PLAN.md — Frontend types + API layer + hooks: extend RoomieProfile/FeedCandidate, new profile.ts API, useFeedQuery(params), useSwipeMutation all 4 actions, useProfileQuery/usePatchProfile, shared UI VibeScaleBar/RulesSection/MatchReasonsList (Wave 2) (COMPLETE 2026-06-22)
-- [ ] 03-04-PLAN.md — Frontend SwipeDeck wiring: FilterSheet extended (onApply + district/dealbreaker rows), DeckToolbar activeCount fix, ProfileCard single ★ N% badge, SwipeDeck queryParams + onCardTap, ActionButtons onSave/onSuperLike (Wave 3)
-- [ ] 03-05-PLAN.md — Frontend: CandidateProfileSheet widget with 4 sections (ВАЙБ ДОМА, ПРАВИЛА, О СЕБЕ, ПОЧЕМУ ВЫ СОВПАЛИ) + Like/Pass/Save/SuperLike action buttons (Wave 3)
-- [ ] 03-06-PLAN.md — Frontend: ProfileView (replace stub), RoomieScoreCard, ProfileEditSheet with full form + PATCH /profile mutation (Wave 4)
+- [x] 03-04-PLAN.md — Frontend SwipeDeck wiring: FilterSheet extended (onApply + district/dealbreaker rows), DeckToolbar activeCount fix, ProfileCard single ★ N% badge, SwipeDeck queryParams + onCardTap, ActionButtons onSave/onSuperLike (Wave 3) (COMPLETE 2026-06-22)
+- [x] 03-05-PLAN.md — Frontend: CandidateProfileSheet widget with 4 sections (ВАЙБ ДОМА, ПРАВИЛА, О СЕБЕ, ПОЧЕМУ ВЫ СОВПАЛИ) + Like/Pass/Save/SuperLike action buttons (Wave 3) (COMPLETE 2026-06-22)
+- [x] 03-06-PLAN.md — Frontend: ProfileView (replace stub), RoomieScoreCard, ProfileEditSheet with full form + PATCH /profile mutation (Wave 4) (COMPLETE 2026-06-22)
 
 ### Phase 4: Chat & Agreement
 **Goal:** Matched users hold a full conversation — smart-chip starters, text messages, call scheduling with slot proposals, and a quiet-chat nudge — and can negotiate a Roomie Agreement covering house rules.
@@ -137,7 +137,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Onboarding | 4/4 | Complete | 2026-06-10 |
 | 2. Matching Engine | 3/3 | Complete | 2026-06-10 |
-| 3. Discovery & Profiles | 0/6 | Planning | - |
+| 3. Discovery & Profiles | 6/6 | Complete | 2026-06-22 |
 | 4. Chat & Agreement | 0/0 | Not started | - |
 | 5. Squad Mode | 0/0 | Not started | - |
 | 6. Trust, Notifications & Feedback | 0/0 | Not started | - |
