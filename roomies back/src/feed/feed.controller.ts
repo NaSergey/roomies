@@ -1,7 +1,8 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { FeedQueryDto } from './dto/feed-query.dto';
 import { FeedService } from './feed.service';
 
 @ApiTags('feed')
@@ -13,7 +14,7 @@ export class FeedController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Лента кандидатов для текущего пользователя' })
-  getFeed(@CurrentUser() user: { id: number }) {
-    return this.feed.getFeed(user.id);
+  getFeed(@CurrentUser() user: { id: number }, @Query() query: FeedQueryDto) {
+    return this.feed.getFeed(user.id, query);
   }
 }

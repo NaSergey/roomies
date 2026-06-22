@@ -1,6 +1,7 @@
 import { ForbiddenException, Injectable } from '@nestjs/common';
-import { Prisma, ScenarioType } from '@prisma/client';
+import { GuestsPreference, Prisma, ScenarioType } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { FeedQueryDto } from './dto/feed-query.dto';
 
 function calculateAge(birthDate: Date | null): number | undefined {
   if (!birthDate) return undefined;
@@ -22,6 +23,7 @@ type UserWithScores = {
   budgetMax: number | null;
   smokingOk: boolean;
   petsOk: boolean;
+  guestsPref: GuestsPreference;
   noiseLevel: object | null;
   cleanliness: object | null;
   sleepSchedule: object | null;
@@ -38,6 +40,7 @@ type UserScoreFields = {
   budgetMax: number | null;
   smokingOk: boolean;
   petsOk: boolean;
+  guestsPref: GuestsPreference;
   noiseLevel: object | null;
   cleanliness: object | null;
   sleepSchedule: object | null;
@@ -97,11 +100,89 @@ function computeLifestyleScore(me: UserScoreFields, candidate: UserScoreFields):
   return 1 - avgDiff;
 }
 
+export function generateMatchReasons(
+  me: UserScoreFields,
+  candidate: UserScoreFields,
+): string[] {
+  const reasons: string[] = [];
+
+  // Lifestyle scale comparisons — use Number() cast for Decimal fields
+  if (
+    me.sleepSchedule != null &&
+    candidate.sleepSchedule != null &&
+    Math.abs(Number(me.sleepSchedule) - Number(candidate.sleepSchedule)) < 0.2
+  ) {
+    reasons.push('Похожий режим сна');
+  }
+
+  if (
+    me.noiseLevel != null &&
+    candidate.noiseLevel != null &&
+    Math.abs(Number(me.noiseLevel) - Number(candidate.noiseLevel)) < 0.2
+  ) {
+    reasons.push('Оба любят тишину дома');
+  }
+
+  if (
+    me.cleanliness != null &&
+    candidate.cleanliness != null &&
+    Math.abs(Number(me.cleanliness) - Number(candidate.cleanliness)) < 0.2
+  ) {
+    reasons.push('Одинаковый подход к чистоте');
+  }
+
+  if (
+    me.socialLevel != null &&
+    candidate.socialLevel != null &&
+    Math.abs(Number(me.socialLevel) - Number(candidate.socialLevel)) < 0.2
+  ) {
+    reasons.push('Схожий уровень общительности');
+  }
+
+  if (
+    me.workFromHome != null &&
+    candidate.workFromHome != null &&
+    Math.abs(Number(me.workFromHome) - Number(candidate.workFromHome)) < 0.2
+  ) {
+    reasons.push('Похожий режим работы');
+  }
+
+  if (!me.smokingOk && !candidate.smokingOk) {
+    reasons.push('Оба не курят');
+  }
+
+  if (me.petsOk && candidate.petsOk) {
+    reasons.push('Оба любят питомцев');
+  }
+
+  if (me.guestsPref && candidate.guestsPref && me.guestsPref === candidate.guestsPref) {
+    reasons.push('Одинаковое отношение к гостям');
+  }
+
+  return reasons.slice(0, 3);
+}
+
+export function generateMatchRisks(
+  me: UserScoreFields,
+  candidate: UserScoreFields,
+): string[] {
+  const risks: string[] = [];
+
+  if (
+    (me.guestsPref === GuestsPreference.rarely && candidate.guestsPref === GuestsPreference.often) ||
+    (me.guestsPref === GuestsPreference.often && candidate.guestsPref === GuestsPreference.rarely)
+  ) {
+    risks.push('Разное отношение к гостям — обсудите при знакомстве');
+  }
+
+  return risks.slice(0, 1);
+}
+
 @Injectable()
 export class FeedService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getFeed(userId: number) {
+  async getFeed(userId: number, query: FeedQueryDto = {}) {
     // Step 1 — Load current user
     const me = await this.prisma.user.findUniqueOrThrow({
       where: { id: userId },
@@ -113,6 +194,7 @@ export class FeedService {
         budgetMax: true,
         smokingOk: true,
         petsOk: true,
+        guestsPref: true,
         noiseLevel: true,
         cleanliness: true,
         sleepSchedule: true,
@@ -143,30 +225,46 @@ export class FeedService {
     };
     const compatibleScenarios = scenarioCompat[me.scenario];
 
-    // Step 4 — Query candidates
-    // Жёсткие фильтры (курение / животные / бюджет) применяем прямо в SQL.
-    // Иначе take:100 мог бы набрать первые 100 кандидатов по id, которые затем
-    // целиком отсеялись бы в JS (hasHardConflict) — и лента оказалась бы пустой,
-    // хотя дальше по списку есть десятки подходящих профилей.
+    // Step 4 — Build query filters
+    // Budget filter: query params override me's budget bounds
+    const effectiveBudgetMin = query.budgetMin ?? me.budgetMin;
+    const effectiveBudgetMax = query.budgetMax ?? me.budgetMax;
+
     const budgetFilter: Prisma.UserWhereInput[] = [];
-    if (me.budgetMax != null) {
-      budgetFilter.push({ OR: [{ budgetMin: null }, { budgetMin: { lte: me.budgetMax } }] });
+    if (effectiveBudgetMax != null) {
+      budgetFilter.push({ OR: [{ budgetMin: null }, { budgetMin: { lte: effectiveBudgetMax } }] });
     }
-    if (me.budgetMin != null) {
-      budgetFilter.push({ OR: [{ budgetMax: null }, { budgetMax: { gte: me.budgetMin } }] });
+    if (effectiveBudgetMin != null) {
+      budgetFilter.push({ OR: [{ budgetMax: null }, { budgetMax: { gte: effectiveBudgetMin } }] });
+    }
+
+    // Dealbreaker filters: query params override me's preferences
+    const effectiveSmokingOk = query.smokingOk !== undefined ? query.smokingOk : me.smokingOk;
+    const effectivePetsOk = query.petsOk !== undefined ? query.petsOk : me.petsOk;
+
+    const whereClause: Prisma.UserWhereInput = {
+      id: { not: userId, notIn: swipedIds },
+      cityId: me.cityId ?? -1,
+      scenario: { in: compatibleScenarios },
+      onboardingCompleted: true,
+      isActive: true,
+      smokingOk: effectiveSmokingOk,
+      petsOk: effectivePetsOk,
+      AND: budgetFilter,
+    };
+
+    // Optional guestsPref filter
+    if (query.guestsPref !== undefined) {
+      whereClause.guestsPref = query.guestsPref;
+    }
+
+    // Optional district filter
+    if (query.districtIds && query.districtIds.length > 0) {
+      whereClause.districts = { some: { districtId: { in: query.districtIds } } };
     }
 
     const candidates = await this.prisma.user.findMany({
-      where: {
-        id: { not: userId, notIn: swipedIds },
-        cityId: me.cityId ?? -1,
-        scenario: { in: compatibleScenarios },
-        onboardingCompleted: true,
-        isActive: true,
-        smokingOk: me.smokingOk,
-        petsOk: me.petsOk,
-        AND: budgetFilter,
-      },
+      where: whereClause,
       select: {
         id: true,
         name: true,
@@ -176,6 +274,7 @@ export class FeedService {
         budgetMax: true,
         smokingOk: true,
         petsOk: true,
+        guestsPref: true,
         noiseLevel: true,
         cleanliness: true,
         sleepSchedule: true,
@@ -197,11 +296,24 @@ export class FeedService {
     });
 
     // Step 5 — Score each candidate
+    const meScoreFields: UserScoreFields = {
+      budgetMin: me.budgetMin,
+      budgetMax: me.budgetMax,
+      smokingOk: me.smokingOk,
+      petsOk: me.petsOk,
+      guestsPref: me.guestsPref,
+      noiseLevel: me.noiseLevel,
+      cleanliness: me.cleanliness,
+      sleepSchedule: me.sleepSchedule,
+      socialLevel: me.socialLevel,
+      workFromHome: me.workFromHome,
+    };
+
     const scored = (candidates as UserWithScores[])
-      .filter((c) => !hasHardConflict(me, c))
+      .filter((c) => !hasHardConflict(meScoreFields, c))
       .map((c) => ({
         ...c,
-        _matchScore: computeLifestyleScore(me, c),
+        _matchScore: computeLifestyleScore(meScoreFields, c),
       }));
 
     // Step 6 — Sort by matchScore descending, take top 20
@@ -216,6 +328,9 @@ export class FeedService {
       scenario: c.scenario,
       budgetMin: c.budgetMin,
       budgetMax: c.budgetMax,
+      smokingOk: c.smokingOk,
+      petsOk: c.petsOk,
+      guestsPref: c.guestsPref,
       photos: c.photos.map((p) => p.url),
       vibeTags: c.vibeTags.map((vt) => ({ id: vt.tag.id, label: vt.tag.label })),
       districts: c.districts.map((d) => ({
@@ -230,6 +345,8 @@ export class FeedService {
         workFromHome: c.workFromHome ? Number(c.workFromHome) : null,
       },
       matchScore: c._matchScore,
+      matchReasons: generateMatchReasons(meScoreFields, c),
+      matchRisks: generateMatchRisks(meScoreFields, c),
     }));
   }
 }
