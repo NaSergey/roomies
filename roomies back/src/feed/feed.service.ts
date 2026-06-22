@@ -120,7 +120,8 @@ export function generateMatchReasons(
     candidate.noiseLevel != null &&
     Math.abs(Number(me.noiseLevel) - Number(candidate.noiseLevel)) < 0.2
   ) {
-    reasons.push('Оба любят тишину дома');
+    const avg = (Number(me.noiseLevel) + Number(candidate.noiseLevel)) / 2;
+    reasons.push(avg < 0.5 ? 'Оба предпочитают тишину дома' : 'Одинаковое отношение к шуму');
   }
 
   if (

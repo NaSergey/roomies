@@ -73,7 +73,7 @@ export function CandidateProfileSheet({
   const matchPct = candidate ? Math.round(candidate.matchScore * 100) : 0;
   const photo = candidate?.photos[0];
   const budgetStr = candidate
-    ? [candidate.budgetMin, candidate.budgetMax].filter(Boolean).join('–') + ' ₽'
+    ? [candidate.budgetMin, candidate.budgetMax].filter((v) => v != null).join('–') + ' ₽'
     : '';
 
   return (

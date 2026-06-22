@@ -57,9 +57,13 @@ export function SwipeDeck() {
       const swipeDir: SwipeDirection = action === 'pass' ? 'left' : 'right';
       if (!swipe(swipeDir)) return;
 
-      const result = await swipeMutation.mutateAsync({ targetId: currentProfile.id, action });
-      if (result.matched && result.matchId != null) {
-        setMatchState({ candidateName: currentProfile.name, matchId: result.matchId });
+      try {
+        const result = await swipeMutation.mutateAsync({ targetId: currentProfile.id, action });
+        if (result.matched && result.matchId != null) {
+          setMatchState({ candidateName: currentProfile.name, matchId: result.matchId });
+        }
+      } catch {
+        // swipe already animated — silently ignore; feed will refetch on next mount
       }
     },
     [visible, swipe, swipeMutation],
