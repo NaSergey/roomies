@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ChatModule } from './chat/chat.module';
 import { FeedModule } from './feed/feed.module';
 import { GeoModule } from './geo/geo.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
@@ -22,6 +23,7 @@ import { VibeTagsModule } from './vibe-tags/vibe-tags.module';
     FeedModule,
     SwipeModule,
     ProfileModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
