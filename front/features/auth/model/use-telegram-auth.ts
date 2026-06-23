@@ -32,27 +32,27 @@ export function useTelegramAuth(): AuthState {
   useEffect(() => {
     let cancelled = false;
 
-    const wa = getWebApp();
-    const initData = wa?.initData;
-
-    // Нет initData (открыто вне Telegram) — перелогиниться нечем. Если есть
-    // токен с прошлой сессии — работаем по нему, иначе честно ошибка.
-    if (!initData) {
-      if (getAccessToken()) {
-        setState({ status: 'authenticated', tokens: null, error: null });
-      } else {
-        setState({
-          status: 'error',
-          tokens: null,
-          error: 'Mini App открыт вне Telegram: нет initData',
-        });
-      }
+    // Есть токен с прошлой сессии — используем его и НЕ логинимся заново.
+    // Telegram отдаёт initData с фиксированным auth_date; в долгой сессии (или при
+    // dev-HMR) он легко становится старше 24ч, и повторный /auth/telegram падает
+    // «initData expired», хотя JWT ещё живёт 7 дней. Если токен всё же протух —
+    // apiFetch вычистит его на первом 401, и следующий старт залогинится заново.
+    if (getAccessToken()) {
+      setState({ status: 'authenticated', tokens: null, error: null });
       return;
     }
 
-    // initData есть — ВСЕГДА логинимся заново, чтобы освежить JWT. Иначе
-    // протухший/битый токен в localStorage залипает навсегда: приложение
-    // считает себя authenticated, а каждый запрос ловит 401.
+    const wa = getWebApp();
+    const initData = wa?.initData;
+    if (!initData) {
+      setState({
+        status: 'error',
+        tokens: null,
+        error: 'Mini App открыт вне Telegram: нет initData',
+      });
+      return;
+    }
+
     setState({ status: 'authenticating', tokens: null, error: null });
 
     loginWithTelegram(initData)
@@ -63,12 +63,6 @@ export function useTelegramAuth(): AuthState {
       })
       .catch((e: unknown) => {
         if (cancelled) return;
-        // Логин не удался, но валидный токен мог остаться с прошлого раза —
-        // пробуем работать по нему, не роняя весь экран в ошибку.
-        if (getAccessToken()) {
-          setState({ status: 'authenticated', tokens: null, error: null });
-          return;
-        }
         const message =
           e instanceof ApiError
             ? `${e.status}: ${e.message}`

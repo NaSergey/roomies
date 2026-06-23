@@ -18,7 +18,7 @@ export function HomeView() {
   const auth = useTelegramAuth();
   const queryClient = useQueryClient();
 
-  const { data: onboardingStatus, isPending } = useQuery({
+  const { data: onboardingStatus, isPending, isError } = useQuery({
     queryKey: ['onboarding-status'],
     queryFn: getOnboardingStatus,
     enabled: auth.status === 'authenticated',
@@ -49,6 +49,24 @@ export function HomeView() {
 
   if (auth.status !== 'authenticated' || isPending) {
     return <SplashScreen />;
+  }
+
+  // Статус не загрузился (напр. токен протух и был вычищен на 401) — НЕ проваливаемся
+  // в онбординг без токена, а показываем перезагрузку: следующий старт перелогинится.
+  if (isError) {
+    return (
+      <main className="mx-auto flex h-full w-full max-w-md flex-col items-center justify-center gap-3 px-4 text-center">
+        <p className="text-3xl">⚠️</p>
+        <p className="text-sm text-muted">Не удалось загрузить профиль. Перезапусти приложение.</p>
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="rounded-full border-2 border-black bg-accent px-5 py-2 text-sm font-black text-(--text-on-accent) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100"
+        >
+          Перезагрузить
+        </button>
+      </main>
+    );
   }
 
   if (!onboardingStatus?.onboardingCompleted) {
