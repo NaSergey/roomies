@@ -16,3 +16,21 @@ export { getCities, getDistricts, type City, type District } from './geo';
 export { getVibeTags, type VibeTag } from './vibe-tags';
 export { getFeed, postSwipe, type FeedCandidate, type FeedQueryParams, type SwipeResult } from './feed';
 export { getMe, patchProfile, type MyProfile, type UpdateProfilePayload } from './profile';
+export {
+  getMatches,
+  getChatMessages,
+  sendMessage,
+  proposeCall,
+  respondCall,
+  createAgreement,
+  respondAgreement,
+  markChatRead,
+  getCallInvites,
+  getAgreements,
+  type MatchListItem,
+  type ChatMessage,
+  type MessagesPage,
+  type CallInviteData,
+  type AgreementItem,
+  type AgreementData,
+} from './chat';
