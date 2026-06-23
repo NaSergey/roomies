@@ -32,25 +32,27 @@ export function useTelegramAuth(): AuthState {
   useEffect(() => {
     let cancelled = false;
 
-    // Если в localStorage уже лежит токен с прошлой сессии — считаем юзера
-    // залогиненным и не дёргаем сеть. tokens=null означает «токен есть, но
-    // деталей не знаем» — userId покажем как «—» в чипе.
-    if (getAccessToken()) {
-      setState({ status: 'authenticated', tokens: null, error: null });
-      return;
-    }
-
     const wa = getWebApp();
     const initData = wa?.initData;
+
+    // Нет initData (открыто вне Telegram) — перелогиниться нечем. Если есть
+    // токен с прошлой сессии — работаем по нему, иначе честно ошибка.
     if (!initData) {
-      setState({
-        status: 'error',
-        tokens: null,
-        error: 'Mini App открыт вне Telegram: нет initData',
-      });
+      if (getAccessToken()) {
+        setState({ status: 'authenticated', tokens: null, error: null });
+      } else {
+        setState({
+          status: 'error',
+          tokens: null,
+          error: 'Mini App открыт вне Telegram: нет initData',
+        });
+      }
       return;
     }
 
+    // initData есть — ВСЕГДА логинимся заново, чтобы освежить JWT. Иначе
+    // протухший/битый токен в localStorage залипает навсегда: приложение
+    // считает себя authenticated, а каждый запрос ловит 401.
     setState({ status: 'authenticating', tokens: null, error: null });
 
     loginWithTelegram(initData)
@@ -61,6 +63,12 @@ export function useTelegramAuth(): AuthState {
       })
       .catch((e: unknown) => {
         if (cancelled) return;
+        // Логин не удался, но валидный токен мог остаться с прошлого раза —
+        // пробуем работать по нему, не роняя весь экран в ошибку.
+        if (getAccessToken()) {
+          setState({ status: 'authenticated', tokens: null, error: null });
+          return;
+        }
         const message =
           e instanceof ApiError
             ? `${e.status}: ${e.message}`

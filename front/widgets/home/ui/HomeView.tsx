@@ -1,9 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTelegramAuth } from '@/features/auth';
 import { OnboardingFlow, getOnboardingStatus } from '@/features/onboarding';
+import { feedKeys } from '@/features/swipe-profile';
+import { profileKeys } from '@/features/profile';
+import { chatKeys } from '@/features/chat';
+import { getFeed, getMe, getMatches } from '@/shared/lib/api';
 import { BottomNav, type NavTab } from '@/widgets/bottom-nav';
 import { ChatView } from '@/widgets/chat';
 import { ProfileView } from '@/widgets/profile';
@@ -11,6 +15,7 @@ import { SwipeDeck } from '@/widgets/swipe-deck';
 
 export function HomeView() {
   const auth = useTelegramAuth();
+  const queryClient = useQueryClient();
 
   const { data: onboardingStatus, isPending } = useQuery({
     queryKey: ['onboarding-status'],
@@ -18,6 +23,18 @@ export function HomeView() {
     enabled: auth.status === 'authenticated',
     staleTime: Infinity, // статус меняется только после прохождения онбординга
   });
+
+  // Прогреваем ленту СРАЗУ после авторизации — параллельно с запросом
+  // onboarding-status. К моменту, когда отрисуется SwipeDeck, карточки уже
+  // в кэше: пользователь не видит второй спиннер «загрузка карточек».
+  useEffect(() => {
+    if (auth.status !== 'authenticated') return;
+    void queryClient.prefetchQuery({
+      queryKey: feedKeys.all,
+      queryFn: () => getFeed(),
+      staleTime: 5 * 60 * 1000,
+    });
+  }, [auth.status, queryClient]);
 
   if (auth.status === 'error') {
     return (
@@ -42,6 +59,22 @@ export function HomeView() {
 
 function MainShell() {
   const [tab, setTab] = useState<NavTab>('deck');
+  const queryClient = useQueryClient();
+
+  // Пользователь на ленте карточек — в фоне прогреваем профиль и список чатов,
+  // чтобы при переходе на эти вкладки данные были уже готовы (без спиннера).
+  useEffect(() => {
+    void queryClient.prefetchQuery({
+      queryKey: profileKeys.me,
+      queryFn: getMe,
+      staleTime: Infinity,
+    });
+    void queryClient.prefetchQuery({
+      queryKey: chatKeys.matches,
+      queryFn: getMatches,
+      staleTime: 30_000,
+    });
+  }, [queryClient]);
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col">

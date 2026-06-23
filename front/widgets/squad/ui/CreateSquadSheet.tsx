@@ -43,7 +43,7 @@ export function CreateSquadSheet({ open, onClose }: CreateSquadSheetProps) {
       />
 
       {/* Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl border-2 border-black bg-[#f0efe9] shadow-[0_-4px_0_rgba(20,20,15,0.9)] p-4 gap-4">
+      <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl border-2 border-black bg-[#f0efe9] shadow-[0_-4px_0_rgba(20,20,15,0.9)] px-4 pt-4 pb-8 gap-4 max-h-[88dvh] overflow-y-auto">
         <div className="mx-auto h-1 w-10 rounded-full bg-[#d0d0cc]" />
 
         <h3 className="text-lg font-black text-(--text)">Создать сквад</h3>
@@ -66,7 +66,7 @@ export function CreateSquadSheet({ open, onClose }: CreateSquadSheetProps) {
             placeholder="Бюджет от ₽"
             value={budgetMin}
             onChange={(e) => setBudgetMin(e.target.value)}
-            className="flex-1 rounded-xl border-2 border-black bg-white px-3 py-2 text-sm font-medium text-(--text) outline-none ring-accent focus:ring-2"
+            className="min-w-0 flex-1 rounded-xl border-2 border-black bg-white px-3 py-2 text-sm font-medium text-(--text) outline-none ring-accent focus:ring-2"
           />
           <input
             type="number"
@@ -74,7 +74,7 @@ export function CreateSquadSheet({ open, onClose }: CreateSquadSheetProps) {
             placeholder="до ₽"
             value={budgetMax}
             onChange={(e) => setBudgetMax(e.target.value)}
-            className="flex-1 rounded-xl border-2 border-black bg-white px-3 py-2 text-sm font-medium text-(--text) outline-none ring-accent focus:ring-2"
+            className="min-w-0 flex-1 rounded-xl border-2 border-black bg-white px-3 py-2 text-sm font-medium text-(--text) outline-none ring-accent focus:ring-2"
           />
         </div>
 

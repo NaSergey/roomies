@@ -89,7 +89,7 @@ function MatchRow({
 }
 
 export function MatchList({ onSelect }: MatchListProps) {
-  const { data: matches, isPending } = useMatchesQuery();
+  const { data: matches, isPending, isError, error } = useMatchesQuery();
 
   if (isPending) {
     return (
@@ -100,6 +100,18 @@ export function MatchList({ onSelect }: MatchListProps) {
             className="h-16 animate-pulse rounded-xl bg-[#f0efe9] mx-3 mb-2"
           />
         ))}
+      </div>
+    );
+  }
+
+  // Ошибку (например, 401) показываем явно, а не как пустой список —
+  // иначе проблема с авторизацией выглядит как «мэтчей нет».
+  if (isError) {
+    const msg = error instanceof Error ? error.message : 'Не удалось загрузить мэтчи';
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
+        <span className="text-5xl" aria-hidden>⚠️</span>
+        <p className="text-sm text-muted">{msg}</p>
       </div>
     );
   }

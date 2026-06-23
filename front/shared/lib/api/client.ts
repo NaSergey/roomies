@@ -1,7 +1,7 @@
 'use client';
 
 import { API_BASE_URL } from './config';
-import { getAccessToken } from './token-storage';
+import { getAccessToken, clearAccessToken } from './token-storage';
 
 export class ApiError extends Error {
   constructor(
@@ -42,6 +42,11 @@ export async function apiFetch<T>(
   const parsed: unknown = text ? safeJson(text) : undefined;
 
   if (!res.ok) {
+    // Стухший/битый токен: выкидываем его, чтобы следующий старт Mini App
+    // перелогинился через initData, а не залипал в «authenticated» навсегда.
+    if (res.status === 401 && auth) {
+      clearAccessToken();
+    }
     const message =
       (parsed && typeof parsed === 'object' && 'message' in parsed
         ? String((parsed as { message: unknown }).message)

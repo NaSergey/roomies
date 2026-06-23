@@ -49,7 +49,7 @@ export function createSquad(data: {
 
 export async function getMySquad(): Promise<SquadData | null> {
   try {
-    return await apiFetch<SquadData>('/squads/me', { method: 'GET' });
+    return (await apiFetch<SquadData | null>('/squads/me', { method: 'GET' })) ?? null;
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) return null;
     throw e;

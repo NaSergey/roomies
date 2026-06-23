@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -21,10 +22,13 @@ export class ChatService {
     chatId: number,
     userId: number,
   ): Promise<void> {
-    const chat = await this.prisma.chat.findUniqueOrThrow({
+    const chat = await this.prisma.chat.findUnique({
       where: { id: chatId },
       include: { match: true },
     });
+    if (!chat) {
+      throw new NotFoundException('Chat not found');
+    }
     if (
       chat.match.user1Id !== userId &&
       chat.match.user2Id !== userId

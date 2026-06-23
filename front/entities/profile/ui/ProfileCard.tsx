@@ -151,8 +151,16 @@ function ProfileCardBase({ profile, priority, overlay }: ProfileCardProps) {
 }
 
 // memo: при ререндере родителя (смена фазы свайпа) карта не пересобирает тяжёлый
-// SVG-фильтр, если profile/priority/overlay не изменились (overlay стабилен — useMemo).
-export const ProfileCard = memo(ProfileCardBase);
+// SVG-фильтр. Сравниваем профиль по id, а не по ссылке: рефетч ленты отдаёт те же
+// карточки новыми объектами — без сравнения по id memo бы их перерисовал и SVG-фильтр
+// мелькнул бы. Контент карточки для одного id в рамках сессии неизменен.
+export const ProfileCard = memo(
+  ProfileCardBase,
+  (prev, next) =>
+    prev.profile.id === next.profile.id &&
+    prev.priority === next.priority &&
+    prev.overlay === next.overlay,
+);
 
 function CheckIcon() {
   return (
