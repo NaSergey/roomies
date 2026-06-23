@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { haptic, hapticNotify } from '@/shared/lib/telegram';
+import { Button } from '@/shared/ui/button';
 
 interface DoneStepProps {
   onComplete: () => void;
@@ -27,7 +28,7 @@ export function DoneStep({ onComplete }: DoneStepProps) {
       {/* Checkmark circle with spring entry animation */}
       <div
         className={[
-          'w-20 h-20 rounded-full bg-accent flex items-center justify-center mx-auto',
+          'w-20 h-20 rounded-full border-2 border-black bg-accent flex items-center justify-center mx-auto shadow-[4px_4px_0_rgba(20,20,15,0.9)]',
           'transition-transform duration-[400ms]',
           visible ? 'scale-100' : 'scale-0',
         ].join(' ')}
@@ -49,23 +50,19 @@ export function DoneStep({ onComplete }: DoneStepProps) {
         </svg>
       </div>
 
-      <h1 className="text-4xl font-bold text-(--text) mt-6">Профиль создан!</h1>
+      <h1 className="text-4xl font-black text-(--text) mt-6">Профиль создан!</h1>
 
-      <p className="text-base text-(--text-muted) mt-3">
+      <p className="text-base text-muted mt-3">
         Скоро здесь появятся твои совпадения
       </p>
 
-      <p className="text-sm text-(--text-muted) mt-2">
+      <p className="text-sm text-muted mt-2">
         Пока покажем анкеты — смотри, кто рядом
       </p>
 
-      <button
-        type="button"
-        onClick={handleComplete}
-        className="mt-8 w-full rounded-2xl bg-accent h-14 text-base font-semibold text-(--text-on-accent) transition-transform active:scale-[0.97]"
-      >
+      <Button onClick={handleComplete} className="mt-8 h-14 w-full text-base">
         Смотреть анкеты
-      </button>
+      </Button>
     </div>
   );
 }
