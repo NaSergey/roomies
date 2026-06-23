@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 5 PLANNED — 3 plans created 2026-06-23. Execute with /gsd-execute-phase 5.
-last_updated: "2026-06-23T00:29:43.707Z"
+status: executing
+last_updated: "2026-06-23T00:32:37.244Z"
 last_activity: 2026-06-23
 progress:
   total_phases: 7
   completed_phases: 3
   total_plans: 20
-  completed_plans: 15
+  completed_plans: 16
   percent: 43
 ---
 
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 5 of 7 — Planning complete, ready to execute
-Plan: 1/3 in Phase 5
-Status: Phase 5 IN PROGRESS — Plan 05-01 complete 2026-06-23.
+Plan: 2/3 in Phase 5
+Status: Phase 5 IN PROGRESS — Plan 05-02 complete 2026-06-23.
 Last activity: 2026-06-23
 
-Progress: [██████████] Phase 4 100% | Phase 5 [███_______] 33%
+Progress: [██████████] Phase 4 100% | Phase 5 [██████____] 67%
 
 ## Performance Metrics
 
@@ -90,6 +90,9 @@ Recent decisions affecting current work:
 - [05-01]: Literal routes (squads/me, squads/invites/pending, squads/feed) declared before parameterised :id routes in SquadController — prevents NestJS treating literal strings as numeric :id segments
 - [05-01]: formatSquad() private helper provides stable SquadCard shape across createSquad, getMySquad, getSquadFeed
 - [05-01]: getSquadFeed applies in-memory member capacity filter because Prisma where cannot compare a relation count to a model field directly
+- [05-02]: getMySquad catches ApiError(404) and returns null — backend returns 404 (not 200+null) when user has no active squad
+- [05-02]: useSquadFeedQuery staleTime 60_000 — squads change infrequently; longer cache avoids hammering feed endpoint
+- [05-02]: useRespondInvite invalidates both mySquad and pendingInvites — accepting a squad invite changes both query caches
 
 ### Pending Todos
 
@@ -121,7 +124,7 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-23T00:01:42Z
-Stopped at: Plan 05-01 — COMPLETE. SquadModule with 8 endpoints (CRUD, invite flow, feed). TypeScript build clean.
+Stopped at: Plan 05-02 — COMPLETE. Frontend squad API layer (squad.ts + 7 apiFetch wrappers) and React Query hooks (use-squad.ts + 7 hooks). TypeScript build clean.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
