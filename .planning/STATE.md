@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 4 IN PROGRESS — Plan 04-01 complete (2026-06-23). 1/4 plans done.
-last_updated: "2026-06-23T00:00:00.000Z"
+status: Phase 4 IN PROGRESS — Plan 04-02 complete (2026-06-23). 2/4 plans done.
+last_updated: "2026-06-23T00:01:42Z"
 last_activity: 2026-06-23
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 17
-  completed_plans: 12
-  percent: 35
+  completed_plans: 13
+  percent: 38
 ---
 
 # Project State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 4 of 7 — Executing
-Plan: 1/4 in Phase 4 (04-01 complete)
-Status: Phase 4 IN PROGRESS — Plan 04-01 complete (2026-06-23). 1/4 plans done.
+Plan: 2/4 in Phase 4 (04-02 complete)
+Status: Phase 4 IN PROGRESS — Plan 04-02 complete (2026-06-23). 2/4 plans done.
 Last activity: 2026-06-23
 
-Progress: [██████████] Phase 3 100% | Phase 4 [██________] 25%
+Progress: [██████████] Phase 3 100% | Phase 4 [████______] 50%
 
 ## Performance Metrics
 
@@ -80,6 +80,8 @@ Recent decisions affecting current work:
 - [04-01]: assertParticipant() is the universal chat access guard — called at the start of every service method that touches a chat
 - [04-01]: chat: { create: {} } placed ONLY in match upsert create block (not update) — ensures one-time Chat creation on mutual match
 - [04-01]: Message IDs returned as String() in all chat endpoints — BigInt serialization rule enforced at service layer
+- [04-02]: ChatMessage.id typed as string on frontend — BigInt serialized by backend main.ts patch; treated as opaque cursor string
+- [04-02]: useChatMessagesQuery uses staleTime: 0 + refetchInterval: 3000 — ensures polling always fires (D-02 HTTP polling pattern)
 
 ### Pending Todos
 
@@ -110,8 +112,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-23T00:00:00.000Z
-Stopped at: Plan 04-01 — COMPLETE. ChatModule with 11 endpoints, SwipeService extended with Chat auto-creation, ChatModule registered in AppModule. Build green.
+Last session: 2026-06-23T00:01:42Z
+Stopped at: Plan 04-02 — COMPLETE. Frontend chat API layer (chat.ts: 10 functions, 6 types), React Query hooks (use-chat.ts: 10 hooks with 3s polling), feature barrel. TypeScript build clean.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
