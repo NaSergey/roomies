@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getDistricts, type District } from '@/shared/lib/api';
 import { BottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
+import { Chip } from '@/shared/ui/chip';
 
 export interface DeckFilters {
   age: '18-22' | '23-26' | '27-30' | 'all';
@@ -41,30 +42,6 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
       <span className="text-xs font-black uppercase tracking-widest text-muted">{label}</span>
       <div className="flex flex-wrap gap-2">{children}</div>
     </div>
-  );
-}
-
-function Chip({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full border-2 border-black px-3 py-1 text-sm font-bold transition-all duration-150 active:scale-95 ${
-        active
-          ? 'bg-accent text-[#14140f] shadow-[2px_2px_0_rgba(20,20,15,0.9)]'
-          : 'bg-white text-[#6f6f68]'
-      }`}
-    >
-      {children}
-    </button>
   );
 }
 

@@ -2,6 +2,7 @@
 
 import { useRespondInvite } from '@/features/squad';
 import type { SquadInvite } from '@/shared/lib/api';
+import { Button } from '@/shared/ui/button';
 
 interface PendingInviteCardProps {
   invite: SquadInvite;
@@ -19,22 +20,21 @@ export function PendingInviteCard({ invite }: PendingInviteCardProps) {
         От: {invite.senderName}
       </p>
       <div className="flex gap-2">
-        <button
-          type="button"
+        <Button
           disabled={respondInvite.isPending}
           onClick={() => respondInvite.mutate({ inviteId: invite.id, action: 'accept' })}
-          className="flex-1 rounded-full border-2 border-black bg-[#c8f36a] py-1.5 text-xs font-black text-(--text) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100 disabled:opacity-60"
+          className="flex-1 py-1.5 text-xs"
         >
           Принять
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          variant="white"
           disabled={respondInvite.isPending}
           onClick={() => respondInvite.mutate({ inviteId: invite.id, action: 'decline' })}
-          className="flex-1 rounded-full border-2 border-black bg-white py-1.5 text-xs font-black text-(--text) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100 disabled:opacity-60"
+          className="flex-1 py-1.5 text-xs"
         >
           Отклонить
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import type { SquadFeedCard } from '@/shared/lib/api';
+import { Button } from '@/shared/ui/button';
 
 interface SquadCardProps {
   squad: SquadFeedCard;
@@ -72,13 +73,9 @@ export function SquadCard({ squad, onDismiss }: SquadCardProps) {
       )}
 
       {/* Dismiss button */}
-      <button
-        type="button"
-        onClick={onDismiss}
-        className="w-full rounded-full border-2 border-black bg-white py-2 text-sm font-black text-(--text) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100"
-      >
+      <Button variant="white" onClick={onDismiss} className="w-full py-2 text-sm">
         Пропустить
-      </button>
+      </Button>
     </div>
   );
 }
