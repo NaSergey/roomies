@@ -102,7 +102,7 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
             type="date"
             value={moveInDate}
             onChange={(e) => setMoveInDate(e.target.value)}
-            className="h-14 w-full min-w-0 bg-white px-4 text-base font-bold text-(--text) [color-scheme:light] [&::-webkit-calendar-picker-indicator]:ml-auto [&::-webkit-date-and-time-value]:text-left"
+            className="h-14 w-full min-w-0 bg-white px-4 text-base font-bold text-(--text) [color-scheme:light]"
           />
         </div>
 
