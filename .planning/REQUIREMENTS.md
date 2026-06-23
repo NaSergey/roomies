@@ -127,15 +127,15 @@
 | PROF-02 | Phase 3 | Pending |
 | PROF-03 | Phase 3 | Pending |
 | PROF-04 | Phase 3 | Pending |
-| CHAT-01 | Phase 4 | Pending |
+| CHAT-01 | Phase 4 | Backend done (04-01) |
 | CHAT-02 | Phase 4 | Pending |
-| CHAT-03 | Phase 4 | Pending |
-| CHAT-04 | Phase 4 | Pending |
-| CHAT-05 | Phase 4 | Pending |
+| CHAT-03 | Phase 4 | Backend done (04-01) |
+| CHAT-04 | Phase 4 | Backend done (04-01) |
+| CHAT-05 | Phase 4 | Backend done (04-01) |
 | CHAT-06 | Phase 4 | Pending |
-| AGREE-01 | Phase 4 | Pending |
-| AGREE-02 | Phase 4 | Pending |
-| AGREE-03 | Phase 4 | Pending |
+| AGREE-01 | Phase 4 | Backend done (04-01) |
+| AGREE-02 | Phase 4 | Backend done (04-01) |
+| AGREE-03 | Phase 4 | Backend done (04-01) |
 | SQUAD-01 | Phase 5 | Pending |
 | SQUAD-02 | Phase 5 | Pending |
 | SQUAD-03 | Phase 5 | Pending |

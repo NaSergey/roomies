@@ -92,8 +92,14 @@ Plans:
   3. A user can propose call slots (CallInvite) and the recipient can accept a slot or propose another time.
   4. A soft nudge appears when a chat is silent for 12–24 hours.
   5. A user can start a Roomie Agreement with the standard items (quiet after 23:00, cleaning, guests, utilities, shared zones) and the other participant can accept or decline it.
-**Plans:** TBD
+**Plans:** 4 plans
 **UI hint:** yes
+
+Plans:
+- [x] 04-01-PLAN.md — Backend: ChatModule (11 endpoints: GET /matches, GET+POST /chats/:id/messages, POST+PATCH /call-invites, POST+PATCH /agreements, PATCH /read, GET /call-invites, GET /agreements) + SwipeService auto-creates Chat on Match (Wave 1) (COMPLETE 2026-06-23)
+- [ ] 04-02-PLAN.md — Frontend: API layer (chat.ts types + functions) + React Query hooks (useMatchesQuery, useChatMessagesQuery with 3s polling, useSendMessage, useCallInvite, useAgreement) (Wave 2)
+- [ ] 04-03-PLAN.md — Frontend: MatchList + MessageBubble + SmartChips + ChatConversation (with nudge bar + Telegram BackButton) + ChatView local-state router (Wave 3)
+- [ ] 04-04-PLAN.md — Frontend: CallInviteCard + ProposeCallSheet (datetime-local picker) + AgreementCard + AgreementSheet + wire into ChatConversation (Wave 4)
 
 ### Phase 5: Squad Mode
 **Goal:** Users can search as a group of 2–4: create a squad with name/budget/districts, invite and join members, and have squad cards appear in the feed.
@@ -138,7 +144,7 @@ Plans:
 | 1. Onboarding | 4/4 | Complete | 2026-06-10 |
 | 2. Matching Engine | 3/3 | Complete | 2026-06-10 |
 | 3. Discovery & Profiles | 6/6 | Complete | 2026-06-22 |
-| 4. Chat & Agreement | 0/0 | Not started | - |
+| 4. Chat & Agreement | 0/4 | Planned | - |
 | 5. Squad Mode | 0/0 | Not started | - |
 | 6. Trust, Notifications & Feedback | 0/0 | Not started | - |
 | 7. Monetization | 0/0 | Not started | - |
@@ -147,3 +153,4 @@ Plans:
 *Roadmap created: 2026-06-07*
 *Updated: 2026-06-10 — Phase 2 planned: 3 plans (02-01 seed, 02-02 backend FeedModule+SwipeModule, 02-03 frontend wiring)*
 *Updated: 2026-06-22 — Phase 3 planned: 6 plans (03-01 backend feed ext, 03-02 backend profile module, 03-03 frontend types+hooks+shared UI, 03-04 swipe deck wiring, 03-05 CandidateProfileSheet, 03-06 ProfileView+edit)*
+*Updated: 2026-06-23 — Phase 4 planned: 4 plans (04-01 backend ChatModule, 04-02 frontend API+hooks, 04-03 MatchList+ChatConversation, 04-04 CallInviteCard+ProposeCallSheet+AgreementCard+AgreementSheet)*

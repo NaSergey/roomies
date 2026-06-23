@@ -2,16 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: ready
-stopped_at: Phase 3 COMPLETE — all 6 plans executed (03-01..03-06). Ready for Phase 4.
-last_updated: "2026-06-22T00:00:00.000Z"
-last_activity: 2026-06-22
+status: Phase 4 IN PROGRESS — Plan 04-01 complete (2026-06-23). 1/4 plans done.
+last_updated: "2026-06-23T00:00:00.000Z"
+last_activity: 2026-06-23
 progress:
   total_phases: 7
-  completed_phases: 3
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
+  completed_phases: 2
+  total_plans: 17
+  completed_plans: 12
+  percent: 35
 ---
 
 # Project State
@@ -25,12 +24,12 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 
 ## Current Position
 
-Phase: 3 of 7 COMPLETE → Phase 4 next
-Plan: 6/6 in Phase 3 (all complete)
-Status: Phase 3 COMPLETE — all 6 plans executed 2026-06-22
-Last activity: 2026-06-22
+Phase: 4 of 7 — Executing
+Plan: 1/4 in Phase 4 (04-01 complete)
+Status: Phase 4 IN PROGRESS — Plan 04-01 complete (2026-06-23). 1/4 plans done.
+Last activity: 2026-06-23
 
-Progress: [██████████] Phase 3 100%
+Progress: [██████████] Phase 3 100% | Phase 4 [██________] 25%
 
 ## Performance Metrics
 
@@ -78,6 +77,9 @@ Recent decisions affecting current work:
 - [02-03]: feed.ts imports apiFetch from './client' directly (not barrel) to prevent circular dependency feed.ts → index.ts → feed.ts
 - [02-03]: handleSwipe is async but SwipeHandler type is sync void — TS allows this; animation fires immediately without awaiting the API call
 - [02-03]: ProfileCard renders house emoji placeholder when photos[] is empty — prevents broken image elements for seed users with no photos
+- [04-01]: assertParticipant() is the universal chat access guard — called at the start of every service method that touches a chat
+- [04-01]: chat: { create: {} } placed ONLY in match upsert create block (not update) — ensures one-time Chat creation on mutual match
+- [04-01]: Message IDs returned as String() in all chat endpoints — BigInt serialization rule enforced at service layer
 
 ### Pending Todos
 
@@ -90,6 +92,7 @@ Recent decisions affecting current work:
 ### Committed Work (Phase 3 foundation — 2026-06-22)
 
 Ad-hoc work committed before Phase 3 execution (commits 241d30b..627ce99):
+
 - Infra: docker-compose.yml, AGENTS.md, dev-tunnel fix
 - Backend: feed.service.ts age + SQL hard-filters; seed improvements + bulk seed
 - Frontend: React Query, TelegramProvider, BottomNav, SwipeDeck perf, ProfileCard neobrutalism
@@ -107,8 +110,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-10T14:00:00.000Z
-Stopped at: Plan 02-03 — COMPLETE. Phase 2 COMPLETE (02-01, 02-02, 02-03). SwipeDeck on real GET /feed + POST /swipes, match overlay working. Ready for Phase 3.
+Last session: 2026-06-23T00:00:00.000Z
+Stopped at: Plan 04-01 — COMPLETE. ChatModule with 11 endpoints, SwipeService extended with Chat auto-creation, ChatModule registered in AppModule. Build green.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
