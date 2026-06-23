@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { Button } from '@/shared/ui/button';
+import { TextField } from '@/shared/ui/text-field';
 import type { BudgetPayload, OnboardingState } from '../../model/types';
 
 interface BudgetStepProps {
@@ -52,7 +54,7 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 py-6">
       <div>
-        <h1 className="text-2xl font-bold text-(--text)">
+        <h1 className="text-2xl font-black text-(--text)">
           Какой у тебя бюджет?
         </h1>
       </div>
@@ -61,24 +63,22 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
             <label className="text-sm text-muted">от, ₽</label>
-            <input
+            <TextField
               type="number"
               value={budgetMin}
               onChange={(e) => setBudgetMin(e.target.value)}
               placeholder="20 000"
-              className="h-14 w-full rounded-2xl bg-surface px-4 text-center text-base text-(--text)"
-              style={{ boxShadow: 'var(--shadow-button)' }}
+              className="h-14 w-full bg-white px-4 text-center text-base font-bold text-(--text)"
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-sm text-muted">до, ₽</label>
-            <input
+            <TextField
               type="number"
               value={budgetMax}
               onChange={(e) => setBudgetMax(e.target.value)}
               placeholder="50 000"
-              className="h-14 w-full rounded-2xl bg-surface px-4 text-center text-base text-(--text)"
-              style={{ boxShadow: 'var(--shadow-button)' }}
+              className="h-14 w-full bg-white px-4 text-center text-base font-bold text-(--text)"
             />
           </div>
         </div>
@@ -94,33 +94,25 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
       </div>
 
       <div className="flex flex-col gap-4">
-        <p className="text-base font-semibold text-(--text)">
-          Когда планируешь?
-        </p>
+        <p className="text-base font-black text-(--text)">Когда планируешь?</p>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-(--text-muted)">
-            Дата въезда
-          </label>
-          <input
+          <label className="text-sm font-bold text-muted">Дата въезда</label>
+          <TextField
             type="date"
             value={moveInDate}
             onChange={(e) => setMoveInDate(e.target.value)}
-            className="h-14 w-full rounded-2xl bg-surface px-4 text-base text-(--text)"
-            style={{ boxShadow: 'var(--shadow-button)' }}
+            className="h-14 w-full bg-white px-4 text-base font-bold text-(--text)"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-sm font-medium text-(--text-muted)">
-            Срок проживания
-          </label>
+          <label className="text-sm font-bold text-muted">Срок проживания</label>
           <div className="relative">
             <select
               value={stayDuration}
               onChange={(e) => setStayDuration(e.target.value)}
-              className="h-14 w-full appearance-none rounded-2xl bg-surface px-4 text-base text-(--text)"
-              style={{ boxShadow: 'var(--shadow-button)' }}
+              className="h-14 w-full appearance-none rounded-xl border-2 border-black bg-white px-4 text-base font-bold text-(--text) outline-none"
             >
               {DURATION_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -138,7 +130,7 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
                 strokeWidth="2.2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-(--text-muted)"
+                className="text-muted"
                 aria-hidden="true"
               >
                 <polyline points="6 9 12 15 18 9" />
@@ -149,21 +141,13 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
       </div>
 
       <div className="mt-auto">
-        <button
-          type="button"
-          disabled={state.loading}
+        <Button
+          loading={state.loading}
           onClick={handleSubmit}
-          className="h-14 w-full rounded-2xl bg-accent text-base font-semibold text-(--text-on-accent) transition-transform active:scale-[0.97] disabled:opacity-50"
+          className="h-14 w-full text-base"
         >
-          {state.loading ? (
-            <span
-              className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent"
-              aria-hidden="true"
-            />
-          ) : (
-            'Продолжить'
-          )}
-        </button>
+          Продолжить
+        </Button>
       </div>
     </div>
   );

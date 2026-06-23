@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react';
 import { getCities, getDistricts, type City, type District } from '@/shared/lib/api';
 import { haptic } from '@/shared/lib/telegram';
+import { Button } from '@/shared/ui/button';
+import { Chip } from '@/shared/ui/chip';
 import type { LocationPayload, OnboardingState } from '../../model/types';
 
 interface LocationStepProps {
@@ -99,8 +101,8 @@ export function LocationStep({ state, onSubmit }: LocationStepProps) {
   return (
     <div className="flex flex-1 flex-col gap-6 px-4 py-6">
       <div>
-        <h1 className="text-2xl font-bold text-(--text)">Где ищешь?</h1>
-        <p className="mt-2 text-base text-(--text-muted)">
+        <h1 className="text-2xl font-black text-(--text)">Где ищешь?</h1>
+        <p className="mt-2 text-base text-muted">
           Город — обязательно, районы — по желанию
         </p>
       </div>
@@ -110,10 +112,9 @@ export function LocationStep({ state, onSubmit }: LocationStepProps) {
           value={selectedCityId ?? ''}
           onChange={handleCityChange}
           disabled={loadingCities}
-          className="h-14 w-full appearance-none rounded-2xl bg-surface px-4 text-base text-(--text) disabled:opacity-50"
-          style={{ boxShadow: 'var(--shadow-button)' }}
+          className="h-14 w-full appearance-none rounded-xl border-2 border-black bg-white px-4 text-base font-bold text-(--text) outline-none disabled:opacity-50"
         >
-          <option value="" className="text-(--text-muted)">
+          <option value="">
             {loadingCities ? 'Загрузка...' : 'Выбери город'}
           </option>
           {cities.map((city) => (
@@ -132,7 +133,7 @@ export function LocationStep({ state, onSubmit }: LocationStepProps) {
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-(--text-muted)"
+            className="text-muted"
             aria-hidden="true"
           >
             <polyline points="6 9 12 15 18 9" />
@@ -141,7 +142,7 @@ export function LocationStep({ state, onSubmit }: LocationStepProps) {
       </div>
 
       {citiesError && (
-        <p className="text-sm text-(--text-muted)">
+        <p className="text-sm text-muted">
           {citiesError}{' '}
           <button
             type="button"
@@ -155,45 +156,37 @@ export function LocationStep({ state, onSubmit }: LocationStepProps) {
 
       {selectedCityId && districts.length > 0 && (
         <div>
-          <p className="mb-2 mt-4 text-sm font-medium text-(--text-muted)">
-            Районы
-          </p>
+          <p className="mb-2 mt-4 text-sm font-bold text-muted">Районы</p>
           {loadingDistricts ? (
             <div className="flex gap-2">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="h-9 w-24 animate-pulse rounded-full bg-surface-2"
+                  className="h-9 w-24 animate-pulse rounded-full bg-[#f0efe9]"
                 />
               ))}
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
-              {districts.map((district) => {
-                const isSelected = selectedDistrictIds.includes(district.id);
-                return (
-                  <button
-                    key={district.id}
-                    type="button"
-                    role="checkbox"
-                    aria-checked={isSelected}
-                    onClick={() => toggleDistrict(district.id)}
-                    className={`min-h-[44px] rounded-full px-4 py-1.5 text-sm font-medium text-(--text) transition-colors ${isSelected ? 'bg-lavender' : 'bg-surface'}`}
-                    style={{ boxShadow: 'var(--shadow-button)' }}
-                  >
-                    {district.name}
-                  </button>
-                );
-              })}
+              {districts.map((district) => (
+                <Chip
+                  key={district.id}
+                  active={selectedDistrictIds.includes(district.id)}
+                  onClick={() => toggleDistrict(district.id)}
+                  className="min-h-[44px] px-4 py-1.5"
+                >
+                  {district.name}
+                </Chip>
+              ))}
             </div>
           )}
         </div>
       )}
 
       <div className="mt-auto">
-        <button
-          type="button"
-          disabled={!selectedCityId || state.loading}
+        <Button
+          loading={state.loading}
+          disabled={!selectedCityId}
           onClick={() =>
             selectedCityId &&
             onSubmit({
@@ -201,17 +194,10 @@ export function LocationStep({ state, onSubmit }: LocationStepProps) {
               districtIds: selectedDistrictIds,
             })
           }
-          className="h-14 w-full rounded-2xl bg-accent text-base font-semibold text-(--text-on-accent) transition-transform active:scale-[0.97] disabled:opacity-50"
+          className="h-14 w-full text-base"
         >
-          {state.loading ? (
-            <span
-              className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent"
-              aria-hidden="true"
-            />
-          ) : (
-            'Продолжить'
-          )}
-        </button>
+          Продолжить
+        </Button>
       </div>
     </div>
   );
