@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
+import { SquadModule } from './squad/squad.module';
 import { FeedModule } from './feed/feed.module';
 import { GeoModule } from './geo/geo.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
@@ -24,6 +25,7 @@ import { VibeTagsModule } from './vibe-tags/vibe-tags.module';
     SwipeModule,
     ProfileModule,
     ChatModule,
+    SquadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
