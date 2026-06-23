@@ -12,6 +12,7 @@ import {
 import type { SwipeDirection } from '@/features/swipe-profile';
 import type { FeedCandidate } from '@/shared/lib/api';
 import { useSquadFeedQuery } from '@/features/squad';
+import { Loader } from '@/shared/ui/loader';
 import { CandidateProfileSheet } from '@/widgets/candidate-profile';
 import { SquadCard } from '@/widgets/squad';
 import { DeckToolbar } from './DeckToolbar';
@@ -88,11 +89,7 @@ export function SwipeDeck() {
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="flex gap-2">
-          {[0, 1, 2].map((i) => (
-            <span key={i} className="h-2 w-2 animate-bounce rounded-full bg-accent" style={{ animationDelay: `${i * 0.15}s` }} />
-          ))}
-        </div>
+        <Loader />
       </div>
     );
   }

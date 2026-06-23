@@ -8,6 +8,7 @@ import { feedKeys } from '@/features/swipe-profile';
 import { profileKeys } from '@/features/profile';
 import { chatKeys } from '@/features/chat';
 import { getFeed, getMe, getMatches } from '@/shared/lib/api';
+import { Loader } from '@/shared/ui/loader';
 import { BottomNav, type NavTab } from '@/widgets/bottom-nav';
 import { ChatView } from '@/widgets/chat';
 import { ProfileView } from '@/widgets/profile';
@@ -94,11 +95,7 @@ function SplashScreen() {
       <div className="flex flex-col items-center gap-3">
         <span className="text-6xl" aria-hidden>🏠</span>
         <h1 className="text-3xl font-bold tracking-tight text-(--text)">roomies</h1>
-        <div className="mt-3 flex gap-2">
-          {[0, 1, 2].map((i) => (
-            <span key={i} className="h-2 w-2 animate-bounce rounded-full bg-accent" style={{ animationDelay: `${i * 0.15}s` }} />
-          ))}
-        </div>
+        <Loader className="mt-3" />
       </div>
     </div>
   );

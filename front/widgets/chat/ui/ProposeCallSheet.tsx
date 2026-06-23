@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useProposeCall } from '@/features/chat';
+import { BottomSheet } from '@/shared/ui/bottom-sheet';
+import { Button } from '@/shared/ui/button';
 
 export interface ProposeCallSheetProps {
   open: boolean;
@@ -34,24 +36,7 @@ export function ProposeCallSheet({ open, onClose, chatId }: ProposeCallSheetProp
   }
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 z-30 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
-          open ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-      />
-
-      {/* Sheet */}
-      <div
-        className={`fixed inset-x-0 bottom-0 z-40 flex flex-col gap-4 overflow-y-auto rounded-t-3xl border-t-2 border-black bg-white px-5 pt-4 pb-8 shadow-[0_-4px_0_rgba(20,20,15,0.9)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.2,0.64,1)] max-h-[88dvh] ${
-          open ? 'translate-y-0' : 'translate-y-full'
-        }`}
-      >
-        {/* Handle */}
-        <div className="mx-auto h-1 w-10 rounded-full bg-[#d0d0cc]" />
-
+    <BottomSheet open={open} onClose={onClose} label="Предложить время созвона">
         {/* Title */}
         <h3 className="text-lg font-black text-(--text)">
           Предложить время созвона
@@ -86,23 +71,17 @@ export function ProposeCallSheet({ open, onClose, chatId }: ProposeCallSheetProp
 
         {/* Action buttons */}
         <div className="flex flex-col gap-2 mt-auto">
-          <button
-            type="button"
+          <Button
             onClick={handlePropose}
             disabled={proposeMutation.isPending || validTimes.length === 0}
-            className="w-full rounded-full border-2 border-black bg-accent py-3 text-sm font-black text-[#14140f] shadow-[3px_3px_0_rgba(20,20,15,0.9)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0_rgba(20,20,15,0.9)] transition-all duration-100 disabled:opacity-50"
+            className="w-full py-3 text-sm"
           >
             {proposeMutation.isPending ? 'Отправляем...' : 'Предложить'}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full rounded-full border-2 border-black bg-white py-3 text-sm font-black text-[#6f6f68] active:scale-95 transition-transform duration-100"
-          >
+          </Button>
+          <Button variant="white" onClick={onClose} className="w-full py-3 text-sm">
             Отмена
-          </button>
+          </Button>
         </div>
-      </div>
-    </>
+    </BottomSheet>
   );
 }

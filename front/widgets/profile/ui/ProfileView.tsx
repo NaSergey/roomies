@@ -6,6 +6,8 @@ import { useProfileQuery } from '@/features/profile';
 import { useMySquadQuery, usePendingInvitesQuery, useLeaveSquad } from '@/features/squad';
 import { VibeScaleBar } from '@/shared/ui/vibe-scale-bar';
 import { RulesSection } from '@/shared/ui/rules-section';
+import { Loader } from '@/shared/ui/loader';
+import { Button } from '@/shared/ui/button';
 import { RoomieScoreCard } from './RoomieScoreCard';
 import { ProfileEditSheet } from './ProfileEditSheet';
 import { CreateSquadSheet } from '@/widgets/squad';
@@ -33,11 +35,7 @@ export function ProfileView() {
   if (isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
-        <div className="flex gap-2">
-          {[0, 1, 2].map((i) => (
-            <span key={i} className="h-2 w-2 animate-bounce rounded-full bg-accent" style={{ animationDelay: `${i * 0.15}s` }} />
-          ))}
-        </div>
+        <Loader />
       </div>
     );
   }
@@ -86,13 +84,9 @@ export function ProfileView() {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setEditOpen(true)}
-            className="shrink-0 rounded-full border-2 border-black bg-white px-3 py-1.5 text-sm font-black text-(--text) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100"
-          >
+          <Button variant="white" onClick={() => setEditOpen(true)} className="shrink-0 px-3 py-1.5 text-sm">
             Изменить
-          </button>
+          </Button>
         </div>
 
         {/* Additional photos */}
@@ -158,31 +152,23 @@ export function ProfileView() {
                 ))}
               </div>
               <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setInviteOpen(true)}
-                  className="flex-1 rounded-full border-2 border-black bg-[#c8f36a] py-2 text-xs font-black text-(--text) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100"
-                >
+                <Button onClick={() => setInviteOpen(true)} className="flex-1 py-2 text-xs">
                   Пригласить
-                </button>
-                <button
-                  type="button"
+                </Button>
+                <Button
+                  variant="white"
                   onClick={() => leaveSquad.mutate(mySquad.id)}
                   disabled={leaveSquad.isPending}
-                  className="flex-1 rounded-full border-2 border-black bg-white py-2 text-xs font-black text-(--text) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100 disabled:opacity-60"
+                  className="flex-1 py-2 text-xs"
                 >
                   Выйти
-                </button>
+                </Button>
               </div>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={() => setCreateSquadOpen(true)}
-              className="w-full rounded-full border-2 border-black bg-accent py-2.5 text-sm font-black text-(--text-on-accent) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100"
-            >
+            <Button onClick={() => setCreateSquadOpen(true)} className="w-full py-2.5 text-sm">
               + Создать сквад
-            </button>
+            </Button>
           )}
         </div>
 

@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getDistricts, type District } from '@/shared/lib/api';
+import { BottomSheet } from '@/shared/ui/bottom-sheet';
+import { Button } from '@/shared/ui/button';
 
 export interface DeckFilters {
   age: '18-22' | '23-26' | '27-30' | 'all';
@@ -102,21 +104,7 @@ export function FilterSheet({ open, filters, onChange, onApply, onClose }: Filte
   };
 
   return (
-    <>
-      <div
-        onClick={onClose}
-        className={`fixed inset-0 z-30 bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${
-          open ? 'opacity-100' : 'pointer-events-none opacity-0'
-        }`}
-      />
-
-      <div
-        className={`fixed inset-x-0 bottom-0 z-40 flex flex-col gap-5 overflow-y-auto rounded-t-3xl border-t-2 border-black bg-white px-5 pt-4 pb-8 shadow-[0_-4px_0_rgba(20,20,15,0.9)] transition-transform duration-300 ease-[cubic-bezier(0.34,1.2,0.64,1)] max-h-[88dvh] ${
-          open ? 'translate-y-0' : 'translate-y-full'
-        }`}
-      >
-        <div className="mx-auto h-1 w-10 rounded-full bg-[#d0d0cc]" />
-
+    <BottomSheet open={open} onClose={onClose} className="gap-5" label="Фильтры">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-black text-(--text)">Фильтры</h3>
           <button
@@ -189,14 +177,9 @@ export function FilterSheet({ open, filters, onChange, onApply, onClose }: Filte
           <Chip active={filters.guestsPref === null}        onClick={() => set('guestsPref', null)}>Всё равно</Chip>
         </Row>
 
-        <button
-          type="button"
-          onClick={() => { onApply(filters); onClose(); }}
-          className="mt-1 w-full rounded-full border-2 border-black bg-accent py-3 text-sm font-black text-[#14140f] shadow-[3px_3px_0_rgba(20,20,15,0.9)] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[2px_2px_0_rgba(20,20,15,0.9)] transition-all duration-100"
-        >
+        <Button onClick={() => { onApply(filters); onClose(); }} className="mt-1 w-full py-3 text-sm">
           Применить
-        </button>
-      </div>
-    </>
+        </Button>
+    </BottomSheet>
   );
 }
