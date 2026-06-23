@@ -28,12 +28,16 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   /** Плоский стиль (без жёсткой тени, scale при нажатии) — для кнопок внутри карточек. */
   flat?: boolean;
+  /** Показать спиннер и заблокировать кнопку (для submit-кнопок форм/онбординга). */
+  loading?: boolean;
   children: ReactNode;
 }
 
 export function Button({
   variant = 'accent',
   flat = false,
+  loading = false,
+  disabled = false,
   type = 'button',
   className = '',
   children,
@@ -42,10 +46,18 @@ export function Button({
   return (
     <button
       type={type}
+      disabled={disabled || loading}
       className={`${BASE} ${flat ? PRESS.flat : PRESS.raised} ${VARIANT[variant]} ${className}`}
       {...rest}
     >
-      {children}
+      {loading ? (
+        <span
+          className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent align-[-2px]"
+          aria-hidden
+        />
+      ) : (
+        children
+      )}
     </button>
   );
 }

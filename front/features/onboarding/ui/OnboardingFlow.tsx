@@ -79,8 +79,7 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       {state.error && (
         <div
           role="alert"
-          className="fixed left-4 right-4 top-4 z-50 rounded-2xl bg-surface px-4 py-3 text-sm text-(--text)"
-          style={{ boxShadow: 'var(--shadow-card)' }}
+          className="fixed left-4 right-4 top-4 z-50 rounded-2xl border-2 border-black bg-[#ffd9e0] px-4 py-3 text-sm font-bold text-(--text) shadow-[4px_4px_0_rgba(20,20,15,0.9)]"
         >
           <div className="flex items-center justify-between gap-2">
             <span>{state.error}</span>
