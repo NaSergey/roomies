@@ -1,6 +1,7 @@
 'use client';
 
 import type { MyProfile } from '@/shared/lib/api';
+import { Card } from '@/shared/ui/card';
 
 const MAX_SCORE = 40;
 
@@ -16,7 +17,7 @@ export function RoomieScoreCard({ profile }: { profile: MyProfile }) {
   const pct = Math.round((score / MAX_SCORE) * 100);
 
   return (
-    <div className="flex flex-col gap-3 rounded-2xl border-2 border-black bg-white p-4 shadow-[4px_4px_0_rgba(20,20,15,0.9)]">
+    <Card className="flex flex-col gap-3 p-4">
       {/* Score header */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
@@ -68,6 +69,6 @@ export function RoomieScoreCard({ profile }: { profile: MyProfile }) {
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 }

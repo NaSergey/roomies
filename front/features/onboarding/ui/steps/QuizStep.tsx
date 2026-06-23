@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { haptic } from '@/shared/lib/telegram';
 import { Button } from '@/shared/ui/button';
+import { Card } from '@/shared/ui/card';
 import { QUIZ_QUESTIONS } from '../../model/quiz-questions';
 import type { OnboardingState, QuizAnswer } from '../../model/types';
 
@@ -109,12 +110,12 @@ export function QuizStep({ state, onSubmit }: QuizStepProps) {
       </h1>
 
       {/* Question card */}
-      <div className="rounded-2xl border-2 border-black bg-white px-6 py-8 text-center shadow-[4px_4px_0_rgba(20,20,15,0.9)]">
+      <Card className="px-6 py-8 text-center">
         <span className="text-5xl" aria-hidden="true">
           {question.categoryIcon}
         </span>
         <p className="mt-4 text-xl font-black text-(--text)">{question.text}</p>
-      </div>
+      </Card>
 
       {/* Option buttons */}
       <div role="radiogroup" className="mt-2 flex flex-col gap-3">

@@ -7,7 +7,7 @@ import { haptic } from '@/shared/lib/telegram';
 import { getWebApp } from '@/shared/lib/telegram';
 import { Button } from '@/shared/ui/button';
 import { Chip } from '@/shared/ui/chip';
-import { TextField } from '@/shared/ui/text-field';
+import { TextInput } from '@/shared/ui/text-input';
 import type { OnboardingState, ProfilePayload } from '../../model/types';
 
 interface ProfileStepProps {
@@ -127,13 +127,13 @@ export function ProfileStep({ state, onSubmit }: ProfileStepProps) {
 
       {/* Name input */}
       <div>
-        <TextField
+        <TextInput
           type="text"
           maxLength={32}
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Как тебя зовут?"
-          className="mt-4 h-14 w-full bg-white px-4 text-base font-bold text-(--text) ring-accent focus:ring-2"
+          className="mt-4 h-14 w-full px-4 text-base font-bold"
         />
         {nameError && (
           <p className="mt-1 text-sm text-rose-500" role="alert">

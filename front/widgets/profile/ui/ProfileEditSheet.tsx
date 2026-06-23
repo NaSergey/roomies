@@ -6,7 +6,7 @@ import type { MyProfile, UpdateProfilePayload } from '@/shared/lib/api';
 import { BottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
 import { Chip } from '@/shared/ui/chip';
-import { TextField } from '@/shared/ui/text-field';
+import { TextInput } from '@/shared/ui/text-input';
 
 interface ProfileEditSheetProps {
   open: boolean;
@@ -84,12 +84,12 @@ export function ProfileEditSheet({ open, profile, onClose }: ProfileEditSheetPro
         {/* Name */}
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Имя</FieldLabel>
-          <TextField
+          <TextInput
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={50}
-            className="w-full px-3 py-2.5 text-sm font-bold text-(--text) ring-accent focus:ring-2"
+            className="w-full px-3 py-2.5 text-sm font-bold"
             placeholder="Твоё имя"
           />
         </div>
@@ -98,20 +98,20 @@ export function ProfileEditSheet({ open, profile, onClose }: ProfileEditSheetPro
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Бюджет (₽/мес.)</FieldLabel>
           <div className="flex items-center gap-2">
-            <TextField
+            <TextInput
               type="number"
               value={budgetMin}
               onChange={(e) => setBudgetMin(e.target.value)}
-              className="w-full px-3 py-2.5 text-sm font-bold text-(--text) ring-accent focus:ring-2"
+              className="w-full px-3 py-2.5 text-sm font-bold"
               placeholder="от"
               min={0}
             />
             <span className="shrink-0 text-sm text-muted">—</span>
-            <TextField
+            <TextInput
               type="number"
               value={budgetMax}
               onChange={(e) => setBudgetMax(e.target.value)}
-              className="w-full px-3 py-2.5 text-sm font-bold text-(--text) ring-accent focus:ring-2"
+              className="w-full px-3 py-2.5 text-sm font-bold"
               placeholder="до"
               min={0}
             />

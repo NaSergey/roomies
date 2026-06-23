@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/shared/ui/button';
-import { TextField } from '@/shared/ui/text-field';
+import { TextInput } from '@/shared/ui/text-input';
 import type { BudgetPayload, OnboardingState } from '../../model/types';
 
 interface BudgetStepProps {
@@ -63,22 +63,22 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
         <div className="grid grid-cols-2 gap-3">
           <div className="flex min-w-0 flex-col gap-1">
             <label className="text-sm text-muted">от, ₽</label>
-            <TextField
+            <TextInput
               type="number"
               value={budgetMin}
               onChange={(e) => setBudgetMin(e.target.value)}
               placeholder="20 000"
-              className="h-14 w-full min-w-0 bg-white px-4 text-center text-base font-bold text-(--text)"
+              className="h-14 w-full px-4 text-center text-base font-bold"
             />
           </div>
           <div className="flex min-w-0 flex-col gap-1">
             <label className="text-sm text-muted">до, ₽</label>
-            <TextField
+            <TextInput
               type="number"
               value={budgetMax}
               onChange={(e) => setBudgetMax(e.target.value)}
               placeholder="50 000"
-              className="h-14 w-full min-w-0 bg-white px-4 text-center text-base font-bold text-(--text)"
+              className="h-14 w-full px-4 text-center text-base font-bold"
             />
           </div>
         </div>
@@ -98,11 +98,11 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
 
         <div className="flex flex-col gap-1">
           <label className="text-sm font-bold text-muted">Дата въезда</label>
-          <TextField
+          <TextInput
             type="date"
             value={moveInDate}
             onChange={(e) => setMoveInDate(e.target.value)}
-            className="h-14 w-full min-w-0 bg-white px-4 text-base font-bold text-(--text) [color-scheme:light]"
+            className="h-14 px-4 text-base font-bold [color-scheme:light]"
           />
         </div>
 

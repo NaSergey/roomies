@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useProposeCall } from '@/features/chat';
 import { BottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
-import { TextField } from '@/shared/ui/text-field';
+import { TextInput } from '@/shared/ui/text-input';
 
 export interface ProposeCallSheetProps {
   open: boolean;
@@ -46,7 +46,7 @@ export function ProposeCallSheet({ open, onClose, chatId }: ProposeCallSheetProp
         {/* Slots */}
         <div className="flex flex-col gap-3">
           {slots.map((slot, i) => (
-            <TextField
+            <TextInput
               key={i}
               type="datetime-local"
               value={slot}
@@ -54,7 +54,7 @@ export function ProposeCallSheet({ open, onClose, chatId }: ProposeCallSheetProp
               onChange={(e) =>
                 setSlots((prev) => prev.map((s, j) => (j === i ? e.target.value : s)))
               }
-              className="w-full px-4 py-2 text-sm bg-white"
+              className="w-full px-4 py-2 text-sm"
             />
           ))}
         </div>
