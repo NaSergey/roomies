@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useCreateSquad } from '@/features/squad';
 import { BottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
+import { TextField } from '@/shared/ui/text-field';
 
 interface CreateSquadSheetProps {
   open: boolean;
@@ -39,32 +40,32 @@ export function CreateSquadSheet({ open, onClose }: CreateSquadSheetProps) {
       <h3 className="text-lg font-black text-(--text)">Создать сквад</h3>
 
       {/* Name */}
-      <input
+      <TextField
         type="text"
         placeholder="Название (необязательно)"
         value={name}
         onChange={(e) => setName(e.target.value)}
         maxLength={100}
-        className="w-full rounded-xl border-2 border-black bg-white px-3 py-2 text-sm font-medium text-(--text) outline-none ring-accent focus:ring-2"
+        className="w-full bg-white px-3 py-2 text-sm font-medium text-(--text) ring-accent focus:ring-2"
       />
 
       {/* Budget */}
       <div className="flex gap-2">
-        <input
+        <TextField
           type="number"
           min={0}
           placeholder="Бюджет от ₽"
           value={budgetMin}
           onChange={(e) => setBudgetMin(e.target.value)}
-          className="min-w-0 flex-1 rounded-xl border-2 border-black bg-white px-3 py-2 text-sm font-medium text-(--text) outline-none ring-accent focus:ring-2"
+          className="min-w-0 flex-1 bg-white px-3 py-2 text-sm font-medium text-(--text) ring-accent focus:ring-2"
         />
-        <input
+        <TextField
           type="number"
           min={0}
           placeholder="до ₽"
           value={budgetMax}
           onChange={(e) => setBudgetMax(e.target.value)}
-          className="min-w-0 flex-1 rounded-xl border-2 border-black bg-white px-3 py-2 text-sm font-medium text-(--text) outline-none ring-accent focus:ring-2"
+          className="min-w-0 flex-1 bg-white px-3 py-2 text-sm font-medium text-(--text) ring-accent focus:ring-2"
         />
       </div>
 

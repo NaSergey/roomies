@@ -2,6 +2,7 @@
 
 import { useRespondCall } from '@/features/chat';
 import type { CallInviteData } from '@/shared/lib/api';
+import { Button } from '@/shared/ui/button';
 
 export interface CallInviteCardProps {
   invite: CallInviteData;
@@ -54,8 +55,8 @@ export function CallInviteCard({
               className="flex items-center justify-between gap-2 py-2 border-b border-[#f0efe9] last:border-0"
             >
               <span className="text-sm text-(--text)">{formatTime(time)}</span>
-              <button
-                type="button"
+              <Button
+                flat
                 onClick={() =>
                   respondCall.mutate({
                     inviteId: invite.id,
@@ -64,10 +65,10 @@ export function CallInviteCard({
                   })
                 }
                 disabled={respondCall.isPending}
-                className="shrink-0 rounded-full border-2 border-black bg-accent px-3 py-1 text-xs font-black text-[#14140f] active:scale-95 transition-transform duration-100 disabled:opacity-50"
+                className="shrink-0 px-3 py-1 text-xs"
               >
                 Принять
-              </button>
+              </Button>
             </div>
           ))}
           <button

@@ -6,6 +6,7 @@ import type { MyProfile, UpdateProfilePayload } from '@/shared/lib/api';
 import { BottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
 import { Chip } from '@/shared/ui/chip';
+import { TextField } from '@/shared/ui/text-field';
 
 interface ProfileEditSheetProps {
   open: boolean;
@@ -83,12 +84,12 @@ export function ProfileEditSheet({ open, profile, onClose }: ProfileEditSheetPro
         {/* Name */}
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Имя</FieldLabel>
-          <input
+          <TextField
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={50}
-            className="w-full rounded-xl border-2 border-black px-3 py-2.5 text-sm font-bold text-(--text) outline-none ring-accent focus:ring-2"
+            className="w-full px-3 py-2.5 text-sm font-bold text-(--text) ring-accent focus:ring-2"
             placeholder="Твоё имя"
           />
         </div>
@@ -97,20 +98,20 @@ export function ProfileEditSheet({ open, profile, onClose }: ProfileEditSheetPro
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Бюджет (₽/мес.)</FieldLabel>
           <div className="flex items-center gap-2">
-            <input
+            <TextField
               type="number"
               value={budgetMin}
               onChange={(e) => setBudgetMin(e.target.value)}
-              className="w-full rounded-xl border-2 border-black px-3 py-2.5 text-sm font-bold text-(--text) outline-none ring-accent focus:ring-2"
+              className="w-full px-3 py-2.5 text-sm font-bold text-(--text) ring-accent focus:ring-2"
               placeholder="от"
               min={0}
             />
             <span className="shrink-0 text-sm text-muted">—</span>
-            <input
+            <TextField
               type="number"
               value={budgetMax}
               onChange={(e) => setBudgetMax(e.target.value)}
-              className="w-full rounded-xl border-2 border-black px-3 py-2.5 text-sm font-bold text-(--text) outline-none ring-accent focus:ring-2"
+              className="w-full px-3 py-2.5 text-sm font-bold text-(--text) ring-accent focus:ring-2"
               placeholder="до"
               min={0}
             />

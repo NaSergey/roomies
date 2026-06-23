@@ -2,6 +2,7 @@
 
 import { useRespondAgreement } from '@/features/chat';
 import type { AgreementData } from '@/shared/lib/api';
+import { Button } from '@/shared/ui/button';
 
 export interface AgreementCardProps {
   agreement: AgreementData;
@@ -44,8 +45,8 @@ export function AgreementCard({
       {/* Draft — recipient view */}
       {agreement.status === 'draft' && isRecipient && (
         <div className="flex gap-2 mt-3">
-          <button
-            type="button"
+          <Button
+            flat
             onClick={() =>
               respondAgreement.mutate({
                 agreementId: agreement.id,
@@ -53,10 +54,10 @@ export function AgreementCard({
               })
             }
             disabled={respondAgreement.isPending}
-            className="flex-1 rounded-full border-2 border-black bg-accent py-2 text-sm font-black text-[#14140f] active:scale-95 transition-transform duration-100 disabled:opacity-50"
+            className="flex-1 py-2 text-sm"
           >
             Принять
-          </button>
+          </Button>
           <button
             type="button"
             onClick={() =>
