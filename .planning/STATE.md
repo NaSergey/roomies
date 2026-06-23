@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase 4 IN PROGRESS — Plan 04-02 complete (2026-06-23). 2/4 plans done.
-last_updated: "2026-06-23T00:01:42Z"
+status: executing
+last_updated: "2026-06-23T00:08:09.565Z"
 last_activity: 2026-06-23
 progress:
   total_phases: 7
   completed_phases: 2
   total_plans: 17
   completed_plans: 13
-  percent: 38
+  percent: 29
 ---
 
 # Project State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 4 of 7 — Executing
-Plan: 2/4 in Phase 4 (04-02 complete)
-Status: Phase 4 IN PROGRESS — Plan 04-02 complete (2026-06-23). 2/4 plans done.
+Plan: 3/4 in Phase 4 (04-03 complete)
+Status: Phase 4 IN PROGRESS — Plan 04-03 complete (2026-06-23). 3/4 plans done.
 Last activity: 2026-06-23
 
-Progress: [██████████] Phase 3 100% | Phase 4 [████______] 50%
+Progress: [██████████] Phase 3 100% | Phase 4 [██████____] 75%
 
 ## Performance Metrics
 
@@ -82,6 +82,9 @@ Recent decisions affecting current work:
 - [04-01]: Message IDs returned as String() in all chat endpoints — BigInt serialization rule enforced at service layer
 - [04-02]: ChatMessage.id typed as string on frontend — BigInt serialized by backend main.ts patch; treated as opaque cursor string
 - [04-02]: useChatMessagesQuery uses staleTime: 0 + refetchInterval: 3000 — ensures polling always fires (D-02 HTTP polling pattern)
+- [04-03]: MatchList time format: today→HH:mm, yesterday→вчера, older→locale date — no lib needed
+- [04-03]: MessageBubble uses var(--card,#f5f5f0) fallback for partner bubble bg — --card not in CSS tokens
+- [04-03]: callInviteSlot/agreementSlot pass undefined in ChatView — 04-04 wires actual slot renderers
 
 ### Pending Todos
 
@@ -113,7 +116,7 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-23T00:01:42Z
-Stopped at: Plan 04-02 — COMPLETE. Frontend chat API layer (chat.ts: 10 functions, 6 types), React Query hooks (use-chat.ts: 10 hooks with 3s polling), feature barrel. TypeScript build clean.
+Stopped at: Plan 04-03 — COMPLETE. Chat UI: MatchList + MessageBubble + SmartChips + ChatConversation + ChatView state router. 3s polling, BackButton, nudge bar (12h), smart chips. TypeScript build clean.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
