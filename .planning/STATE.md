@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-last_updated: "2026-06-23T00:12:50.494Z"
+status: Phase 5 PLANNED — 3 plans created 2026-06-23. Execute with /gsd-execute-phase 5.
+last_updated: "2026-06-23T00:29:43.707Z"
 last_activity: 2026-06-23
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 17
-  completed_plans: 14
+  total_plans: 20
+  completed_plans: 15
   percent: 43
 ---
 
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-07)
 
 **Core value:** Пользователь получает первые качественные совпадения по вайбу за 3 минуты онбординга и понимает, почему ему показали именно этого человека.
-**Current focus:** Phase 4 — Chat & Agreement (next)
+**Current focus:** Phase 5 — Squad Mode (next)
 
 ## Current Position
 
-Phase: 4 of 7 — Executing
-Plan: 4/4 in Phase 4 (04-04 complete)
-Status: Phase 4 IN PROGRESS — Plan 04-04 complete (2026-06-23). 4/4 plans done.
+Phase: 5 of 7 — Planning complete, ready to execute
+Plan: 1/3 in Phase 5
+Status: Phase 5 IN PROGRESS — Plan 05-01 complete 2026-06-23.
 Last activity: 2026-06-23
 
-Progress: [██████████] Phase 3 100% | Phase 4 [██████████] 100%
+Progress: [██████████] Phase 4 100% | Phase 5 [███_______] 33%
 
 ## Performance Metrics
 
@@ -87,6 +87,9 @@ Recent decisions affecting current work:
 - [04-03]: callInviteSlot/agreementSlot pass undefined in ChatView — 04-04 wires actual slot renderers
 - [04-04]: useCallInvitesQuery/useAgreementsQuery called unconditionally with chatId=0 fallback — avoids conditional hook violation; 403 on chatId=0 caught harmlessly by React Query
 - [04-04]: CallInviteCard checks currentUserId !== invite.proposerId (T-04-15); AgreementCard checks currentUserId !== agreement.createdById (T-04-16)
+- [05-01]: Literal routes (squads/me, squads/invites/pending, squads/feed) declared before parameterised :id routes in SquadController — prevents NestJS treating literal strings as numeric :id segments
+- [05-01]: formatSquad() private helper provides stable SquadCard shape across createSquad, getMySquad, getSquadFeed
+- [05-01]: getSquadFeed applies in-memory member capacity filter because Prisma where cannot compare a relation count to a model field directly
 
 ### Pending Todos
 
@@ -118,7 +121,7 @@ Items acknowledged and carried forward from previous milestone close:
 ## Session Continuity
 
 Last session: 2026-06-23T00:01:42Z
-Stopped at: Plan 04-04 — COMPLETE. CallInviteCard + ProposeCallSheet + AgreementCard + AgreementSheet. ChatView wired with real slot functions and sheet state. TypeScript build clean.
+Stopped at: Plan 05-01 — COMPLETE. SquadModule with 8 endpoints (CRUD, invite flow, feed). TypeScript build clean.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)
