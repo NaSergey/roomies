@@ -5,6 +5,7 @@ import { useEffect, useRef } from 'react';
 import { VibeScaleBar } from '@/shared/ui/vibe-scale-bar';
 import { RulesSection } from '@/shared/ui/rules-section';
 import { MatchReasonsList } from '@/shared/ui/match-reasons-list';
+import { TAG_COLORS, SCENARIO_LABELS } from '@/shared/config';
 import { ActionButtons } from '@/features/swipe-profile';
 import type { ActionButtonsProps } from '@/features/swipe-profile';
 import type { FeedCandidate } from '@/shared/lib/api';
@@ -13,13 +14,6 @@ export interface CandidateProfileSheetProps extends ActionButtonsProps {
   candidate: FeedCandidate | null;
   onClose: () => void;
 }
-
-const BUDGET_SCENARIOS: Record<string, string> = {
-  looking_housing_roomie: 'Ищет жильё + соседа',
-  has_housing_seeking_roomie: 'Сдаёт комнату',
-  looking_roomie_only: 'Ищет соседа',
-  flexible: 'Любой вариант',
-};
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -122,7 +116,7 @@ export function CandidateProfileSheet({
                 )}
               </h2>
               <p className="truncate text-xs text-muted">
-                {BUDGET_SCENARIOS[candidate.scenario] ?? candidate.scenario}
+                {SCENARIO_LABELS[candidate.scenario] ?? candidate.scenario}
               </p>
             </div>
             <span className="shrink-0 rounded-xl border-2 border-black bg-accent px-2 py-1 text-sm font-black text-[#14140f] shadow-[2px_2px_0_rgba(20,20,15,0.9)]">
@@ -179,7 +173,7 @@ export function CandidateProfileSheet({
                         <span
                           key={t.id}
                           className={`rounded-full border-2 border-black px-2.5 py-0.5 text-xs font-bold text-[#14140f] ${
-                            ['bg-[#c8f36a]', 'bg-[#a8d8ff]', 'bg-[#ffb8d4]'][i % 3]
+                            TAG_COLORS[i % 3]
                           }`}
                         >
                           {t.label}

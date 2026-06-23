@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { memo, type ReactNode } from 'react';
+import { TAG_COLORS } from '@/shared/config';
 import type { RoomieProfile } from '../model/types';
 
 interface ProfileCardProps {
@@ -10,7 +11,6 @@ interface ProfileCardProps {
   overlay?: ReactNode;
 }
 
-const TAG_COLORS = ['bg-[#c8f36a]', 'bg-[#a8d8ff]', 'bg-[#ffb8d4]'];
 const HARD_SHADOW = 'shadow-[4px_4px_0_rgba(20,20,15,0.9)]';
 
 const SCORE_META = [

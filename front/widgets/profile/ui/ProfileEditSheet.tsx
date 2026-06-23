@@ -5,6 +5,7 @@ import { usePatchProfile } from '@/features/profile';
 import type { MyProfile, UpdateProfilePayload } from '@/shared/lib/api';
 import { BottomSheet } from '@/shared/ui/bottom-sheet';
 import { Button } from '@/shared/ui/button';
+import { Chip } from '@/shared/ui/chip';
 
 interface ProfileEditSheetProps {
   open: boolean;
@@ -12,28 +13,12 @@ interface ProfileEditSheetProps {
   onClose: () => void;
 }
 
-function ToggleChip({
-  active,
-  onClick,
-  children,
-}: {
+function ToggleChip(props: {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
 }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`rounded-full border-2 border-black px-3 py-1.5 text-sm font-bold transition-all active:scale-95 ${
-        active
-          ? 'bg-accent text-[#14140f] shadow-[2px_2px_0_rgba(20,20,15,0.9)]'
-          : 'bg-white text-muted'
-      }`}
-    >
-      {children}
-    </button>
-  );
+  return <Chip className="px-3 py-1.5" {...props} />;
 }
 
 function FieldLabel({ children }: { children: React.ReactNode }) {

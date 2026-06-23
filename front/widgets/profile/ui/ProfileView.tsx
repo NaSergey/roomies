@@ -8,20 +8,12 @@ import { VibeScaleBar } from '@/shared/ui/vibe-scale-bar';
 import { RulesSection } from '@/shared/ui/rules-section';
 import { Loader } from '@/shared/ui/loader';
 import { Button } from '@/shared/ui/button';
+import { TAG_COLORS, SCENARIO_LABELS } from '@/shared/config';
 import { RoomieScoreCard } from './RoomieScoreCard';
 import { ProfileEditSheet } from './ProfileEditSheet';
 import { CreateSquadSheet } from '@/widgets/squad';
 import { InviteMemberSheet } from '@/widgets/squad';
 import { PendingInviteCard } from '@/widgets/squad';
-
-const SCENARIO_LABELS: Record<string, string> = {
-  looking_housing_roomie: 'Ищет жильё + соседа',
-  has_housing_seeking_roomie: 'Сдаёт комнату',
-  looking_roomie_only: 'Ищет соседа',
-  flexible: 'Любой вариант',
-};
-
-const TAG_COLORS = ['bg-[#c8f36a]', 'bg-[#a8d8ff]', 'bg-[#ffb8d4]'];
 
 export function ProfileView() {
   const { data: profile, isLoading, isError, error } = useProfileQuery();
