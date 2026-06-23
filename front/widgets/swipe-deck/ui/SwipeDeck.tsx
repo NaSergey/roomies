@@ -11,7 +11,9 @@ import {
 } from '@/features/swipe-profile';
 import type { SwipeDirection } from '@/features/swipe-profile';
 import type { FeedCandidate } from '@/shared/lib/api';
+import { useSquadFeedQuery } from '@/features/squad';
 import { CandidateProfileSheet } from '@/widgets/candidate-profile';
+import { SquadCard } from '@/widgets/squad';
 import { DeckToolbar } from './DeckToolbar';
 import { EmptyState } from './EmptyState';
 import { FilterSheet, DEFAULT_FILTERS } from './FilterSheet';
@@ -36,13 +38,17 @@ export function SwipeDeck() {
   const [boosted, setBoosted] = useState(false);
   const [matchState, setMatchState] = useState<{ candidateName: string; matchId: number } | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<FeedCandidate | null>(null);
+  const [dismissedSquads, setDismissedSquads] = useState<Set<number>>(new Set());
 
   const { data: profiles = [], isLoading, isError, error, refetch } = useFeedQuery(queryParams);
+  const { data: squadCards = [] } = useSquadFeedQuery();
   const swipeMutation = useSwipeMutation();
 
   const cardEls = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
   const { visible, exitDirection, enterDirection, isEmpty, swipe, reset } = useSwipeDeck(profiles);
+
+  const visibleSquads = squadCards.filter((s) => !dismissedSquads.has(s.id));
 
   const handleApplyFilters = useCallback((f: DeckFilters) => {
     setFilters(f);
@@ -174,6 +180,25 @@ export function SwipeDeck() {
           onClose={() => setFilterOpen(false)}
         />
       </div>
+
+      {visibleSquads.length > 0 && (
+        <div className="flex flex-col gap-2 pt-2">
+          <span className="text-[10px] font-black uppercase tracking-widest text-muted px-1">
+            Сквады в поиске 👥
+          </span>
+          <div className="flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {visibleSquads.map((squad) => (
+              <SquadCard
+                key={squad.id}
+                squad={squad}
+                onDismiss={() =>
+                  setDismissedSquads((prev) => new Set([...prev, squad.id]))
+                }
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       <CandidateProfileSheet
         candidate={selectedProfile}
