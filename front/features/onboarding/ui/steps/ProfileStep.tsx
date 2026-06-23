@@ -5,9 +5,9 @@ import { useEffect, useState } from 'react';
 import { getVibeTags, type VibeTag } from '@/shared/lib/api';
 import { haptic } from '@/shared/lib/telegram';
 import { getWebApp } from '@/shared/lib/telegram';
-import { Button } from '@/shared/ui/button';
-import { Chip } from '@/shared/ui/chip';
-import { TextInput } from '@/shared/ui/text-input';
+import { Button } from '@/shared/ui/Button';
+import { Chip } from '@/shared/ui/Chip';
+import { TextInput } from '@/shared/ui/TextInput';
 import type { OnboardingState, ProfilePayload } from '../../model/types';
 
 interface ProfileStepProps {

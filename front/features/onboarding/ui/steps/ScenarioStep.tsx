@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { haptic } from '@/shared/lib/telegram';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/Button';
 import type { OnboardingState, ScenarioType } from '../../model/types';
 
 interface ScenarioStepProps {

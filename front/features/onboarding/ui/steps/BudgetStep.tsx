@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Button } from '@/shared/ui/button';
-import { TextInput } from '@/shared/ui/text-input';
+import { Button } from '@/shared/ui/Button';
+import { TextInput } from '@/shared/ui/TextInput';
 import type { BudgetPayload, OnboardingState } from '../../model/types';
 
 interface BudgetStepProps {

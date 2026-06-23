@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { useProposeCall } from '@/features/chat';
-import { BottomSheet } from '@/shared/ui/bottom-sheet';
-import { Button } from '@/shared/ui/button';
-import { TextInput } from '@/shared/ui/text-input';
+import { BottomSheet } from '@/shared/ui/BottomSheet';
+import { Button } from '@/shared/ui/Button';
+import { TextInput } from '@/shared/ui/TextInput';
 
 export interface ProposeCallSheetProps {
   open: boolean;

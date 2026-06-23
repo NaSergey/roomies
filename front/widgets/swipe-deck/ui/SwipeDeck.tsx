@@ -12,7 +12,7 @@ import {
 import type { SwipeDirection } from '@/features/swipe-profile';
 import type { FeedCandidate } from '@/shared/lib/api';
 import { useSquadFeedQuery } from '@/features/squad';
-import { Loader } from '@/shared/ui/loader';
+import { Loader } from '@/shared/ui/Loader';
 import { CandidateProfileSheet } from '@/widgets/candidate-profile';
 import { SquadCard } from '@/widgets/squad';
 import { DeckToolbar } from './DeckToolbar';

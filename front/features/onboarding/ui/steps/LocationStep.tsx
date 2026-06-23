@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import { getCities, getDistricts, type City, type District } from '@/shared/lib/api';
 import { haptic } from '@/shared/lib/telegram';
-import { Button } from '@/shared/ui/button';
-import { Chip } from '@/shared/ui/chip';
+import { Button } from '@/shared/ui/Button';
+import { Chip } from '@/shared/ui/Chip';
 import type { LocationPayload, OnboardingState } from '../../model/types';
 
 interface LocationStepProps {

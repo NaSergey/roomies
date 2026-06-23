@@ -2,7 +2,7 @@
 
 import type { ComponentType } from 'react';
 import { haptic } from '@/shared/lib/telegram';
-import { CardsIcon, ChatIcon, ProfileIcon } from '@/shared/ui/icons';
+import { CardsIcon, ChatIcon, ProfileIcon } from '@/shared/ui/NavIcons';
 
 export type NavTab = 'chat' | 'deck' | 'profile';
 

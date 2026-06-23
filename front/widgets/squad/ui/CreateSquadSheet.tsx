@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useCreateSquad } from '@/features/squad';
-import { BottomSheet } from '@/shared/ui/bottom-sheet';
-import { Button } from '@/shared/ui/button';
-import { TextInput } from '@/shared/ui/text-input';
+import { BottomSheet } from '@/shared/ui/BottomSheet';
+import { Button } from '@/shared/ui/Button';
+import { TextInput } from '@/shared/ui/TextInput';
 
 interface CreateSquadSheetProps {
   open: boolean;

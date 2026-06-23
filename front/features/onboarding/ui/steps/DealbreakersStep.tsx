@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { haptic } from '@/shared/lib/telegram';
-import { Button } from '@/shared/ui/button';
-import { Chip } from '@/shared/ui/chip';
+import { Button } from '@/shared/ui/Button';
+import { Chip } from '@/shared/ui/Chip';
 import type {
   DealbreakersPayload,
   GuestsPreference,

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { haptic, hapticNotify } from '@/shared/lib/telegram';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/Button';
 
 interface DoneStepProps {
   onComplete: () => void;

@@ -1,8 +1,8 @@
 'use client';
 
 import { useCreateAgreement } from '@/features/chat';
-import { BottomSheet } from '@/shared/ui/bottom-sheet';
-import { Button } from '@/shared/ui/button';
+import { BottomSheet } from '@/shared/ui/BottomSheet';
+import { Button } from '@/shared/ui/Button';
 
 export interface AgreementSheetProps {
   open: boolean;

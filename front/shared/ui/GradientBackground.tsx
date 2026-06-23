@@ -1,4 +1,14 @@
-export interface GradientPreset {
+'use client';
+
+import { useState, type CSSProperties, type ReactNode } from 'react';
+
+interface GradientBackgroundProps {
+  className?: string;
+  style?: CSSProperties;
+  children?: ReactNode;
+}
+
+interface GradientPreset {
   name: string;
   css: string;
 }
@@ -6,7 +16,7 @@ export interface GradientPreset {
 // Светлые тёплые яркие градиенты — пастельно-сочные, приятные для глаз.
 // Тёплый спектр (персик / коралл / роза / золото / манго), высокая светлота,
 // чтобы тёмный текст поверх оставался читаемым. Переключаются между карточками.
-export const GRADIENT_PRESETS: readonly GradientPreset[] = [
+const GRADIENT_PRESETS: readonly GradientPreset[] = [
   { name: 'peach',       css: 'linear-gradient(135deg, #ffd9a8 0%, #ff9e7d 100%)' },
   { name: 'coral',       css: 'linear-gradient(135deg, #ffc1a0 0%, #ff8f9a 100%)' },
   { name: 'blossom',     css: 'linear-gradient(150deg, #ffe0ec 0%, #ffb0c4 100%)' },
@@ -25,6 +35,28 @@ export const GRADIENT_PRESETS: readonly GradientPreset[] = [
   { name: 'soft-coral',  css: 'linear-gradient(135deg, #ffc9b0 0%, #ff96a0 100%)' },
 ] as const;
 
-export function getRandomGradientPreset(): GradientPreset {
+function getRandomGradientPreset(): GradientPreset {
   return GRADIENT_PRESETS[Math.floor(Math.random() * GRADIENT_PRESETS.length)];
+}
+
+// Основные стили «стикер-бейджа» (рамка, поворот, отступы, типографика) заданы
+// здесь Tailwind-классами. На месте использования передаётся только
+// позиционирование через className. Инлайном идёт лишь сам градиент — он
+// динамический (случайный пресет), классом его не выразить. Пресет выбирается
+// один раз при монтировании (ленивый useState), чтобы при ре-рендерах
+// (например, во время свайпа) он не «мигал» новыми цветами.
+const BASE_CLASS =
+  'border-2 border-black  px-3 py-1 text-xl font-medium text-[#111]';
+
+export function GradientBackground({ className, style, children }: GradientBackgroundProps) {
+  const [preset] = useState(getRandomGradientPreset);
+
+  return (
+    <div
+      className={`${BASE_CLASS} ${className ?? ''}`.trim()}
+      style={{ ...style, background: preset.css }}
+    >
+      {children}
+    </div>
+  );
 }

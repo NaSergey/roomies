@@ -1,7 +1,7 @@
 'use client';
 
 import type { MyProfile } from '@/shared/lib/api';
-import { Card } from '@/shared/ui/card';
+import { Card } from '@/shared/ui/Card';
 
 const MAX_SCORE = 40;
 

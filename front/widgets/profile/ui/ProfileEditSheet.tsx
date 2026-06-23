@@ -3,10 +3,10 @@
 import { useEffect, useState } from 'react';
 import { usePatchProfile } from '@/features/profile';
 import type { MyProfile, UpdateProfilePayload } from '@/shared/lib/api';
-import { BottomSheet } from '@/shared/ui/bottom-sheet';
-import { Button } from '@/shared/ui/button';
-import { Chip } from '@/shared/ui/chip';
-import { TextInput } from '@/shared/ui/text-input';
+import { BottomSheet } from '@/shared/ui/BottomSheet';
+import { Button } from '@/shared/ui/Button';
+import { Chip } from '@/shared/ui/Chip';
+import { TextInput } from '@/shared/ui/TextInput';
 
 interface ProfileEditSheetProps {
   open: boolean;

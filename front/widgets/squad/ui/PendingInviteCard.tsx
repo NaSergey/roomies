@@ -2,7 +2,7 @@
 
 import { useRespondInvite } from '@/features/squad';
 import type { SquadInvite } from '@/shared/lib/api';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/Button';
 
 interface PendingInviteCardProps {
   invite: SquadInvite;

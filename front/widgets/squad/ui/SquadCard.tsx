@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import type { SquadFeedCard } from '@/shared/lib/api';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/Button';
 
 interface SquadCardProps {
   squad: SquadFeedCard;

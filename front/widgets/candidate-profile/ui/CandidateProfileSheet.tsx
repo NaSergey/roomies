@@ -2,9 +2,9 @@
 
 import Image from 'next/image';
 import { useEffect, useRef } from 'react';
-import { VibeScaleBar } from '@/shared/ui/vibe-scale-bar';
-import { RulesSection } from '@/shared/ui/rules-section';
-import { MatchReasonsList } from '@/shared/ui/match-reasons-list';
+import { VibeScaleBar } from '@/shared/ui/VibeScaleBar';
+import { RulesSection } from '@/shared/ui/RulesSection';
+import { MatchReasonsList } from '@/shared/ui/MatchReasonsList';
 import { TAG_COLORS, SCENARIO_LABELS } from '@/shared/config';
 import { ActionButtons } from '@/features/swipe-profile';
 import type { ActionButtonsProps } from '@/features/swipe-profile';

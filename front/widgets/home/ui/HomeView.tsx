@@ -8,7 +8,7 @@ import { feedKeys } from '@/features/swipe-profile';
 import { profileKeys } from '@/features/profile';
 import { chatKeys } from '@/features/chat';
 import { getFeed, getMe, getMatches } from '@/shared/lib/api';
-import { Loader } from '@/shared/ui/loader';
+import { Loader } from '@/shared/ui/Loader';
 import { BottomNav, type NavTab } from '@/widgets/bottom-nav';
 import { ChatView } from '@/widgets/chat';
 import { ProfileView } from '@/widgets/profile';

@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getDistricts, type District } from '@/shared/lib/api';
-import { BottomSheet } from '@/shared/ui/bottom-sheet';
-import { Button } from '@/shared/ui/button';
-import { Chip } from '@/shared/ui/chip';
+import { BottomSheet } from '@/shared/ui/BottomSheet';
+import { Button } from '@/shared/ui/Button';
+import { Chip } from '@/shared/ui/Chip';
 
 export interface DeckFilters {
   age: '18-22' | '23-26' | '27-30' | 'all';

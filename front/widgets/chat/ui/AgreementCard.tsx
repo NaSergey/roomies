@@ -2,7 +2,7 @@
 
 import { useRespondAgreement } from '@/features/chat';
 import type { AgreementData } from '@/shared/lib/api';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/Button';
 
 export interface AgreementCardProps {
   agreement: AgreementData;

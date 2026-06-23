@@ -2,7 +2,7 @@
 
 import { useRespondCall } from '@/features/chat';
 import type { CallInviteData } from '@/shared/lib/api';
-import { Button } from '@/shared/ui/button';
+import { Button } from '@/shared/ui/Button';
 
 export interface CallInviteCardProps {
   invite: CallInviteData;

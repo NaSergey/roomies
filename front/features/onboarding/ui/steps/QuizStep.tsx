@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { haptic } from '@/shared/lib/telegram';
-import { Button } from '@/shared/ui/button';
-import { Card } from '@/shared/ui/card';
+import { Button } from '@/shared/ui/Button';
+import { Card } from '@/shared/ui/Card';
 import { QUIZ_QUESTIONS } from '../../model/quiz-questions';
 import type { OnboardingState, QuizAnswer } from '../../model/types';
 
