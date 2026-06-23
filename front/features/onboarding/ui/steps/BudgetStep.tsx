@@ -61,24 +61,24 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
 
       <div>
         <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             <label className="text-sm text-muted">от, ₽</label>
             <TextField
               type="number"
               value={budgetMin}
               onChange={(e) => setBudgetMin(e.target.value)}
               placeholder="20 000"
-              className="h-14 w-full bg-white px-4 text-center text-base font-bold text-(--text)"
+              className="h-14 w-full min-w-0 bg-white px-4 text-center text-base font-bold text-(--text)"
             />
           </div>
-          <div className="flex flex-col gap-1">
+          <div className="flex min-w-0 flex-col gap-1">
             <label className="text-sm text-muted">до, ₽</label>
             <TextField
               type="number"
               value={budgetMax}
               onChange={(e) => setBudgetMax(e.target.value)}
               placeholder="50 000"
-              className="h-14 w-full bg-white px-4 text-center text-base font-bold text-(--text)"
+              className="h-14 w-full min-w-0 bg-white px-4 text-center text-base font-bold text-(--text)"
             />
           </div>
         </div>
@@ -102,7 +102,7 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
             type="date"
             value={moveInDate}
             onChange={(e) => setMoveInDate(e.target.value)}
-            className="h-14 w-full bg-white px-4 text-base font-bold text-(--text)"
+            className="h-14 w-full min-w-0 appearance-none bg-white px-4 text-base font-bold text-(--text)"
           />
         </div>
 
@@ -112,7 +112,7 @@ export function BudgetStep({ state, onSubmit }: BudgetStepProps) {
             <select
               value={stayDuration}
               onChange={(e) => setStayDuration(e.target.value)}
-              className="h-14 w-full appearance-none rounded-xl border-2 border-black bg-white px-4 text-base font-bold text-(--text) outline-none"
+              className="h-14 w-full min-w-0 appearance-none rounded-xl border-2 border-black bg-white px-4 pr-10 text-base font-bold text-(--text) outline-none"
             >
               {DURATION_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
