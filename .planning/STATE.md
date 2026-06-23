@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-last_updated: "2026-06-23T00:32:37.244Z"
+last_updated: "2026-06-23T00:37:51Z"
 last_activity: 2026-06-23
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 20
-  completed_plans: 16
-  percent: 43
+  completed_plans: 18
+  percent: 60
 ---
 
 # Project State
@@ -25,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-06-07)
 ## Current Position
 
 Phase: 5 of 7 — Planning complete, ready to execute
-Plan: 2/3 in Phase 5
-Status: Phase 5 IN PROGRESS — Plan 05-02 complete 2026-06-23.
+Plan: 3/3 in Phase 5
+Status: Phase 5 COMPLETE — all 3 plans executed 2026-06-23.
 Last activity: 2026-06-23
 
-Progress: [██████████] Phase 4 100% | Phase 5 [██████____] 67%
+Progress: [██████████] Phase 4 100% | Phase 5 [██████████] 100%
 
 ## Performance Metrics
 
@@ -93,6 +93,9 @@ Recent decisions affecting current work:
 - [05-02]: getMySquad catches ApiError(404) and returns null — backend returns 404 (not 200+null) when user has no active squad
 - [05-02]: useSquadFeedQuery staleTime 60_000 — squads change infrequently; longer cache avoids hammering feed endpoint
 - [05-02]: useRespondInvite invalidates both mySquad and pendingInvites — accepting a squad invite changes both query caches
+- [05-03]: SquadCard uses w-64 shrink-0 in overflow-x-auto flex container — fixed width gives consistent horizontal scroll without clipping
+- [05-03]: InviteMemberSheet tracks sentIds locally (not query invalidation) — invite state is ephemeral per sheet open; recipient-side list doesn't need refresh
+- [05-03]: CreateSquadSheet resets form fields on successful close — prevents stale values on re-open
 
 ### Pending Todos
 
@@ -123,8 +126,8 @@ Items acknowledged and carried forward from previous milestone close:
 
 ## Session Continuity
 
-Last session: 2026-06-23T00:01:42Z
-Stopped at: Plan 05-02 — COMPLETE. Frontend squad API layer (squad.ts + 7 apiFetch wrappers) and React Query hooks (use-squad.ts + 7 hooks). TypeScript build clean.
+Last session: 2026-06-23T00:37:51Z
+Stopped at: Plan 05-03 — COMPLETE. Squad UI components (SquadCard, PendingInviteCard, CreateSquadSheet, InviteMemberSheet), SwipeDeck horizontal squad row, ProfileView squad management section. TypeScript build clean.
 Resume file: None
 
 ### Phase 1 Key Decisions (from 1-CONTEXT.md)

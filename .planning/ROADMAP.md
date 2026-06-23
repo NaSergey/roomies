@@ -15,8 +15,8 @@ The critical path follows the user journey: onboard → get scored matches → b
 - [x] **Phase 1: Onboarding** — User completes the 7-step flow (incl. Vibe Quiz) and lands on first matches. (COMPLETE: all 4 plans executed)
 - [ ] **Phase 2: Matching Engine** — Real Match Score (Hard/Lifestyle/Vibe/Behavioral) replaces mock data.
 - [x] **Phase 3: Discovery & Profiles** — Real feed with compatibility %, filters, candidate profile, editable own profile. (COMPLETE 2026-06-22)
-- [ ] **Phase 4: Chat & Agreement** — Matched users chat, schedule calls, and negotiate a Roomie Agreement.
-- [ ] **Phase 5: Squad Mode** — Users create/join squads and search together as a group.
+- [x] **Phase 4: Chat & Agreement** — Matched users chat, schedule calls, and negotiate a Roomie Agreement. (COMPLETE 2026-06-23)
+- [x] **Phase 5: Squad Mode** — Users create/join squads and search together as a group. (completed 2026-06-23)
 - [ ] **Phase 6: Trust, Notifications & Feedback** — Verification, reports/blocks, push notifications, post-match feedback.
 - [ ] **Phase 7: Monetization** — Boost profile and unlock "who liked me".
 
@@ -110,8 +110,13 @@ Plans:
   1. User can create a squad (2–4 members) with a name, budget, and districts.
   2. User can invite other users to a squad and a user can accept an invite to join an existing squad.
   3. A squad card with combined budget and districts appears in the discovery feed.
-**Plans:** TBD
+**Plans:** 3/3 plans complete
 **UI hint:** yes
+
+Plans:
+- [x] 05-01-PLAN.md — Backend: SquadModule (8 endpoints: POST /squads, GET /squads/me, POST /squads/:id/invites, GET /squads/invites/pending, PATCH /squads/invites/:id/respond, DELETE /squads/:id/members/me, GET /squads/feed) + AppModule registration (Wave 1)
+- [x] 05-02-PLAN.md — Frontend: API layer (squad.ts types + functions) + React Query hooks (useMySquadQuery, useSquadFeedQuery, usePendingInvitesQuery, useCreateSquad, useInviteToSquad, useRespondInvite, useLeaveSquad) (Wave 2)
+- [x] 05-03-PLAN.md — Frontend: SquadCard (in SwipeDeck horizontal row), ProfileView squad section (Мой сквад), CreateSquadSheet, InviteMemberSheet, PendingInviteCard (Wave 3)
 
 ### Phase 6: Trust, Notifications & Feedback
 **Goal:** Make the product safe and sticky — phone and selfie verification, reporting and blocking, push notifications (match / message / call reminder) with user-controlled preferences, and one-tap post-match feedback that feeds the algorithm.
@@ -144,8 +149,8 @@ Plans:
 | 1. Onboarding | 4/4 | Complete | 2026-06-10 |
 | 2. Matching Engine | 3/3 | Complete | 2026-06-10 |
 | 3. Discovery & Profiles | 6/6 | Complete | 2026-06-22 |
-| 4. Chat & Agreement | 0/4 | Planned | - |
-| 5. Squad Mode | 0/0 | Not started | - |
+| 4. Chat & Agreement | 4/4 | Complete | 2026-06-23 |
+| 5. Squad Mode | 3/3 | Complete   | 2026-06-23 |
 | 6. Trust, Notifications & Feedback | 0/0 | Not started | - |
 | 7. Monetization | 0/0 | Not started | - |
 

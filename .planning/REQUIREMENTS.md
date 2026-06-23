@@ -51,10 +51,10 @@
 
 ### Squad
 
-- [ ] **SQUAD-01**: Пользователь может создать squad (2–4 человека) с названием, бюджетом, районами
-- [ ] **SQUAD-02**: Пользователь может пригласить других пользователей в squad
-- [ ] **SQUAD-03**: Пользователь может вступить в существующий squad
-- [ ] **SQUAD-04**: Squad-карточка отображается в ленте с общим бюджетом и районами
+- [x] **SQUAD-01**: Пользователь может создать squad (2–4 человека) с названием, бюджетом, районами
+- [x] **SQUAD-02**: Пользователь может пригласить других пользователей в squad
+- [x] **SQUAD-03**: Пользователь может вступить в существующий squad
+- [x] **SQUAD-04**: Squad-карточка отображается в ленте с общим бюджетом и районами
 
 ### Trust & Safety
 
@@ -136,10 +136,10 @@
 | AGREE-01 | Phase 4 | Backend done (04-01) |
 | AGREE-02 | Phase 4 | Backend done (04-01) |
 | AGREE-03 | Phase 4 | Backend done (04-01) |
-| SQUAD-01 | Phase 5 | Pending |
-| SQUAD-02 | Phase 5 | Pending |
-| SQUAD-03 | Phase 5 | Pending |
-| SQUAD-04 | Phase 5 | Pending |
+| SQUAD-01 | Phase 5 | Complete |
+| SQUAD-02 | Phase 5 | Complete |
+| SQUAD-03 | Phase 5 | Complete |
+| SQUAD-04 | Phase 5 | Complete |
 | TRUST-01 | Phase 6 | Pending |
 | TRUST-02 | Phase 6 | Pending |
 | TRUST-03 | Phase 6 | Pending |
