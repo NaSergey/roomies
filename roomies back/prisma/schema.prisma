@@ -17,6 +17,13 @@ enum ScenarioType {
   squad
 }
 
+// Роль аккаунта. admin — доступ к CRM-бэку аналитики (/admin/**).
+// Выдаётся вручную (скрипт scripts/make-admin.ts), публичного эндпоинта для смены роли нет.
+enum Role {
+  user
+  admin
+}
+
 enum GuestsPreference {
   rarely
   sometimes
@@ -133,6 +140,10 @@ model User {
   // Без него отозвать stateless-токен до истечения 7 суток невозможно.
   tokenVersion Int @default(0) @map("token_version")
 
+  // Роль аккаунта — user по умолчанию для всех, включая Telegram/email-регистрацию.
+  // admin открывает CRM-эндпоинты аналитики (см. AdminGuard).
+  role Role @default(user)
+
   // Telegram-аккаунт (основной идентификатор для входа через Mini App).
   // BigInt — Telegram user id может превышать диапазон Int32.
   // Nullable — аккаунты, созданные через email/пароль в браузере, его не имеют.
@@ -235,6 +246,8 @@ model User {
   @@index([smokingOk, petsOk, guestsPref])
   // Счётчик приглашённых на экране профиля читает именно по этому полю.
   @@index([referredById])
+  // Графики роста регистраций в CRM-аналитике (group by day).
+  @@index([createdAt])
   @@map("users")
 }
 
@@ -351,6 +364,8 @@ model Swipe {
   @@unique([actorId, targetId])
   @@index([actorId, createdAt(sort: Desc)])
   @@index([targetId, action])
+  // Дневные тайм-серии свайпов в CRM-аналитике.
+  @@index([createdAt])
   @@map("swipes")
 }
 
@@ -387,6 +402,8 @@ model Match {
   @@unique([user1Id, user2Id])
   @@index([user1Id, matchScore(sort: Desc)])
   @@index([user2Id, matchScore(sort: Desc)])
+  // Дневные тайм-серии мэтчей в CRM-аналитике.
+  @@index([createdAt])
   @@map("matches")
 }
 
@@ -424,6 +441,8 @@ model Message {
   sender User @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([chatId, createdAt(sort: Desc)])
+  // Дневные тайм-серии сообщений в CRM-аналитике.
+  @@index([createdAt])
   @@map("messages")
 }
 

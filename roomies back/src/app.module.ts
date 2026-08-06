@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AnalyticsModule } from './analytics/analytics.module';
 import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { SquadModule } from './squad/squad.module';
@@ -32,6 +33,7 @@ import { VibeTagsModule } from './vibe-tags/vibe-tags.module';
     ProfileModule,
     ChatModule,
     SquadModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [
