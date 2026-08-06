@@ -15,6 +15,7 @@ import { CurrentUser } from '../auth/current-user.decorator';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ChatService } from './chat.service';
 import { CreateMessageDto } from './dto/create-message.dto';
+import { GetMessagesQueryDto } from './dto/get-messages-query.dto';
 import { ProposeCallDto } from './dto/propose-call.dto';
 import { RespondAgreementDto } from './dto/respond-agreement.dto';
 import { RespondCallDto } from './dto/respond-call.dto';
@@ -27,7 +28,9 @@ export class ChatController {
   @Get('matches')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Get active matches with last message and unread count' })
+  @ApiOperation({
+    summary: 'Get active matches with last message and unread count',
+  })
   getMatches(@CurrentUser() user: { id: number }) {
     return this.chat.getMatches(user.id);
   }
@@ -39,14 +42,13 @@ export class ChatController {
   getMessages(
     @CurrentUser() user: { id: number },
     @Param('chatId', ParseIntPipe) chatId: number,
-    @Query('limit') limit?: string,
-    @Query('before') before?: string,
+    @Query() query: GetMessagesQueryDto,
   ) {
     return this.chat.getChatMessages(
       chatId,
       user.id,
-      limit ? Number(limit) : 30,
-      before,
+      query.limit ?? 30,
+      query.before,
     );
   }
 
@@ -85,7 +87,13 @@ export class ChatController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: RespondCallDto,
   ) {
-    return this.chat.respondCall(chatId, user.id, id, dto.action, dto.confirmedTime);
+    return this.chat.respondCall(
+      chatId,
+      user.id,
+      id,
+      dto.action,
+      dto.confirmedTime,
+    );
   }
 
   @Post('chats/:chatId/agreements')

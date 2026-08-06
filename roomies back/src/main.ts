@@ -3,6 +3,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 // JSON.stringify не умеет BigInt — приводим к строке.
@@ -28,6 +29,22 @@ async function bootstrap() {
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Базовые security-заголовки (X-Content-Type-Options, X-Frame-Options,
+  // Strict-Transport-Security и т.д.). CSP отключаем глобально: это чистый
+  // JSON API для отдельных фронтов на других origin (Mini App, будущая CRM),
+  // а не HTML-рендерер — единственная HTML-поверхность (Swagger UI) есть
+  // только в dev, и её ломает дефолтный inline-script запрет helmet'а; узкий
+  // CSP для /uploads/* уже задан ниже отдельно. crossOriginResourcePolicy
+  // расширяем до cross-origin — иначе браузер блокирует загрузку
+  // /uploads/*.jpg с домена фронта (другой origin, чем API).
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: 'cross-origin' },
+    }),
+  );
+
   // Загруженные фото профиля (см. ProfileController#uploadPhoto) — раздаём как статику.
   // nosniff + attachment: даже если в uploads попадёт файл с HTML внутри, браузер
   // не выполнит его как страницу на нашем origin (иначе — stored XSS).
@@ -36,16 +53,23 @@ async function bootstrap() {
     setHeaders: (res) => {
       res.setHeader('X-Content-Type-Options', 'nosniff');
       res.setHeader('Content-Disposition', 'inline');
-      res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'");
+      res.setHeader(
+        'Content-Security-Policy',
+        "default-src 'none'; img-src 'self'",
+      );
     },
   });
 
   // Mini App открывается из Telegram через эфемерный домен (cloudflare-туннель и т.п.),
   // поэтому в dev пускаем любое origin. На проде отражать любой Origin нельзя —
   // требуем явный список и не даём молча уехать в прод с wildcard.
-  const corsOrigins = process.env.CORS_ORIGINS?.split(',').map((s) => s.trim()).filter(Boolean);
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
   if (isProduction && (!corsOrigins || corsOrigins.length === 0)) {
-    throw new Error('В production CORS_ORIGINS обязателен — wildcard-CORS запрещён');
+    throw new Error(
+      'В production CORS_ORIGINS обязателен — wildcard-CORS запрещён',
+    );
   }
   app.enableCors({
     origin: corsOrigins && corsOrigins.length > 0 ? corsOrigins : true,

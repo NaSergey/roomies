@@ -1,4 +1,4 @@
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
 
 export interface TelegramUser {
   id: number;
@@ -51,7 +51,17 @@ export function verifyTelegramInitData(
     .update(dataCheckString)
     .digest('hex');
 
-  if (computedHash !== hash) {
+  // timingSafeEqual, а не `!==`: строковое сравнение выходит по первому
+  // несовпавшему байту, и по времени ответа можно восстанавливать hash
+  // байт за байтом (см. тот же приём в password.ts). Buffer.from(hash, 'hex')
+  // на нечётной длине/невалидных символах молча обрежет буфер — тогда длины
+  // разойдутся и мы уйдём в safe-false до вызова timingSafeEqual.
+  const computedBuf = Buffer.from(computedHash, 'hex');
+  const providedBuf = Buffer.from(hash, 'hex');
+  if (
+    providedBuf.length !== computedBuf.length ||
+    !timingSafeEqual(computedBuf, providedBuf)
+  ) {
     throw new InvalidInitDataError('hash mismatch');
   }
 
