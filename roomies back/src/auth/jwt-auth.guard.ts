@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { Request } from 'express';
+import type { Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export const JWT_ISSUER = 'roomies-api';
@@ -21,14 +22,14 @@ export interface JwtPayload {
 }
 
 export interface AuthenticatedRequest extends Request {
-  user: { id: number; telegramId: bigint | null };
+  user: { id: number; telegramId: bigint | null; role: Role };
 }
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
-    private readonly jwt: JwtService,
-    private readonly prisma: PrismaService,
+    protected readonly jwt: JwtService,
+    protected readonly prisma: PrismaService,
   ) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
@@ -59,14 +60,20 @@ export class JwtAuthGuard implements CanActivate {
     // поэтому личность всегда подтверждаем запросом к БД (индексный lookup).
     const user = await this.prisma.user.findUnique({
       where: { publicId: payload.sub },
-      select: { id: true, telegramId: true, tokenVersion: true, isActive: true },
+      select: {
+        id: true,
+        telegramId: true,
+        tokenVersion: true,
+        isActive: true,
+        role: true,
+      },
     });
 
     if (!user || !user.isActive || user.tokenVersion !== payload.tv) {
       throw new UnauthorizedException('Invalid or expired token');
     }
 
-    req.user = { id: user.id, telegramId: user.telegramId };
+    req.user = { id: user.id, telegramId: user.telegramId, role: user.role };
     return true;
   }
 }
