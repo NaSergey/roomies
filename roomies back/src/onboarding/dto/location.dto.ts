@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsInt, IsOptional, Min } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsInt, IsOptional, Min } from 'class-validator';
 
 export class LocationDto {
   @ApiProperty()
@@ -9,6 +9,7 @@ export class LocationDto {
 
   @ApiProperty({ required: false, type: [Number] })
   @IsArray()
+  @ArrayMaxSize(20)
   @IsInt({ each: true })
   @IsOptional()
   districtIds?: number[];

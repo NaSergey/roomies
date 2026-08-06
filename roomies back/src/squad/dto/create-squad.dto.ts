@@ -1,4 +1,5 @@
 import {
+  ArrayMaxSize,
   IsArray,
   IsInt,
   IsOptional,
@@ -26,6 +27,7 @@ export class CreateSquadDto {
 
   @IsOptional()
   @IsArray()
+  @ArrayMaxSize(20)
   @IsInt({ each: true })
   @IsPositive({ each: true })
   districtIds?: number[];

@@ -1,5 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsEnum,
@@ -30,6 +31,7 @@ export class FeedQueryDto {
       : (Array.isArray(value) ? value : [value]).map(Number),
   )
   @IsArray()
+  @ArrayMaxSize(20)
   @IsInt({ each: true })
   districtIds?: number[];
 

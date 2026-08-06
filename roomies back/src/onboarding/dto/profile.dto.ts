@@ -20,6 +20,7 @@ export class ProfileDto {
 
   @ApiProperty({ required: false, type: [String] })
   @IsArray()
+  @ArrayMaxSize(9)
   @IsString({ each: true })
   @IsUrl({}, { each: true })
   @IsOptional()
