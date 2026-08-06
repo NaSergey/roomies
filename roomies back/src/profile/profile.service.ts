@@ -38,6 +38,10 @@ export class ProfileService {
       where: { id: userId },
       select: {
         id: true,
+        // publicId отдаём как реферальный код — он и так публичный, а порядок
+        // регистраций и размер базы, в отличие от id, не выдаёт.
+        publicId: true,
+        _count: { select: { referrals: true } },
         name: true,
         birthDate: true,
         scenario: true,
@@ -102,6 +106,14 @@ export class ProfileService {
         workFromHome: user.workFromHome ? Number(user.workFromHome) : null,
       },
       roomieScore,
+      // Оба поля участвуют в расчёте roomieScore выше и нужны фронту, чтобы
+      // отметить галочками пройденные пункты чеклиста в карточке Roomie Score.
+      // Без них чеклист приходил с undefined и не показывал галочки даже там,
+      // где шаг давно выполнен — счёт рос, а пункты оставались серыми.
+      onboardingStep: user.onboardingStep,
+      quizCompleted: user.quizCompleted,
+      referralCode: user.publicId,
+      invitedCount: user._count.referrals,
     };
   }
 

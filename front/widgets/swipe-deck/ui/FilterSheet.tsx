@@ -6,10 +6,10 @@ import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
 
+// Только то, что реально фильтрует ленту. Возраст, режим и чистота отсюда
+// убраны: их не принимает FeedQueryDto на бэке и они даже не попадали в
+// query-параметры — пользователь крутил чипы, а выдача не менялась.
 export interface DeckFilters {
-  age: '18-22' | '23-26' | '27-30' | 'all';
-  schedule: 'early' | 'night' | 'any';
-  cleanliness: 'neat' | 'normal' | 'relaxed' | 'any';
   budget: 'low' | 'mid' | 'high' | 'any';
   districtIds: number[];
   smokingOk: boolean | null;
@@ -18,9 +18,6 @@ export interface DeckFilters {
 }
 
 export const DEFAULT_FILTERS: DeckFilters = {
-  age: 'all',
-  schedule: 'any',
-  cleanliness: 'any',
   budget: 'any',
   districtIds: [],
   smokingOk: null,
@@ -92,27 +89,6 @@ export function FilterSheet({ open, filters, onChange, onApply, onClose }: Filte
             Сбросить
           </button>
         </div>
-
-        <Row label="Возраст">
-          {(['18-22', '23-26', '27-30', 'all'] as const).map((v) => (
-            <Chip key={v} active={filters.age === v} onClick={() => set('age', v)}>
-              {v === 'all' ? 'Любой' : v}
-            </Chip>
-          ))}
-        </Row>
-
-        <Row label="Режим">
-          <Chip active={filters.schedule === 'early'} onClick={() => set('schedule', 'early')}>🌅 Жаворонок</Chip>
-          <Chip active={filters.schedule === 'night'}  onClick={() => set('schedule', 'night')}>🌙 Сова</Chip>
-          <Chip active={filters.schedule === 'any'}   onClick={() => set('schedule', 'any')}>Любой</Chip>
-        </Row>
-
-        <Row label="Чистота">
-          <Chip active={filters.cleanliness === 'neat'}    onClick={() => set('cleanliness', 'neat')}>🧹 Педант</Chip>
-          <Chip active={filters.cleanliness === 'normal'}  onClick={() => set('cleanliness', 'normal')}>✌️ Нормально</Chip>
-          <Chip active={filters.cleanliness === 'relaxed'} onClick={() => set('cleanliness', 'relaxed')}>😌 Расслабленно</Chip>
-          <Chip active={filters.cleanliness === 'any'}     onClick={() => set('cleanliness', 'any')}>Любая</Chip>
-        </Row>
 
         <Row label="Бюджет / мес.">
           <Chip active={filters.budget === 'low'}  onClick={() => set('budget', 'low')}>до 20 тыс.</Chip>

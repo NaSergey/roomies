@@ -21,8 +21,11 @@ export class AuthTokensDto {
   @ApiProperty({ description: 'Внутренний id пользователя' })
   userId!: number;
 
-  @ApiProperty({ description: 'Telegram id (строкой — может выходить за Number)' })
-  telegramId!: string;
+  @ApiProperty({
+    description: 'Telegram id (строкой — может выходить за Number). null для email/пароль-аккаунтов',
+    nullable: true,
+  })
+  telegramId!: string | null;
 
   @ApiProperty({ description: 'true — аккаунт создан в этом запросе' })
   isNew!: boolean;

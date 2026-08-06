@@ -47,14 +47,21 @@ export async function apiFetch<T>(
     if (res.status === 401 && auth) {
       clearAccessToken();
     }
-    const message =
-      (parsed && typeof parsed === 'object' && 'message' in parsed
-        ? String((parsed as { message: unknown }).message)
-        : undefined) ?? `HTTP ${res.status}`;
-    throw new ApiError(res.status, message, parsed);
+    throw new ApiError(res.status, extractMessage(parsed, res.status), parsed);
   }
 
   return parsed as T;
+}
+
+// ValidationPipe отдаёт message массивом («email must be an email», …) — склеиваем
+// по-человечески, иначе String([...]) выводит их через запятую без пробелов.
+function extractMessage(parsed: unknown, status: number): string {
+  if (parsed && typeof parsed === 'object' && 'message' in parsed) {
+    const raw = (parsed as { message: unknown }).message;
+    if (Array.isArray(raw)) return raw.join('. ');
+    if (typeof raw === 'string') return raw;
+  }
+  return `HTTP ${status}`;
 }
 
 function safeJson(text: string): unknown {

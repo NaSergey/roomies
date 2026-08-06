@@ -19,10 +19,18 @@ export class FeedQueryDto {
   @Type(() => Number)
   budgetMax?: number;
 
+  // Приходит повторяющимся ключом: districtIds=1&districtIds=2. Парсер query
+  // отдаёт массив только когда ключей несколько, а на одном районе — просто
+  // строку, и @IsArray() валил бы запрос в 400. Поэтому сначала нормализуем в
+  // массив, и только потом валидируем.
   @IsOptional()
+  @Transform(({ value }) =>
+    value === undefined || value === null
+      ? value
+      : (Array.isArray(value) ? value : [value]).map(Number),
+  )
   @IsArray()
   @IsInt({ each: true })
-  @Type(() => Number)
   districtIds?: number[];
 
   @IsOptional()

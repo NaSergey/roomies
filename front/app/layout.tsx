@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Geist_Mono, Golos_Text, Outfit } from 'next/font/google';
+import { bim } from '@/shared/font';
 import { TelegramProvider } from '@/shared/lib/telegram';
 import { ReactQueryProvider } from '@/shared/lib/query';
 import './globals.css';
@@ -23,7 +24,10 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#cfc4f6',
+  // Тёмный низ фонового меша, а не светлый верх: этим цветом клиент красит
+  // зоны вокруг контента до того, как SDK применит setBackgroundColor
+  // (см. use-telegram-web-app.ts). На светлом внизу мигала чужая плашка.
+  themeColor: '#1f2064',
 };
 
 export default function RootLayout({
@@ -32,7 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${golosText.variable} ${outfit.variable} ${geistMono.variable} antialiased`}
+      className={`${golosText.variable} ${outfit.variable} ${geistMono.variable} ${bim.variable} antialiased`}
       suppressHydrationWarning
     >
       <head>

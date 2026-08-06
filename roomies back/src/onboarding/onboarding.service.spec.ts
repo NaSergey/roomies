@@ -149,7 +149,7 @@ describe('OnboardingService', () => {
   });
 
   describe('saveProfile', () => {
-    it('sets onboardingCompleted: true and quizCompleted: true', async () => {
+    it('sets onboardingCompleted: true (quizCompleted is untouched — quiz is optional, done later from profile)', async () => {
       await service.saveProfile(1, {
         name: 'Алексей',
         photoUrls: [],

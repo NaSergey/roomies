@@ -11,14 +11,15 @@ interface BottomSheetProps {
   label?: string;
 }
 
-// Единая нижняя шторка: затемнение + выезжающая снизу панель + «ручка».
+// Единая нижняя шторка: затемнение + выезжающая снизу стеклянная панель + «ручка».
 // Раньше каждая форма-шторка повторяла эту разметку со своими расхождениями
-// (z-index, фон, наличие анимации). Канон — выезжающая белая панель.
+// (z-index, фон, наличие анимации). Канон — выезжающая стеклянная панель
+// (bg-glass/backdrop-glass/border-glass/shadow-glass, globals.css).
 const OVERLAY =
   'fixed inset-0 z-40 bg-black/40 backdrop-blur-sm transition-opacity duration-300';
 const PANEL =
-  'fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-y-auto rounded-t-3xl border-t-2 border-black ' +
-  'bg-white px-5 pt-4 pb-8 shadow-[0_-4px_0_rgba(20,20,15,0.9)] ' +
+  'fixed inset-x-0 bottom-0 z-50 flex flex-col overflow-y-auto rounded-t-3xl ' +
+  'bg-glass backdrop-glass border-glass shadow-glass px-5 pt-4 pb-8 ' +
   'transition-transform duration-300 ease-[cubic-bezier(0.34,1.2,0.64,1)] max-h-[88dvh]';
 
 export function BottomSheet({
@@ -41,7 +42,7 @@ export function BottomSheet({
         aria-label={label}
         className={`${PANEL} ${className} ${open ? 'translate-y-0' : 'translate-y-full'}`}
       >
-        <div className="mx-auto h-1 w-10 rounded-full bg-[#d0d0cc]" />
+        <div className="mx-auto h-1 w-10 rounded-full bg-white/50" />
         {children}
       </div>
     </>

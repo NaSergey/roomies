@@ -12,6 +12,12 @@ export function isMobilePlatform(): boolean {
   return p === 'ios' || p === 'android';
 }
 
+// Крайние тона фонового меша (--bg-mesh в globals.css). Дублируются здесь
+// строками, потому что уходят в Telegram SDK, а он принимает только готовый
+// hex — прочитать CSS-переменную на момент вызова нельзя.
+const MESH_TOP = '#d7cfff';
+const MESH_BOTTOM = '#1f2064';
+
 // Инициализация SDK Telegram: разворачиваем Mini App и ФИКСИРУЕМ единый режим
 // (expanded), чтобы приложение всегда открывалось одинаково, а не «шторкой»:
 //  - expand() + disableVerticalSwipes() — нельзя схлопнуть обратно в compact;
@@ -43,6 +49,16 @@ export function useTelegramWebApp() {
     };
     goFullscreen();
     if (wa.isVersionAtLeast?.('7.7')) wa.disableVerticalSwipes?.();
+
+    // Цвета «рамы» Telegram вокруг нашего контента. Пока они не заданы,
+    // Telegram красит эти зоны цветом темы (светлый bg_color), и под нижней
+    // навигацией появлялась светлая плашка, не совпадающая с фоном приложения —
+    // выглядело так, будто у панели свой фон. Берём крайние тона фонового меша:
+    // шапке — светлый верх, фону и нижней полосе — тёмный низ.
+    // hex принимается разными версиями Bot API, отсюда проверки.
+    if (wa.isVersionAtLeast?.('6.1')) wa.setBackgroundColor?.(MESH_BOTTOM);
+    if (wa.isVersionAtLeast?.('6.9')) wa.setHeaderColor?.(MESH_TOP);
+    if (wa.isVersionAtLeast?.('7.10')) wa.setBottomBarColor?.(MESH_BOTTOM);
 
     // Safe-area: в fullscreen контент уходит под статус-бар и кнопки Telegram,
     // поэтому верхний отступ = системный вырез + зона UI Telegram.

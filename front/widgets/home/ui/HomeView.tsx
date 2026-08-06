@@ -1,9 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTelegramAuth } from '@/features/auth';
-import { OnboardingFlow, getOnboardingStatus } from '@/features/onboarding';
+import { EmailAuthForm, useAppAuth } from '@/features/auth';
+import {
+  OnboardingFlow,
+  getOnboardingStatus,
+  type OnboardingStatus,
+} from '@/features/onboarding';
 import { feedKeys } from '@/features/swipe-profile';
 import { profileKeys } from '@/features/profile';
 import { chatKeys } from '@/features/chat';
@@ -14,16 +18,31 @@ import { ChatView } from '@/widgets/chat';
 import { ProfileView } from '@/widgets/profile';
 import { SwipeDeck } from '@/widgets/swipe-deck';
 
+const ONBOARDING_STATUS_KEY = ['onboarding-status'] as const;
+
 export function HomeView() {
-  const auth = useTelegramAuth();
+  const auth = useAppAuth();
   const queryClient = useQueryClient();
 
   const { data: onboardingStatus, isPending, isError } = useQuery({
-    queryKey: ['onboarding-status'],
+    queryKey: ONBOARDING_STATUS_KEY,
     queryFn: getOnboardingStatus,
     enabled: auth.status === 'authenticated',
     staleTime: Infinity, // статус меняется только после прохождения онбординга
   });
+
+  // Финал онбординга. Бэкенд ставит onboardingCompleted при сохранении профиля
+  // (onboarding.service.ts saveProfile), но запрос статуса — staleTime: Infinity,
+  // поэтому в кэше всё ещё лежит false и HomeView продолжил бы рендерить
+  // OnboardingFlow: кнопка «Смотреть анкеты» выглядела бы нерабочей. Правим кэш
+  // сразу (мгновенный переход на ленту, без промежуточного спиннера) и следом
+  // инвалидируем — сервер подтвердит.
+  const handleOnboardingComplete = useCallback(() => {
+    queryClient.setQueryData<OnboardingStatus>(ONBOARDING_STATUS_KEY, (prev) =>
+      prev ? { ...prev, onboardingCompleted: true } : prev,
+    );
+    void queryClient.invalidateQueries({ queryKey: ONBOARDING_STATUS_KEY });
+  }, [queryClient]);
 
   // Прогреваем ленту СРАЗУ после авторизации — параллельно с запросом
   // onboarding-status. К моменту, когда отрисуется SwipeDeck, карточки уже
@@ -36,6 +55,19 @@ export function HomeView() {
       staleTime: 5 * 60 * 1000,
     });
   }, [auth.status, queryClient]);
+
+  if (auth.status === 'unauthenticated') {
+    return (
+      <EmailAuthForm
+        loading={auth.submitting}
+        error={auth.error}
+        onLogin={auth.login}
+        onRegister={auth.register}
+        onTelegramLogin={auth.loginViaTelegram}
+        onClearError={auth.clearError}
+      />
+    );
+  }
 
   if (auth.status === 'error') {
     return (
@@ -61,7 +93,7 @@ export function HomeView() {
         <button
           type="button"
           onClick={() => window.location.reload()}
-          className="rounded-full border-2 border-black bg-accent px-5 py-2 text-sm font-black text-(--text-on-accent) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100"
+          className="rounded-full border-glass bg-accent-glass backdrop-glass px-5 py-2 text-sm font-black text-(--text-on-accent) shadow-glass active:scale-95 transition-transform duration-150"
         >
           Перезагрузить
         </button>
@@ -70,7 +102,7 @@ export function HomeView() {
   }
 
   if (!onboardingStatus?.onboardingCompleted) {
-    return <OnboardingFlow onComplete={() => {/* query invalidation через queryClient если нужно */}} />;
+    return <OnboardingFlow onComplete={handleOnboardingComplete} />;
   }
 
   return <MainShell />;
@@ -96,8 +128,15 @@ function MainShell() {
   }, [queryClient]);
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col">
-      <main className="flex min-h-0 flex-1 flex-col px-3 pt-3">
+    // relative — под плавающую навигацию: она вынута из потока и лежит поверх
+    // вкладки, чтобы контент проезжал под стеклом, а не упирался в панель.
+    // Место под неё вкладки резервируют своим нижним отступом (NAV_SPACE).
+    <div className="relative mx-auto flex h-full w-full max-w-md flex-col">
+      {/* Отступы намеренно НЕ здесь, а внутри каждой вкладки. Снаружи они
+          прижимали содержимое к краю скроллящегося контейнера вкладки, и он
+          срезал всё, что выходит за него — тени стеклянных карточек, аватаров,
+          кнопок обрубались ровной вертикальной линией по краю экрана. */}
+      <main className="flex min-h-0 flex-1 flex-col">
         {tab === 'deck' && <SwipeDeck />}
         {tab === 'chat' && <ChatView />}
         {tab === 'profile' && <ProfileView />}
@@ -109,7 +148,7 @@ function MainShell() {
 
 function SplashScreen() {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center" style={{ background: 'var(--bg)' }}>
+    <div className="flex h-full w-full flex-col items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <span className="text-6xl" aria-hidden>🏠</span>
         <h1 className="text-3xl font-bold tracking-tight text-(--text)">roomies</h1>

@@ -9,7 +9,6 @@ import {
   saveDealbreakers,
   saveLocation,
   saveProfile,
-  saveQuiz,
   saveScenario,
 } from '../api/onboarding-api';
 import type {
@@ -20,7 +19,6 @@ import type {
   OnboardingAnswers,
   OnboardingState,
   ProfilePayload,
-  QuizPayload,
   ScenarioType,
 } from './types';
 
@@ -35,7 +33,6 @@ const initialAnswers: OnboardingAnswers = {
   smokingOk: false,
   petsOk: false,
   guestsPref: 'sometimes',
-  quizAnswers: [],
   name: '',
   photoUrls: [],
   vibeTagIds: [],
@@ -63,7 +60,7 @@ function reducer(
     case 'UPDATE_ANSWERS':
       return { ...state, answers: { ...state.answers, ...action.answers } };
     case 'COMPLETE':
-      return { ...state, step: 6, onboardingCompleted: true };
+      return { ...state, step: 5, onboardingCompleted: true };
     default:
       return state;
   }
@@ -117,6 +114,11 @@ export function useOnboarding() {
     };
   }, []);
 
+  // Переход на произвольный шаг — используется стрелкой «назад» в OnboardingLayout.
+  const goToStep = useCallback((step: number) => {
+    dispatch({ type: 'SET_STEP', step });
+  }, []);
+
   // BackButton side effect
   const handleBack = useCallback(() => {
     dispatch({ type: 'SET_STEP', step: state.step - 1 });
@@ -125,7 +127,7 @@ export function useOnboarding() {
   useEffect(() => {
     const wa = getWebApp();
     if (!wa) return;
-    if (state.step > 0 && state.step < 6) {
+    if (state.step > 0 && state.step < 5) {
       wa.BackButton.show();
       wa.BackButton.onClick(handleBack);
     } else {
@@ -216,23 +218,6 @@ export function useOnboarding() {
     [],
   );
 
-  const submitQuiz = useCallback(async (payload: QuizPayload) => {
-    dispatch({ type: 'SET_LOADING', loading: true });
-    dispatch({ type: 'SET_ERROR', error: null });
-    try {
-      await saveQuiz(payload);
-      dispatch({
-        type: 'UPDATE_ANSWERS',
-        answers: { quizAnswers: payload.answers },
-      });
-      dispatch({ type: 'SET_STEP', step: 5 });
-    } catch (e) {
-      dispatch({ type: 'SET_ERROR', error: extractError(e) });
-    } finally {
-      dispatch({ type: 'SET_LOADING', loading: false });
-    }
-  }, []);
-
   const submitProfile = useCallback(async (payload: ProfilePayload) => {
     dispatch({ type: 'SET_LOADING', loading: true });
     dispatch({ type: 'SET_ERROR', error: null });
@@ -246,7 +231,7 @@ export function useOnboarding() {
           vibeTagIds: payload.vibeTagIds,
         },
       });
-      dispatch({ type: 'SET_STEP', step: 6 });
+      dispatch({ type: 'SET_STEP', step: 5 });
     } catch (e) {
       dispatch({ type: 'SET_ERROR', error: extractError(e) });
     } finally {
@@ -260,11 +245,11 @@ export function useOnboarding() {
 
   return {
     state,
+    goToStep,
     submitScenario,
     submitLocation,
     submitBudget,
     submitDealbreakers,
-    submitQuiz,
     submitProfile,
     onComplete,
   };

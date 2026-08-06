@@ -1,5 +1,6 @@
 'use client';
 
+import { Glass } from '@samasante/liquid-glass';
 import type { ChatMessage } from '@/shared/lib/api';
 
 export interface MessageBubbleProps {
@@ -19,9 +20,16 @@ export function MessageBubble({ message, isOwn, callInviteSlot, agreementSlot }:
     return (
       <div className="my-1 flex justify-center">
         {callInviteSlot ?? (
-          <div className="rounded-xl border-2 border-black bg-[#f0efe9] px-4 py-2 text-sm text-(--text) shadow-[2px_2px_0_rgba(20,20,15,0.6)]">
+          <Glass
+            className="rounded-xl px-4 py-2 text-sm text-(--text)"
+            style={{
+              background:
+                'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+            }}
+            optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+          >
             📞 Созвон
-          </div>
+          </Glass>
         )}
       </div>
     );
@@ -47,8 +55,8 @@ export function MessageBubble({ message, isOwn, callInviteSlot, agreementSlot }:
       <div
         className={`max-w-[75%] px-3 py-2 rounded-2xl ${
           isOwn
-            ? 'bg-accent text-[#14140f] rounded-br-sm'
-            : 'bg-[var(--card,#f5f5f0)] text-(--text) rounded-bl-sm border border-[#e8e8e3]'
+            ? 'bg-accent-glass backdrop-glass border-glass text-[#14140f] rounded-br-sm'
+            : 'bg-white/14 backdrop-blur-md border-glass text-(--text) rounded-bl-sm'
         }`}
       >
         <p className="text-sm leading-snug break-words">{message.content}</p>

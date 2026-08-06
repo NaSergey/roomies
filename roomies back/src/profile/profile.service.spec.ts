@@ -42,6 +42,8 @@ describe('ProfileService', () => {
     it('returns 30 for user with 1 photo, quizCompleted=true, onboardingStep=4 (phone not verified)', async () => {
       const mockUser = {
         id: 1,
+        publicId: 'aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa',
+        _count: { referrals: 0 },
         name: 'Test',
         birthDate: null,
         scenario: 'looking_housing_roomie' as const,
@@ -74,6 +76,8 @@ describe('ProfileService', () => {
     it('returns 0 for user with no photos, quizCompleted=false, onboardingStep=2', async () => {
       const mockUser = {
         id: 2,
+        publicId: 'bbbbbbbb-2222-4222-8222-bbbbbbbbbbbb',
+        _count: { referrals: 0 },
         name: 'Empty',
         birthDate: null,
         scenario: 'looking_housing_roomie' as const,
@@ -108,6 +112,8 @@ describe('ProfileService', () => {
     it('returns a profile object with roomieScore field', async () => {
       const mockUser = {
         id: 3,
+        publicId: 'cccccccc-3333-4333-8333-cccccccccccc',
+        _count: { referrals: 2 },
         name: 'Alice',
         birthDate: new Date('2000-01-01'),
         scenario: 'has_housing_seeking_roomie' as const,

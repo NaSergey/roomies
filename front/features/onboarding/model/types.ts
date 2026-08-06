@@ -25,7 +25,6 @@ export type OnboardingAnswers = {
   smokingOk: boolean;
   petsOk: boolean;
   guestsPref: GuestsPreference;
-  quizAnswers: QuizAnswer[];
   name: string;
   photoUrls: string[];
   vibeTagIds: number[];

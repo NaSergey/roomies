@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActionButtons,
   SwipeCard,
@@ -36,7 +36,6 @@ export function SwipeDeck() {
   const [filters, setFilters] = useState<DeckFilters>(DEFAULT_FILTERS);
   const [queryParams, setQueryParams] = useState<FeedQueryParams>({});
   const [filterOpen, setFilterOpen] = useState(false);
-  const [boosted, setBoosted] = useState(false);
   const [matchState, setMatchState] = useState<{ candidateName: string; matchId: number } | null>(null);
   const [selectedProfile, setSelectedProfile] = useState<FeedCandidate | null>(null);
   const [dismissedSquads, setDismissedSquads] = useState<Set<number>>(new Set());
@@ -44,8 +43,6 @@ export function SwipeDeck() {
   const { data: profiles = [], isLoading, isError, error, refetch } = useFeedQuery(queryParams);
   const { data: squadCards = [] } = useSquadFeedQuery();
   const swipeMutation = useSwipeMutation();
-
-  const cardEls = useRef<Map<number, HTMLDivElement | null>>(new Map());
 
   const { visible, exitDirection, enterDirection, isEmpty, swipe, reset } = useSwipeDeck(profiles);
 
@@ -101,7 +98,7 @@ export function SwipeDeck() {
         <p className="text-3xl">⚠️</p>
         <p className="text-sm font-semibold text-(--text)">Не удалось загрузить ленту</p>
         <p className="text-xs text-muted">{msg}</p>
-        <button type="button" onClick={() => refetch()} className="mt-2 rounded-full bg-accent px-5 py-2 text-sm font-semibold text-(--text-on-accent)">
+        <button type="button" onClick={() => refetch()} className="mt-2 rounded-full border-glass bg-accent-glass backdrop-glass px-5 py-2 text-sm font-semibold text-(--text-on-accent)">
           Повторить
         </button>
       </div>
@@ -109,13 +106,8 @@ export function SwipeDeck() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-2">
-      <DeckToolbar
-        filters={filters}
-        boosted={boosted}
-        onOpenFilters={() => setFilterOpen(true)}
-        onBoost={() => setBoosted((b) => !b)}
-      />
+    <div className="flex flex-1 flex-col gap-2 px-3 pb-(--nav-space) pt-3">
+      <DeckToolbar filters={filters} onOpenFilters={() => setFilterOpen(true)} />
 
       <div className="relative flex-1">
         {matchState && (
@@ -123,7 +115,7 @@ export function SwipeDeck() {
             <p className="text-4xl">🏠</p>
             <h2 className="text-2xl font-bold text-white">It&apos;s a match!</h2>
             <p className="text-base text-white/80">{matchState.candidateName}</p>
-            <button type="button" onClick={() => setMatchState(null)} className="mt-2 rounded-full bg-accent px-6 py-2 text-sm font-semibold text-white">
+            <button type="button" onClick={() => setMatchState(null)} className="mt-2 rounded-full border-glass bg-accent-glass backdrop-glass px-6 py-2 text-sm font-semibold text-(--text-on-accent)">
               Начать общение
             </button>
           </div>
@@ -135,10 +127,6 @@ export function SwipeDeck() {
           visible.map((profile, i) => (
             <SwipeCard
               key={profile.id}
-              ref={(el) => {
-                if (el) cardEls.current.set(profile.id, el);
-                else cardEls.current.delete(profile.id);
-              }}
               profile={profile}
               isTop={i === 0}
               stackIndex={i}
@@ -146,14 +134,6 @@ export function SwipeDeck() {
               enterDirection={i === 1 ? enterDirection : null}
               onSwipe={handleSwipe}
               onCardTap={i === 0 ? () => setSelectedProfile(profiles.find(p => p.id === profile.id) ?? null) : undefined}
-              getPeerEl={
-                i === 0
-                  ? () => {
-                      const next = visible[1];
-                      return next ? cardEls.current.get(next.id) ?? null : null;
-                    }
-                  : undefined
-              }
             />
           ))
         )}
@@ -165,6 +145,7 @@ export function SwipeDeck() {
               onLike={() => handleAction('like')}
               onSave={() => handleAction('save')}
               onSuperLike={() => handleAction('super_like')}
+              onDetails={() => setSelectedProfile(profiles.find((p) => p.id === visible[0].id) ?? null)}
             />
           </div>
         )}

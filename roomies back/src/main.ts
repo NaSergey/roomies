@@ -1,5 +1,7 @@
+import { join } from 'path';
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 
@@ -8,12 +10,43 @@ import { AppModule } from './app.module';
   return this.toString();
 };
 
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Слабый или дефолтный JWT_SECRET = любой может подписать токен от имени любого
+// пользователя. Падаем на старте, а не после первого запроса.
+function assertJwtSecret(): void {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      'JWT_SECRET должен быть задан и содержать минимум 32 символа случайных данных',
+    );
+  }
+}
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  assertJwtSecret();
+
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+
+  // Загруженные фото профиля (см. ProfileController#uploadPhoto) — раздаём как статику.
+  // nosniff + attachment: даже если в uploads попадёт файл с HTML внутри, браузер
+  // не выполнит его как страницу на нашем origin (иначе — stored XSS).
+  app.useStaticAssets(join(process.cwd(), 'uploads'), {
+    prefix: '/uploads/',
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Disposition', 'inline');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'");
+    },
+  });
 
   // Mini App открывается из Telegram через эфемерный домен (cloudflare-туннель и т.п.),
-  // поэтому в dev пускаем любое origin. На проде список нужно сузить через CORS_ORIGINS.
+  // поэтому в dev пускаем любое origin. На проде отражать любой Origin нельзя —
+  // требуем явный список и не даём молча уехать в прод с wildcard.
   const corsOrigins = process.env.CORS_ORIGINS?.split(',').map((s) => s.trim()).filter(Boolean);
+  if (isProduction && (!corsOrigins || corsOrigins.length === 0)) {
+    throw new Error('В production CORS_ORIGINS обязателен — wildcard-CORS запрещён');
+  }
   app.enableCors({
     origin: corsOrigins && corsOrigins.length > 0 ? corsOrigins : true,
     credentials: true,
@@ -27,15 +60,18 @@ async function bootstrap() {
     }),
   );
 
-  const config = new DocumentBuilder()
-    .setTitle('Roomies API')
-    .setDescription('Roomies backend API')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
+  // Swagger публикует всю поверхность API — в проде не выставляем.
+  if (!isProduction) {
+    const config = new DocumentBuilder()
+      .setTitle('Roomies API')
+      .setDescription('Roomies backend API')
+      .setVersion('1.0')
+      .addBearerAuth()
+      .build();
 
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
+  }
 
   await app.listen(process.env.PORT ?? 3000);
 }

@@ -7,21 +7,23 @@ import { DealbreakersStep } from './steps/DealbreakersStep';
 import { DoneStep } from './steps/DoneStep';
 import { LocationStep } from './steps/LocationStep';
 import { ProfileStep } from './steps/ProfileStep';
-import { QuizStep } from './steps/QuizStep';
 import { ScenarioStep } from './steps/ScenarioStep';
 
 interface OnboardingFlowProps {
   onComplete: () => void;
 }
 
+// Шагов с вопросами 5 (0..4); DoneStep — финальный экран, в счётчик не входит.
+const TOTAL_STEPS = 5;
+
 export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
   const {
     state,
+    goToStep,
     submitScenario,
     submitLocation,
     submitBudget,
     submitDealbreakers,
-    submitQuiz,
     submitProfile,
     onComplete: completeOnboarding,
   } = useOnboarding();
@@ -41,33 +43,23 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
     stableOnComplete();
   }, [completeOnboarding, stableOnComplete]);
 
-  function dismissError() {
-    // error is cleared on next submit — no explicit dismiss needed in this flow
-    // but we provide the button for UX per spec
-  }
+  // На первом шаге стрелка «назад» неактивна — уходить некуда.
+  const back = state.step > 0 ? () => goToStep(state.step - 1) : undefined;
 
   function renderStep() {
+    const common = { state, totalSteps: TOTAL_STEPS, onBack: back };
     switch (state.step) {
       case 0:
-        return <ScenarioStep state={state} onSubmit={submitScenario} />;
+        return <ScenarioStep {...common} step={1} onSubmit={submitScenario} />;
       case 1:
-        return <LocationStep state={state} onSubmit={submitLocation} />;
+        return <LocationStep {...common} step={2} onSubmit={submitLocation} />;
       case 2:
-        return <BudgetStep state={state} onSubmit={submitBudget} />;
+        return <BudgetStep {...common} step={3} onSubmit={submitBudget} />;
       case 3:
-        return (
-          <DealbreakersStep state={state} onSubmit={submitDealbreakers} />
-        );
+        return <DealbreakersStep {...common} step={4} onSubmit={submitDealbreakers} />;
       case 4:
-        return (
-          <QuizStep
-            state={state}
-            onSubmit={(answers) => submitQuiz({ answers })}
-          />
-        );
+        return <ProfileStep {...common} step={5} onSubmit={submitProfile} />;
       case 5:
-        return <ProfileStep state={state} onSubmit={submitProfile} />;
-      case 6:
         return <DoneStep onComplete={handleDoneComplete} />;
       default:
         return null;
@@ -79,39 +71,13 @@ export function OnboardingFlow({ onComplete }: OnboardingFlowProps) {
       {state.error && (
         <div
           role="alert"
-          className="fixed left-4 right-4 top-4 z-50 rounded-2xl border-2 border-black bg-[#ffd9e0] px-4 py-3 text-sm font-bold text-(--text) shadow-[4px_4px_0_rgba(20,20,15,0.9)]"
+          className="fixed left-4 right-4 top-4 z-50 rounded-2xl border-glass backdrop-glass shadow-glass bg-[rgba(255,217,224,0.35)] px-4 py-3 text-sm font-bold text-(--text)"
         >
-          <div className="flex items-center justify-between gap-2">
-            <span>{state.error}</span>
-            <button
-              type="button"
-              aria-label="Закрыть ошибку"
-              onClick={dismissError}
-              className="text-(--text-muted) transition-opacity active:opacity-70"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
+          {state.error}
         </div>
       )}
 
-      <div
-        key={state.step}
-        className="flex flex-1 flex-col overflow-y-auto translate-x-0 transition-transform duration-[280ms] ease-out"
-      >
+      <div key={state.step} className="flex min-h-0 flex-1 flex-col">
         {renderStep()}
       </div>
     </main>

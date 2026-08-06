@@ -25,8 +25,19 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
   const idx = TAB_INDEX[active];
 
   return (
-    <nav className="shrink-0 px-3 pt-1.5 pb-[max(2rem,env(safe-area-inset-bottom))]">
-      <div className="relative mx-auto flex w-full max-w-md items-center overflow-hidden rounded-full border-2 border-black bg-white shadow-[3px_3px_0_rgba(20,20,15,0.9)]">
+    // pb-8 без env(safe-area-inset-bottom): нижнюю safe-area уже держит
+    // контейнер в TelegramProvider, и вторым слоем она давала под панелью
+    // лишнюю пустую полосу.
+    <nav className="absolute inset-x-0 bottom-0 z-30 px-3 pb-4">
+      {/* Ровно один блок с фоном — сама пилюля, больше вокруг неё ничего не
+          рисуется. Намеренно БЕЗ backdrop-glass: backdrop-filter в вебвью
+          Telegram переставал обрезаться скруглением (внутри пилюли едет
+          индикатор на transform) и ложился прямоугольником размытого фона —
+          вокруг панели читалась вторая, чужая подложка. Потеря невелика: на
+          гладком градиенте фона размывать нечего, стекло здесь держится на
+          заливке bg-glass и кромках shadow-glass (см. globals.css).
+          overflow-hidden тоже не нужен — индикатор ограничен inset-0 + p-1. */}
+      <div className="relative mx-auto flex w-full max-w-md items-center rounded-full bg-glass backdrop-glass shadow-glass">
 
         {/* Скользящий фон активной вкладки */}
         <div
@@ -36,7 +47,7 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
             transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
           }}
         >
-          <div className="flex-1 rounded-full bg-accent" />
+          <div className="flex-1 rounded-full bg-white/45 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]" />
         </div>
 
         {ITEMS.map(({ id, label, Icon }) => {

@@ -2,22 +2,30 @@
 
 import { useEffect, useState } from 'react';
 import { getCities, getDistricts, type City, type District } from '@/shared/lib/api';
-import { haptic } from '@/shared/lib/telegram';
-import { Button } from '@/shared/ui/Button';
-import { Chip } from '@/shared/ui/Chip';
 import type { LocationPayload, OnboardingState } from '../../model/types';
+import { OnboardingLayout } from '../OnboardingLayout';
+import { RadioRow } from '../RadioRow';
 
 interface LocationStepProps {
   state: OnboardingState;
+  step: number;
+  totalSteps: number;
   onSubmit: (payload: LocationPayload) => void;
+  onBack?: () => void;
 }
 
-export function LocationStep({ state, onSubmit }: LocationStepProps) {
+export function LocationStep({
+  state,
+  step,
+  totalSteps,
+  onSubmit,
+  onBack,
+}: LocationStepProps) {
   const [cities, setCities] = useState<City[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [loadingCities, setLoadingCities] = useState(true);
   const [loadingDistricts, setLoadingDistricts] = useState(false);
-  const [citiesError, setCitiesError] = useState<string | null>(null);
+  const [citiesError, setCitiesError] = useState(false);
   const [selectedCityId, setSelectedCityId] = useState<number | null>(
     state.answers.cityId,
   );
@@ -25,58 +33,42 @@ export function LocationStep({ state, onSubmit }: LocationStepProps) {
     state.answers.districtIds,
   );
 
-  useEffect(() => {
-    let cancelled = false;
+  function loadCities() {
     setLoadingCities(true);
+    setCitiesError(false);
     getCities()
-      .then((data) => {
-        if (cancelled) return;
-        setCities(data);
-        setLoadingCities(false);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setCitiesError('Не удалось загрузить список городов. Обновить?');
-        setLoadingCities(false);
-      });
-    return () => {
-      cancelled = true;
-    };
+      .then(setCities)
+      .catch(() => setCitiesError(true))
+      .finally(() => setLoadingCities(false));
+  }
+
+  useEffect(() => {
+    loadCities();
   }, []);
 
   useEffect(() => {
     if (!selectedCityId) {
       setDistricts([]);
-      setSelectedDistrictIds([]);
       return;
     }
     let cancelled = false;
     setLoadingDistricts(true);
     getDistricts(selectedCityId)
       .then((data) => {
-        if (cancelled) return;
-        setDistricts(data);
-        setLoadingDistricts(false);
+        if (!cancelled) setDistricts(data);
       })
       .catch(() => {
-        if (cancelled) return;
-        setDistricts([]);
-        setLoadingDistricts(false);
+        if (!cancelled) setDistricts([]);
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingDistricts(false);
       });
     return () => {
       cancelled = true;
     };
   }, [selectedCityId]);
 
-  function handleCityChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    const val = e.target.value;
-    setSelectedCityId(val ? Number(val) : null);
-    setSelectedDistrictIds([]);
-    haptic('light');
-  }
-
   function toggleDistrict(districtId: number) {
-    haptic('light');
     setSelectedDistrictIds((prev) =>
       prev.includes(districtId)
         ? prev.filter((id) => id !== districtId)
@@ -84,121 +76,66 @@ export function LocationStep({ state, onSubmit }: LocationStepProps) {
     );
   }
 
-  function handleRetry() {
-    setCitiesError(null);
-    setLoadingCities(true);
-    getCities()
-      .then((data) => {
-        setCities(data);
-        setLoadingCities(false);
-      })
-      .catch(() => {
-        setCitiesError('Не удалось загрузить список городов. Обновить?');
-        setLoadingCities(false);
-      });
-  }
-
   return (
-    <div className="flex flex-1 flex-col gap-6 px-4 py-6">
-      <div>
-        <h1 className="text-2xl font-black text-(--text)">Где ищешь?</h1>
-        <p className="mt-2 text-base text-muted">
-          Город — обязательно, районы — по желанию
-        </p>
-      </div>
-
-      <div className="relative">
-        <select
-          value={selectedCityId ?? ''}
-          onChange={handleCityChange}
-          disabled={loadingCities}
-          className="h-14 w-full appearance-none rounded-xl border-2 border-black bg-white px-4 text-base font-bold text-(--text) outline-none disabled:opacity-50"
-        >
-          <option value="">
-            {loadingCities ? 'Загрузка...' : 'Выбери город'}
-          </option>
-          {cities.map((city) => (
-            <option key={city.id} value={city.id}>
-              {city.name}
-            </option>
+    <OnboardingLayout
+      step={step}
+      totalSteps={totalSteps}
+      title="Где ищешь?"
+      subtitle="Город обязательно, районы — по желанию"
+      onBack={onBack}
+      onNext={() =>
+        selectedCityId &&
+        onSubmit({ cityId: selectedCityId, districtIds: selectedDistrictIds })
+      }
+      canGoNext={Boolean(selectedCityId)}
+      loading={state.loading}
+    >
+      {loadingCities ? (
+        <div className="flex flex-col gap-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-8 w-full animate-pulse rounded-lg bg-white/15" />
           ))}
-        </select>
-        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-muted"
-            aria-hidden="true"
-          >
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
         </div>
-      </div>
-
-      {citiesError && (
-        <p className="text-sm text-muted">
-          {citiesError}{' '}
-          <button
-            type="button"
-            onClick={handleRetry}
-            className="underline text-(--text)"
-          >
+      ) : citiesError ? (
+        <p className="text-sm text-(--text-deep) opacity-75" role="alert">
+          Не удалось загрузить города.{' '}
+          <button type="button" onClick={loadCities} className="underline text-(--text-deep)">
             Обновить
           </button>
         </p>
-      )}
-
-      {selectedCityId && districts.length > 0 && (
-        <div>
-          <p className="mb-2 mt-4 text-sm font-bold text-muted">Районы</p>
-          {loadingDistricts ? (
-            <div className="flex gap-2">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-9 w-24 animate-pulse rounded-full bg-[#f0efe9]"
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-wrap gap-2">
-              {districts.map((district) => (
-                <Chip
-                  key={district.id}
-                  active={selectedDistrictIds.includes(district.id)}
-                  onClick={() => toggleDistrict(district.id)}
-                  className="min-h-[44px] px-4 py-1.5"
-                >
-                  {district.name}
-                </Chip>
-              ))}
-            </div>
-          )}
+      ) : (
+        <div role="radiogroup" aria-label="Город" className="flex flex-col gap-1">
+          {cities.map((city) => (
+            <RadioRow
+              key={city.id}
+              selected={selectedCityId === city.id}
+              onSelect={() => {
+                setSelectedCityId(city.id);
+                // Районы принадлежат городу — при смене города сбрасываем.
+                setSelectedDistrictIds([]);
+              }}
+              label={city.name}
+            />
+          ))}
         </div>
       )}
 
-      <div className="mt-auto">
-        <Button
-          loading={state.loading}
-          disabled={!selectedCityId}
-          onClick={() =>
-            selectedCityId &&
-            onSubmit({
-              cityId: selectedCityId,
-              districtIds: selectedDistrictIds,
-            })
-          }
-          className="h-14 w-full text-base"
-        >
-          Продолжить
-        </Button>
-      </div>
-    </div>
+      {selectedCityId && !loadingDistricts && districts.length > 0 && (
+        <div role="group" aria-label="Районы" className="flex flex-col gap-1">
+          <span className="text-[10px] font-black uppercase tracking-widest text-(--text-deep) opacity-65">
+            Районы
+          </span>
+          {districts.map((district) => (
+            <RadioRow
+              key={district.id}
+              multiple
+              selected={selectedDistrictIds.includes(district.id)}
+              onSelect={() => toggleDistrict(district.id)}
+              label={district.name}
+            />
+          ))}
+        </div>
+      )}
+    </OnboardingLayout>
   );
 }

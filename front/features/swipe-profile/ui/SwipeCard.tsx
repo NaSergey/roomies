@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  forwardRef,
-  useCallback,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  type PointerEvent,
-} from 'react';
+import { useLayoutEffect, useMemo, useRef, type PointerEvent } from 'react';
 import { ProfileCard, type RoomieProfile } from '@/entities/profile';
 import { SWIPE_EXIT_DURATION_MS } from '../model/use-swipe-deck';
 import type { SwipeDirection, SwipeHandler } from '../model/types';
@@ -15,44 +8,39 @@ import type { SwipeDirection, SwipeHandler } from '../model/types';
 interface SwipeCardProps {
   profile: RoomieProfile;
   isTop: boolean;
-  stackIndex: number; // 0 — верхняя, 1 — следующая (видна за ней), 2+ — запас (скрыт)
+  stackIndex: number; // 0 — верхняя (видна), 1+ — в очереди (скрыта до своего въезда)
   exitDirection: SwipeDirection | null;  // на верхней карте — вылет
-  enterDirection: SwipeDirection | null; // на следующей карте — «дорастание» до верхней
+  enterDirection: SwipeDirection | null; // на следующей карте — въезд с противоположной стороны
   onSwipe: SwipeHandler;
   onCardTap?: () => void;
-  getPeerEl?: () => HTMLDivElement | null;
 }
 
 const SWIPE_THRESHOLD = 110; // px
 const VELOCITY_THRESHOLD = 500; // px/s
-const EXIT_DISTANCE = 600; // px — куда улетает свайпнутая карта
-const PEER_REST_SCALE = 0.92; // масштаб следующей карты в покое (за верхней)
+const EXIT_DISTANCE = 600; // px — куда улетает свайпнутая карта / откуда въезжает следующая
 
 const SPRING = 'transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1)';
 const EXIT_TRANSITION = `transform ${SWIPE_EXIT_DURATION_MS}ms ease-out, opacity ${SWIPE_EXIT_DURATION_MS}ms ease-out`;
-const ENTER_TRANSITION = `transform ${SWIPE_EXIT_DURATION_MS}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+// Обычный ease-out (не агрессивная кривая старой scale-анимации): на полноценном
+// слайде в 600px она делала почти весь путь за первые ~30мс — не «влёт», а телепорт.
+const ENTER_TRANSITION = `transform ${SWIPE_EXIT_DURATION_MS}ms ease-out`;
 
 function clamp(v: number, min: number, max: number) {
   return Math.max(min, Math.min(max, v));
 }
 
-export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function SwipeCard(
-  { profile, isTop, stackIndex, exitDirection, enterDirection, onSwipe, onCardTap, getPeerEl },
-  forwardedRef,
-) {
+export function SwipeCard({
+  profile,
+  isTop,
+  stackIndex,
+  exitDirection,
+  enterDirection,
+  onSwipe,
+  onCardTap,
+}: SwipeCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const likeRef = useRef<HTMLDivElement>(null);
   const nopeRef = useRef<HTMLDivElement>(null);
-
-  // Сливаем внутренний ref с проброшенным наружу (для координации соседних карт).
-  const setRefs = useCallback(
-    (el: HTMLDivElement | null) => {
-      cardRef.current = el;
-      if (typeof forwardedRef === 'function') forwardedRef(el);
-      else if (forwardedRef) (forwardedRef as { current: HTMLDivElement | null }).current = el;
-    },
-    [forwardedRef],
-  );
 
   const xRef = useRef(0);
   const yRef = useRef(0);
@@ -75,26 +63,26 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
     if (el) el.style.transform = `translate3d(${x}px,0,0) rotate(${rot}deg)`;
     if (likeRef.current) likeRef.current.style.opacity = `${clamp((x - 40) / 90, 0, 1)}`;
     if (nopeRef.current) nopeRef.current.style.opacity = `${clamp((-x - 40) / 90, 0, 1)}`;
-
-    // Следующая карта подрастает пропорционально драгу — видно, что она готова
-    // встать на место. По мере оттягивания верхней открывается слева/справа.
-    const peer = getPeerEl?.();
-    if (peer) {
-      const p = clamp(Math.abs(x) / SWIPE_THRESHOLD, 0, 1);
-      const scale = PEER_REST_SCALE + (1 - PEER_REST_SCALE) * p;
-      peer.style.transform = `translate3d(0,0,0) scale(${scale})`;
-    }
   };
 
-  // ── ВЪЕЗД: следующая карта дорастает до полного размера и становится верхней.
+  // ── ВЪЕЗД: следующая карта появляется с ПРОТИВОПОЛОЖНОЙ стороны от свайпа
+  // (свайпнули влево → следующая влетает справа, и наоборот) — карты больше не
+  // лежат «стопкой» друг за другом, вне анимации следующая карта не видна.
   useLayoutEffect(() => {
     if (!isEntering) return;
     const el = cardRef.current;
     if (!el) return;
-    el.style.transition = ENTER_TRANSITION;
-    el.style.transform = 'translate3d(0,0,0) scale(1)';
+    const startX = enterDirection === 'left' ? EXIT_DISTANCE : -EXIT_DISTANCE;
+    el.style.transition = 'none';
+    el.style.transform = `translate3d(${startX}px,0,0)`;
     el.style.opacity = '1';
-  }, [isEntering]);
+    // Форсируем reflow, чтобы браузер зафиксировал стартовую позицию ДО того,
+    // как включится transition — иначе оба присваивания схлопнутся в один кадр
+    // и слайда не будет видно.
+    void el.offsetWidth;
+    el.style.transition = ENTER_TRANSITION;
+    el.style.transform = 'translate3d(0,0,0)';
+  }, [isEntering, enterDirection]);
 
   // ── ВЫЛЕТ: верхняя карта улетает из текущего (возможно, перетащенного) положения.
   useLayoutEffect(() => {
@@ -108,24 +96,16 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
     el.style.opacity = '0';
   }, [isExiting, exitDirection]);
 
-  // ── ПОКОЙ: верхняя — центр/полный размер; следующая — за ней, уменьшена и видна;
-  //    запасные (2+) — скрыты (предзагружены, чтобы не было рывка при появлении).
+  // ── ПОКОЙ: верхняя — по центру, видна; все остальные — скрыты (предзагружены,
+  // чтобы не было рывка при собственном въезде, но не «просвечивают» позади верхней).
   useLayoutEffect(() => {
     if (isExiting || isEntering) return;
     const el = cardRef.current;
     if (!el) return;
     xRef.current = 0;
     el.style.transition = 'none';
-    if (isTop) {
-      el.style.transform = 'translate3d(0,0,0) scale(1)';
-      el.style.opacity = '1';
-    } else if (stackIndex === 1) {
-      el.style.transform = `translate3d(0,0,0) scale(${PEER_REST_SCALE})`;
-      el.style.opacity = '1';
-    } else {
-      el.style.transform = `translate3d(0,0,0) scale(${PEER_REST_SCALE})`;
-      el.style.opacity = '0';
-    }
+    el.style.transform = 'translate3d(0,0,0)';
+    el.style.opacity = isTop ? '1' : '0';
     if (likeRef.current) likeRef.current.style.opacity = '0';
     if (nopeRef.current) nopeRef.current.style.opacity = '0';
   }, [isTop, stackIndex, isExiting, isEntering]);
@@ -139,8 +119,6 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
     startTimeRef.current = performance.now();
     const el = cardRef.current;
     if (el) el.style.transition = 'none';
-    const peer = getPeerEl?.();
-    if (peer) peer.style.transition = 'none'; // следующая следует за драгом мгновенно
     e.currentTarget.setPointerCapture(e.pointerId);
   }
 
@@ -170,10 +148,10 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
     else if (x < -SWIPE_THRESHOLD || velocity < -VELOCITY_THRESHOLD) direction = 'left';
 
     if (direction) {
-      // Верхняя → exit, следующая → enter (дорастает) через ре-рендер по props.
+      // Верхняя → exit, следующая → enter (въезжает сбоку) через ре-рендер по props.
       onSwipe(direction);
     } else {
-      // Недотянули — пружиним: верхняя в центр, следующая обратно в покой.
+      // Недотянули — пружиним верхнюю карту обратно в центр.
       const el = cardRef.current;
       xRef.current = 0;
       if (el) {
@@ -182,11 +160,6 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
       }
       if (likeRef.current) likeRef.current.style.opacity = '0';
       if (nopeRef.current) nopeRef.current.style.opacity = '0';
-      const peer = getPeerEl?.();
-      if (peer) {
-        peer.style.transition = SPRING;
-        peer.style.transform = `translate3d(0,0,0) scale(${PEER_REST_SCALE})`;
-      }
     }
   }
 
@@ -214,7 +187,7 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
 
   return (
     <div
-      ref={setRefs}
+      ref={cardRef}
       className="absolute inset-0 touch-none select-none [backface-visibility:hidden]"
       style={{
         zIndex: 10 - stackIndex,
@@ -231,4 +204,4 @@ export const SwipeCard = forwardRef<HTMLDivElement, SwipeCardProps>(function Swi
       <ProfileCard profile={profile} priority={isTop} overlay={overlay} />
     </div>
   );
-});
+}

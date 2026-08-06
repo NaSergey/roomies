@@ -28,7 +28,7 @@ export function DoneStep({ onComplete }: DoneStepProps) {
       {/* Checkmark circle with spring entry animation */}
       <div
         className={[
-          'w-20 h-20 rounded-full border-2 border-black bg-accent flex items-center justify-center mx-auto shadow-[4px_4px_0_rgba(20,20,15,0.9)]',
+          'w-20 h-20 rounded-full border-glass bg-accent-glass backdrop-glass flex items-center justify-center mx-auto shadow-glass',
           'transition-transform duration-[400ms]',
           visible ? 'scale-100' : 'scale-0',
         ].join(' ')}

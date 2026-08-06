@@ -10,6 +10,7 @@
     "tunnel": "concurrently -k -n next,cf -c blue,magenta \"npm:dev\" \"cloudflared tunnel --url http://localhost:3000\""
   },
   "dependencies": {
+    "@samasante/liquid-glass": "^0.1.1",
     "@tanstack/react-query": "^5.101.0",
     "next": "16.2.6",
     "react": "19.2.4",

@@ -49,8 +49,12 @@ export function getFeed(params?: FeedQueryParams): Promise<FeedCandidate[]> {
     if (params.smokingOk !== undefined) qs.set('smokingOk', String(params.smokingOk));
     if (params.petsOk !== undefined) qs.set('petsOk', String(params.petsOk));
     if (params.guestsPref !== undefined) qs.set('guestsPref', params.guestsPref);
+    // Повторяющийся ключ без скобок: districtIds=1&districtIds=2. Скобочную
+    // нотацию (districtIds[]) разбирает только extended-парсер query, а бэк на
+    // Express 5, где дефолт — simple: ключ приходил буквально как
+    // "districtIds[]", в DTO не попадал, и фильтр по районам молча терялся.
     if (params.districtIds) {
-      params.districtIds.forEach((id) => qs.append('districtIds[]', String(id)));
+      params.districtIds.forEach((id) => qs.append('districtIds', String(id)));
     }
   }
   const query = qs.toString();

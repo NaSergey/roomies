@@ -25,6 +25,10 @@ export interface MyProfile {
   roomieScore: number;
   quizCompleted: boolean;
   onboardingStep: number;
+  /** Код для реферальной ссылки (publicId аккаунта). */
+  referralCode: string;
+  /** Сколько человек зарегистрировалось по ссылке этого пользователя. */
+  invitedCount: number;
 }
 
 export interface UpdateProfilePayload {

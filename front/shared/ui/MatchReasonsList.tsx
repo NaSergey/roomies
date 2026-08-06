@@ -1,5 +1,7 @@
 'use client';
 
+import { Glass } from '@samasante/liquid-glass';
+
 interface MatchReasonsListProps {
   matchReasons: string[];
   matchRisks?: string[];
@@ -17,9 +19,13 @@ export function MatchReasonsList({ matchReasons, matchRisks }: MatchReasonsListP
         </div>
       ))}
       {matchRisks?.[0] && (
-        <span className="rounded-full border-2 border-black bg-[#ffd9e0] px-3 py-2 text-xs font-black text-[#14140f] shadow-[2px_2px_0_rgba(20,20,15,0.9)]">
+        <Glass
+          className="rounded-full px-3 py-2 text-xs font-black text-[#14140f]"
+          style={{ background: 'rgba(255,217,224,0.3)' }}
+          optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+        >
           ⚠️ {matchRisks[0]}
-        </span>
+        </Glass>
       )}
     </div>
   );

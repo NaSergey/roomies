@@ -1,5 +1,6 @@
 'use client';
 
+import { Glass } from '@samasante/liquid-glass';
 import { useRespondInvite } from '@/features/squad';
 import type { SquadInvite } from '@/shared/lib/api';
 import { Button } from '@/shared/ui/Button';
@@ -12,7 +13,13 @@ export function PendingInviteCard({ invite }: PendingInviteCardProps) {
   const respondInvite = useRespondInvite();
 
   return (
-    <div className="rounded-xl border-2 border-black bg-[#a8d8ff] p-3 flex flex-col gap-2 shadow-[2px_2px_0_rgba(20,20,15,0.9)]">
+    <Glass
+      className="flex flex-col gap-2 rounded-xl p-3"
+      // display через style — <Glass> перебивает класс flex своим инлайновым
+      // inline-block (см. Card.tsx).
+      style={{ display: 'flex', background: 'var(--tint-sky)' }}
+      optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+    >
       <p className="text-sm font-bold text-(--text)">
         Вас приглашают в сквад {invite.squadName ?? 'без названия'} ({invite.memberCount} участника)
       </p>
@@ -36,6 +43,6 @@ export function PendingInviteCard({ invite }: PendingInviteCardProps) {
           Отклонить
         </Button>
       </div>
-    </div>
+    </Glass>
   );
 }

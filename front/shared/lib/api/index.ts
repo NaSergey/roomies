@@ -1,5 +1,6 @@
 export { apiFetch, ApiError } from './client';
 export { API_BASE_URL } from './config';
+export { mediaUrl } from './media';
 export {
   getAccessToken,
   setAccessToken,
@@ -7,10 +8,13 @@ export {
 } from './token-storage';
 export {
   loginWithTelegram,
+  registerWithEmail,
+  loginWithEmail,
   fetchMe,
   type AuthTokens,
   type CurrentUser,
 } from './auth';
+export { uploadPhoto } from './upload';
 export { pingBackend } from './health';
 export { getCities, getDistricts, type City, type District } from './geo';
 export { getVibeTags, type VibeTag } from './vibe-tags';

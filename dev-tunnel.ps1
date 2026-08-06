@@ -4,6 +4,7 @@
 # Usage: .\dev-tunnel.ps1
 #
 # Steps:
+#   0. Start Postgres (docker compose up -d db) and wait until it accepts connections
 #   1. Start NestJS backend (npm run start:dev) in a new window
 #   2. Start cloudflared tunnel for port 4000, wait for URL
 #   3. Update front/.env.local with NEXT_PUBLIC_API_URL=<backend-tunnel-url>
@@ -25,9 +26,30 @@ if (-not (Test-Path $cloudflaredExe)) {
     }
 }
 
+# -- 0. Postgres (docker compose) ---------------------------------------------
+Write-Host ""
+Write-Host "==> [0/4] Starting Postgres (docker compose)..." -ForegroundColor Cyan
+docker compose -f "$projectRoot\docker-compose.yml" up -d db
+if (-not $?) {
+    Write-Error "Failed to start the 'db' container. Is Docker Desktop running?"
+    exit 1
+}
+
+$dbReady = $false
+for ($i = 0; $i -lt 30; $i++) {
+    docker exec roomies-db pg_isready -U postgres *> $null
+    if ($?) { $dbReady = $true; break }
+    Start-Sleep -Seconds 1
+}
+if (-not $dbReady) {
+    Write-Error "Postgres did not become ready in time."
+    exit 1
+}
+Write-Host "    Postgres is ready." -ForegroundColor Green
+
 # -- 1. Backend ---------------------------------------------------------------
 Write-Host ""
-Write-Host "==> [1/3] Starting NestJS backend (port 4000)..." -ForegroundColor Cyan
+Write-Host "==> [1/4] Starting NestJS backend (port 4000)..." -ForegroundColor Cyan
 Start-Process powershell -ArgumentList @(
     "-NoExit",
     "-Command",
@@ -37,7 +59,7 @@ Start-Process powershell -ArgumentList @(
 Start-Sleep -Seconds 2
 
 # -- 2. Cloudflare tunnel for backend (port 4000) ----------------------------
-Write-Host "==> [2/3] Starting cloudflare tunnel for backend (port 4000)..." -ForegroundColor Cyan
+Write-Host "==> [2/4] Starting cloudflare tunnel for backend (port 4000)..." -ForegroundColor Cyan
 
 $backLogFile = "$env:TEMP\cf-back-roomies.log"
 # Kill stale cloudflared processes before removing the log they may hold open
@@ -72,9 +94,20 @@ if (-not $backUrl) {
 Write-Host "    Backend tunnel: $backUrl" -ForegroundColor Green
 
 # -- 3. Update front/.env.local ----------------------------------------------
-Write-Host "==> [3/3] Updating front/.env.local..." -ForegroundColor Cyan
+Write-Host "==> [3/4] Updating front/.env.local..." -ForegroundColor Cyan
 $envLocalPath = "$projectRoot\front\.env.local"
-Set-Content -Path $envLocalPath -Value "NEXT_PUBLIC_API_URL=$backUrl" -Encoding utf8
+# Обновляем ТОЛЬКО строку с адресом API, остальные переменные сохраняем.
+# Раньше файл перезаписывался целиком, и постоянные настройки (например,
+# NEXT_PUBLIC_TELEGRAM_APP_URL для реферальных ссылок) молча пропадали при
+# каждом запуске туннеля.
+$apiLine = "NEXT_PUBLIC_API_URL=$backUrl"
+if (Test-Path $envLocalPath) {
+    $lines = @(Get-Content $envLocalPath | Where-Object { $_ -notmatch '^\s*NEXT_PUBLIC_API_URL\s*=' })
+    $lines += $apiLine
+    Set-Content -Path $envLocalPath -Value $lines -Encoding utf8
+} else {
+    Set-Content -Path $envLocalPath -Value $apiLine -Encoding utf8
+}
 Write-Host "    NEXT_PUBLIC_API_URL=$backUrl" -ForegroundColor Green
 
 # -- 4. Frontend + its tunnel ------------------------------------------------

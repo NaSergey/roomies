@@ -69,6 +69,15 @@ declare global {
     disableVerticalSwipes?: () => void;
     enableVerticalSwipes?: () => void;
     close: () => void;
+    // Открывает t.me-ссылку внутри Telegram, не выкидывая из Mini App —
+    // используется для нативного диалога «поделиться».
+    openTelegramLink?: (url: string) => void;
+    // Цвета «рамы» Telegram вокруг нашего контента. hex принимается: фоном с
+    // 6.1, шапкой с 6.9, нижней полосой с 7.10 — отсюда проверки версий на
+    // вызове. Без них Telegram красит эти зоны своей темой.
+    setBackgroundColor?: (color: string) => void;
+    setHeaderColor?: (color: string) => void;
+    setBottomBarColor?: (color: string) => void;
     HapticFeedback?: {
       impactOccurred: (style: 'light' | 'medium' | 'heavy' | 'rigid' | 'soft') => void;
       notificationOccurred: (type: 'error' | 'success' | 'warning') => void;

@@ -952,6 +952,17 @@ async function seedFakeProfiles(): Promise<void> {
           },
         });
       }
+
+      // Фото — заглушка, контент не важен (тестовые данные). pravatar.cc отдаёт
+      // ограниченный, но стабильный набор аватарок (img=1..70) без API-ключа.
+      await tx.userPhoto.deleteMany({ where: { userId: user.id } });
+      await tx.userPhoto.create({
+        data: {
+          userId: user.id,
+          url: `https://i.pravatar.cc/500?img=${Number(fake.telegramId % 70n) + 1}`,
+          displayOrder: 0,
+        },
+      });
     });
     processed++;
   }

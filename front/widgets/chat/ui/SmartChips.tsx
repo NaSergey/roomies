@@ -24,7 +24,7 @@ export function SmartChips({ onChipTap }: SmartChipsProps) {
             key={chip}
             type="button"
             onClick={() => onChipTap(chip)}
-            className="rounded-full border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-(--text) active:scale-95 transition-transform duration-100"
+            className="rounded-full bg-glass backdrop-glass border-glass px-3 py-1.5 text-sm font-bold text-(--text) active:scale-95 transition-transform duration-100"
           >
             {chip}
           </button>

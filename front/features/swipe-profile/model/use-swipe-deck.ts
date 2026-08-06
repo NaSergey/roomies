@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useMemo, useRef, useState } from 'react';
+import { advanceGradientPhase } from '@/shared/lib/gradient';
 import { haptic, hapticNotify } from '@/shared/lib/telegram';
 import type { RoomieProfile } from '@/entities/profile';
 import type { SwipeDirection } from './types';
@@ -49,6 +50,8 @@ export function useSwipeDeck(profiles: RoomieProfile[]): UseSwipeDeckResult {
 
     if (direction === 'right') hapticNotify('success');
     else haptic('light');
+
+    advanceGradientPhase(); // фон «дышит» — как у Telegram при отправке сообщения
 
     setExitDirection(direction);   // верхняя — вылетает
     setEnterDirection(direction);  // следующая — въезжает (одновременно)

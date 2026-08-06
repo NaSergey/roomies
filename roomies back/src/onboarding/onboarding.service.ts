@@ -149,6 +149,8 @@ export class OnboardingService {
     return { ok: true };
   }
 
+  // Не часть основной последовательности онбординга (см. saveScenario..saveProfile) —
+  // вызывается отдельно из блока «вайб-квиз» в профиле, поэтому onboardingStep не трогаем.
   async saveQuiz(userId: number, dto: QuizDto) {
     const upsertOps = dto.answers.map((a) =>
       this.prisma.userQuizAnswer.upsert({
@@ -177,7 +179,6 @@ export class OnboardingService {
         data: {
           ...scales,
           quizCompleted: true,
-          onboardingStep: 5,
         },
       }),
     ]);
@@ -203,9 +204,8 @@ export class OnboardingService {
         where: { id: userId },
         data: {
           name: dto.name,
-          onboardingStep: 6,
+          onboardingStep: 5,
           onboardingCompleted: true,
-          quizCompleted: true,
         },
       }),
       this.prisma.userVibeTag.deleteMany({ where: { userId } }),

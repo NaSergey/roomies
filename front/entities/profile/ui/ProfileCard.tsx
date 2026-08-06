@@ -1,8 +1,10 @@
 'use client';
 
 import Image from 'next/image';
+import { Glass } from '@samasante/liquid-glass';
 import { memo, type ReactNode } from 'react';
-import { TAG_COLORS } from '@/shared/config';
+import { GLASS_TAG_TINTS, SCENARIO_LABELS } from '@/shared/config';
+import { mediaUrl } from '@/shared/lib/api';
 import type { RoomieProfile } from '../model/types';
 
 interface ProfileCardProps {
@@ -11,26 +13,39 @@ interface ProfileCardProps {
   overlay?: ReactNode;
 }
 
-const HARD_SHADOW = 'shadow-[4px_4px_0_rgba(20,20,15,0.9)]';
 
-const SCORE_META = [
-  { bg: 'bg-[#ffd6e8]', icon: '💎', rot: '-rotate-6' },
-  { bg: 'bg-[#fff3a0]', icon: '⭐', rot: 'rotate-3' },
-  { bg: 'bg-[#ffd6e8]', icon: '🕐', rot: '-rotate-2' },
-];
+
+const GLASS_CHIP = 'border-glass shadow-glass backdrop-glass';
+
+
 
 const SCALE_LABELS: Record<string, string> = {
-  cleanliness:   'Чистота',
+  cleanliness: 'Чистота',
   sleepSchedule: 'Режим',
-  socialLevel:   'Общение',
-  noiseLevel:    'Шум',
-  workFromHome:  'Дома',
+  socialLevel: 'Общение',
+  noiseLevel: 'Шум',
+  workFromHome: 'Дома',
 };
+
+function formatBudget(min: number | null, max: number | null): string | null {
+  const k = (v: number) => Math.round(v / 1000);
+  if (min != null && max != null) return `${k(min)}–${k(max)} тыс`;
+  if (max != null) return `до ${k(max)} тыс`;
+  if (min != null) return `от ${k(min)} тыс`;
+  return null;
+}
 
 function ProfileCardBase({ profile, priority, overlay }: ProfileCardProps) {
   const [mainPhoto, ...thumbPhotos] = profile.photos;
   const tagLabels = profile.vibeTags.map((t) => t.label);
-  const matchPct  = Math.round(profile.matchScore * 100);
+
+  const district = profile.districts[0]?.name ?? null;
+  const ageDistrict = [profile.age != null ? `${profile.age} лет` : null, district]
+    .filter(Boolean)
+    .join(', ');
+  const budgetLabel = formatBudget(profile.budgetMin, profile.budgetMax);
+  const scenarioLabel = SCENARIO_LABELS[profile.scenario] ?? null;
+  const reason = profile.matchReasons?.[0] ?? null;
 
   const scores = profile.lifestyleScales
     ? (Object.entries(profile.lifestyleScales) as [string, number | null][])
@@ -40,120 +55,137 @@ function ProfileCardBase({ profile, priority, overlay }: ProfileCardProps) {
     : [];
 
   return (
-    <div className="relative h-full w-full">
-      {/* SVG-фильтр рваного края */}
-      <svg width="0" height="0" aria-hidden className="absolute">
-        <defs>
-          <filter id="torn" x="-10%" y="-10%" width="120%" height="120%">
-            <feTurbulence type="fractalNoise" baseFrequency="0.038" numOctaves="4" seed="3" result="noise" />
-            <feDisplacementMap in="SourceGraphic" in2="noise" scale="7" xChannelSelector="R" yChannelSelector="G" />
-          </filter>
-        </defs>
-      </svg>
-
-      {/* ── Фото на всю карточку (рваная рамка + фото) ── */}
-      <div className="absolute inset-0 [filter:url(#torn)]">
-        <div className="h-full w-full overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#ffb8d4_0%,#a8d8ff_33%,#fdf4a0_66%,#ffb8d4_100%)] p-[10px]">
-          <div className="relative h-full w-full overflow-hidden rounded-[10px]">
-            {mainPhoto ? (
-              <Image
-                src={mainPhoto}
-                alt={profile.name}
-                fill
-                sizes="(max-width: 480px) 100vw, 480px"
-                className="pointer-events-none select-none object-cover"
-                priority={priority}
-                draggable={false}
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-6xl">🏠</div>
-            )}
-          </div>
+    <div className="relative flex h-full w-full flex-col items-center gap-4 overflow-y-auto px-4 pb-4 pt-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {/* ── Круглое фото + повёрнутые подписи вокруг ── */}
+      <div className="relative mx-auto mt-8 mb-6 w-[92%] max-w-84 shrink-0">
+        <div className="relative aspect-square w-full overflow-hidden rounded-full border-glass shadow-glass">
+          {mainPhoto ? (
+            <Image
+              src={mediaUrl(mainPhoto)}
+              alt={profile.name}
+              fill
+              sizes="(max-width: 480px) 80vw, 320px"
+              className="pointer-events-none select-none object-cover"
+              priority={priority}
+              draggable={false}
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-white/10 text-6xl">🏠</div>
+          )}
         </div>
-      </div>
 
-      {/* Match-бейдж (стикер) */}
-      <span className={`absolute left-0 top-0 z-[2] -rotate-[5deg] rounded-xl border-2 border-black bg-accent px-2 py-1 text-sm font-black text-[#14140f] ${HARD_SHADOW}`}>
-        ★ {matchPct}%
-      </span>
 
-      {/* Верификация — стикер */}
-      <div
-        className={`absolute right-0 top-0 z-[2] flex h-10 w-10 rotate-[6deg] items-center justify-center rounded-full border-2 border-black bg-[#a8d8ff] text-[#14140f] ${HARD_SHADOW}`}
-      >
-        <CheckIcon />
-      </div>
+        {/* Верификация — стеклянный кружок, тот же приём */}
+        {/* <div
+          className={`absolute -right-2 top-[8%] flex h-8 w-8 items-center justify-center rounded-full bg-white/25 text-[#14140f] ${GLASS_CHIP}`}
+        >
+          <CheckIcon />
+        </div> */}
 
-      {/* Полоска миниатюр справа */}
-      {thumbPhotos.length > 0 && (
-        <div className="absolute right-3 top-14 z-[3] flex flex-col gap-1.5">
-          {thumbPhotos.slice(0, 3).map((src, i) => (
-            <div
-              key={i}
-              className="relative h-[66px] w-[54px] overflow-hidden rounded-lg border-2 border-black shadow-[3px_3px_0_rgba(20,20,15,0.9)]"
-            >
-              <Image src={src} alt="" fill sizes="54px" className="object-cover" />
-            </div>
-          ))}
-        </div>
-      )}
-
-      <div className="absolute inset-x-3 bottom-24 z-[4] flex flex-col gap-2">
-        {/* Скоры — наклейки вертикальной колонкой справа */}
-        {scores.length > 0 && (
-          <div className="flex flex-col items-end gap-2">
-            {scores.map((s, i) => {
-              const meta = SCORE_META[i] ?? SCORE_META[0];
-              return (
-                <span
-                  key={s.label}
-                  className={`flex items-center gap-0.5 rounded-md border-2 border-black px-1.5 py-0.5 text-[11px] font-black leading-none text-[#14140f] shadow-[2px_2px_0_rgba(20,20,15,0.9)] ${meta.rot} ${meta.bg}`}
-                >
-                  <span>{meta.icon}</span>
-                  <span>{s.pct}%</span>
-                </span>
-              );
-            })}
+        {/* Мини-фото — стеклянные пузырьки на краю круга */}
+        {thumbPhotos.length > 0 && (
+          <div className="absolute -right-2 top-[28%] flex flex-col gap-2">
+            {thumbPhotos.slice(0, 2).map((src, i) => (
+              <div
+                key={i}
+                className={`relative h-11 w-11 overflow-hidden rounded-full bg-glass ${GLASS_CHIP}`}
+              >
+                <Image src={mediaUrl(src)} alt="" fill sizes="44px" className="object-cover" />
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Инфо — стеклянная панель, сливается с фото */}
-        <div className="flex flex-col gap-2 rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[linear-gradient(to_top,rgba(12,12,10,0.80)_0%,rgba(12,12,10,0.46)_100%)] px-4 py-3 shadow-[0_12px_28px_-10px_rgba(0,0,0,0.55)] backdrop-blur-md">
-          {/* Имя + возраст — на всю ширину панели */}
-          <h2 className="break-words text-3xl font-black leading-none text-white drop-shadow-[1px_1px_0_rgba(0,0,0,0.55)]">
-            {profile.name}
-            {profile.age != null ? (
-              <span className="ml-1.5 font-age text-xl font-extrabold text-white/75">
-                {profile.age}
-              </span>
-            ) : null}
-          </h2>
 
-          {/* Теги — цветные наклейки из палитры рамки */}
-          {tagLabels.length > 0 && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              {tagLabels.slice(0, 3).map((label, i) => (
-                <span
-                  key={label}
-                  className={`rounded-full border-2 border-black px-2.5 py-0.5 text-xs font-bold text-[#14140f] ${TAG_COLORS[i % TAG_COLORS.length]}`}
-                >
-                  {label}
-                </span>
-              ))}
-            </div>
+
+        {/* Подписи вокруг фото — реально идут ПО дуге круга (SVG textPath), а не
+            просто повёрнутый текст. Каждая подпись — на своей четверти дуги
+            (запад→север, север→восток, восток→юг, юг→запад — один и тот же
+            обход по часовой стрелке), отцентрована на ней: так текст не
+            вылезает за пределы своей дуги и не переворачивается. */}
+        <svg viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 h-full w-full overflow-visible" aria-hidden>
+          <defs>
+            <path id={`arc-tl-${profile.id}`} d="M -4 50 A 54 54 0 0 1 50 -4" fill="none" />
+            <path id={`arc-tr-${profile.id}`} d="M 50 -4 A 54 54 0 0 1 104 50" fill="none" />
+            <path id={`arc-br-${profile.id}`} d="M 104 50 A 54 54 0 0 1 50 104" fill="none" />
+            {/* Тот же радиус 54 и то же направление обхода (по часовой), что и
+                у остальных трёх дуг — South→West. Chromium рендерит textPath
+                на этой дуге перевёрнутым на 180° (эмпирически подтверждённый
+                баг, не зависящий от шрифта/среды) — правим ниже честным
+                поворотом текста на 180° вокруг её же середины, а не хаком
+                через dy/радиус, который плыл в разных браузерах. */}
+            <path id={`arc-bl-${profile.id}`} d="M 50 104 A 54 54 0 0 1 -4 50" fill="none" />
+          </defs>
+
+          <text fontSize="4.6" fontWeight={400} fill="white" style={{ filter: 'drop-shadow(0 1px 2px rgba(20,20,60,0.55))' }}>
+            <textPath href={`#arc-tl-${profile.id}`} xlinkHref={`#arc-tl-${profile.id}`} startOffset="50%" textAnchor="middle">
+              {profile.name}
+            </textPath>
+          </text>
+
+          {ageDistrict && (
+            <text fontSize="4.6" fontWeight={400} fill="rgba(255,255,255,0.9)" style={{ filter: 'drop-shadow(0 1px 2px rgba(20,20,60,0.55))' }}>
+              <textPath href={`#arc-tr-${profile.id}`} xlinkHref={`#arc-tr-${profile.id}`} startOffset="50%" textAnchor="middle">
+                {ageDistrict}
+              </textPath>
+            </text>
           )}
-        </div>
+
+          {scenarioLabel && (
+            <text fontSize="4.6" fontWeight={400} fill="rgba(255,255,255,0.9)" style={{ filter: 'drop-shadow(0 1px 2px rgba(20,20,60,0.55))' }}>
+              <textPath href={`#arc-br-${profile.id}`} xlinkHref={`#arc-br-${profile.id}`} startOffset="50%" textAnchor="middle">
+                {scenarioLabel} 👉
+              </textPath>
+            </text>
+          )}
+          
+          {budgetLabel && (
+            // Поворот на 180° вокруг середины дуги (центр круга 50,50, r=54,
+            // угол 135° между South и West): cos135=-0.7071, sin135=0.7071.
+              <text fontSize="4.6" fontWeight={400} fill="rgba(255,255,255,0.9)" style={{ filter: 'drop-shadow(0 1px 2px rgba(20,20,60,0.55))' }}>
+                <textPath href={`#arc-bl-${profile.id}`} xlinkHref={`#arc-bl-${profile.id}`} startOffset="50%" textAnchor="middle">
+                  {budgetLabel}
+                </textPath>
+              </text>
+          )}
+        </svg>
       </div>
+
+      {/* Причина мэтча — короткая «био»-строка под фото */}
+      {reason && (
+        <p className="shrink-0 text-center text-sm leading-snug text-white/90 drop-shadow-[0_1px_3px_rgba(20,20,60,0.45)]">
+          {reason}
+        </p>
+      )}
+
+      {/* Теги — стеклянные пилюли */}
+      {tagLabels.length > 0 && (
+        <div className="flex shrink-0 flex-wrap items-center justify-center gap-2">
+          {tagLabels.map((label, i) => (
+            <Glass
+              key={label}
+              className="text-xs font-bold text-[#14140f]"
+              style={{
+                background: GLASS_TAG_TINTS[i % GLASS_TAG_TINTS.length],
+                borderRadius: 9999,
+                padding: '4px 12px',
+              }}
+              optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+            >
+              {label}
+            </Glass>
+          ))}
+        </div>
+      )}
 
       {overlay}
     </div>
   );
 }
 
-// memo: при ререндере родителя (смена фазы свайпа) карта не пересобирает тяжёлый
-// SVG-фильтр. Сравниваем профиль по id, а не по ссылке: рефетч ленты отдаёт те же
-// карточки новыми объектами — без сравнения по id memo бы их перерисовал и SVG-фильтр
-// мелькнул бы. Контент карточки для одного id в рамках сессии неизменен.
+// memo: при ререндере родителя (смена фазы свайпа) карта не пересобирает DOM.
+// Сравниваем профиль по id, а не по ссылке: рефетч ленты отдаёт те же карточки
+// новыми объектами — без сравнения по id memo бы их перерисовал зря.
 export const ProfileCard = memo(
   ProfileCardBase,
   (prev, next) =>
@@ -164,7 +196,7 @@ export const ProfileCard = memo(
 
 function CheckIcon() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );

@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { Glass } from '@samasante/liquid-glass';
 import { useMatchesQuery } from '@/features/chat';
+import { mediaUrl } from '@/shared/lib/api';
 import { useInviteToSquad } from '@/features/squad';
 
 interface InviteMemberSheetProps {
@@ -29,14 +31,14 @@ export function InviteMemberSheet({ open, onClose, squadId }: InviteMemberSheetP
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 z-40 bg-black/50"
+        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
 
       {/* Sheet */}
-      <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl border-2 border-black bg-[#f0efe9] shadow-[0_-4px_0_rgba(20,20,15,0.9)] max-h-[70vh]">
+      <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-2xl bg-glass backdrop-glass border-glass shadow-glass max-h-[70vh]">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b-2 border-black">
+        <div className="flex items-center justify-between p-4 border-b border-white/15">
           <h3 className="text-lg font-black text-(--text)">Пригласить участника</h3>
           <button
             type="button"
@@ -56,15 +58,23 @@ export function InviteMemberSheet({ open, onClose, squadId }: InviteMemberSheetP
               const partner = match.partner;
               const sent = sentIds.has(partner.id);
               return (
-                <div
+                <Glass
                   key={match.matchId}
-                  className="flex items-center gap-3 p-2 rounded-xl border-2 border-black bg-white"
+                  className="flex items-center gap-3 rounded-xl p-2"
+                  // display через style — <Glass> перебивает класс flex своим
+                  // инлайновым inline-block (см. Card.tsx).
+                  style={{
+                    display: 'flex',
+                    background:
+                      'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+                  }}
+                  optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
                 >
                   {/* Avatar */}
-                  <div className="h-10 w-10 shrink-0 rounded-full border-2 border-black bg-[#f0efe9] flex items-center justify-center text-sm font-bold overflow-hidden">
+                  <div className="h-10 w-10 shrink-0 rounded-full border-glass bg-white/10 flex items-center justify-center text-sm font-bold overflow-hidden">
                     {partner.photo ? (
                       <Image
-                        src={partner.photo}
+                        src={mediaUrl(partner.photo)}
                         alt={partner.name}
                         width={40}
                         height={40}
@@ -86,12 +96,12 @@ export function InviteMemberSheet({ open, onClose, squadId }: InviteMemberSheetP
                       type="button"
                       onClick={() => handleInvite(partner.id)}
                       disabled={inviteMutation.isPending}
-                      className="rounded-full border-2 border-black bg-[#c8f36a] px-3 py-1 text-xs font-black text-(--text) shadow-[2px_2px_0_rgba(20,20,15,0.9)] active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] transition-all duration-100 disabled:opacity-60"
+                      className="rounded-full border-glass bg-accent-glass backdrop-glass px-3 py-1 text-xs font-black text-(--text) shadow-glass active:scale-95 transition-transform duration-150 disabled:opacity-60"
                     >
                       Пригласить
                     </button>
                   )}
-                </div>
+                </Glass>
               );
             })
           )}

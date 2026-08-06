@@ -1,7 +1,12 @@
 'use client';
 
+import { Glass } from '@samasante/liquid-glass';
 import type { MyProfile } from '@/shared/lib/api';
 import { Card } from '@/shared/ui/Card';
+
+const CHIP_OPTICS = { frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 };
+const NEUTRAL_GLASS_BG =
+  'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)';
 
 const MAX_SCORE = 40;
 
@@ -27,19 +32,33 @@ export function RoomieScoreCard({ profile }: { profile: MyProfile }) {
             <span className="text-sm font-bold text-muted">/ {MAX_SCORE}</span>
           </div>
         </div>
-        <div
-          className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-black text-xl font-black shadow-[2px_2px_0_rgba(20,20,15,0.9)]"
-          style={{ background: pct >= 75 ? '#c8f36a' : pct >= 50 ? '#ffd7a8' : '#ffd9e0' }}
+        <Glass
+          className="flex h-16 w-16 items-center justify-center rounded-full text-xl font-black"
+          // Ступени «плохо → отлично» тинтами из общей палитры: скай → фиолетовый
+          // → розовый. Средняя ступень намеренно НЕ персиковая: фон приложения
+          // лавандово-синий, и тёплый оранжевый тинт на нём уходит в грязно-
+          // коричневый вместо персика. Вся шкала держится холодной half-палитры.
+          // display — через style, а не классом: <Glass> ставит инлайновый
+          // inline-block, и класс flex до элемента не доходил (текст процента
+          // стоял в углу вместо центра круга). См. Card.tsx.
+          style={{
+            display: 'flex',
+            background: pct >= 75 ? 'var(--tint-pink)' : pct >= 50 ? 'var(--tint-violet)' : 'var(--tint-sky)',
+          }}
+          optics={CHIP_OPTICS}
         >
           {pct}%
-        </div>
+        </Glass>
       </div>
 
       {/* Progress bar */}
-      <div className="h-2 overflow-hidden rounded-full border-2 border-black bg-[#f0efe9]">
+      <div className="h-2 overflow-hidden rounded-full border-glass bg-white/10">
+        {/* Полоса тонкая (2px) — тинт на ней не читался бы, поэтому заполнение
+            плотное. Цвет — тёмно-синий --progress-fill, а не акцент: на светлом
+            стекле карточки он даёт контраст, которого розовому не хватало. */}
         <div
-          className="h-full rounded-full bg-accent transition-all duration-700"
-          style={{ width: `${pct}%` }}
+          className="h-full rounded-full transition-all duration-700"
+          style={{ width: `${pct}%`, background: '#090a5c' }}
         />
       </div>
 
@@ -50,17 +69,18 @@ export function RoomieScoreCard({ profile }: { profile: MyProfile }) {
           const future = 'future' in step && step.future;
           return (
             <div key={step.label} className="flex items-center gap-2">
-              <span
-                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-black text-[10px] font-black ${
-                  done
-                    ? 'bg-accent text-[#14140f]'
-                    : future
-                    ? 'bg-[#f0efe9] text-muted'
-                    : 'bg-white text-muted'
+              <Glass
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-black ${
+                  done ? 'text-[#14140f]' : 'text-muted'
                 }`}
+                style={{
+                  display: 'flex',
+                  background: done ? 'var(--tint-pink)' : NEUTRAL_GLASS_BG,
+                }}
+                optics={CHIP_OPTICS}
               >
                 {done ? '✓' : '○'}
-              </span>
+              </Glass>
               <span className={`text-sm ${done ? 'font-bold text-(--text)' : 'text-muted'} ${future ? 'line-through' : ''}`}>
                 {step.label}
                 {future && <span className="ml-1 text-[10px] font-normal">(скоро)</span>}

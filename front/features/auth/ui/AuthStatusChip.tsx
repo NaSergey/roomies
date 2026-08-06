@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { ApiError, pingBackend } from '@/shared/lib/api';
-import type { AuthState } from '../model/use-telegram-auth';
+import type { AuthState } from '../model/use-app-auth';
 
 type Ping = 'idle' | 'ok' | 'down';
 

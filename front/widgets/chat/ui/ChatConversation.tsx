@@ -6,6 +6,7 @@ import {
   useSendMessage,
   useMarkChatRead,
 } from '@/features/chat';
+import { mediaUrl } from '@/shared/lib/api';
 import { getWebApp } from '@/shared/lib/telegram';
 import { MessageBubble } from './MessageBubble';
 import { SmartChips } from './SmartChips';
@@ -84,9 +85,9 @@ export function ChatConversation({
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex h-full flex-col px-3 pb-(--nav-space) pt-3">
       {/* Header */}
-      <div className="flex items-center gap-3 border-b-2 border-black px-3 py-2 shrink-0">
+      <div className="flex items-center gap-3 border-b border-white/15 px-3 py-2 shrink-0">
         <button
           type="button"
           onClick={onBack}
@@ -96,10 +97,10 @@ export function ChatConversation({
           ‹
         </button>
         {/* Avatar */}
-        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border-2 border-black bg-accent flex items-center justify-center">
+        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border-glass shadow-glass bg-accent-glass backdrop-glass flex items-center justify-center">
           {partnerPhoto ? (
             <img
-              src={partnerPhoto}
+              src={mediaUrl(partnerPhoto)}
               alt={partnerName}
               className="h-9 w-9 rounded-full object-cover"
             />
@@ -142,14 +143,14 @@ export function ChatConversation({
 
       {/* Nudge bar */}
       {showNudge && (
-        <div className="mx-3 mb-2 flex items-center justify-between gap-2 rounded-xl border-2 border-black bg-[#fff9e6] px-4 py-2 shrink-0">
+        <div className="mx-3 mb-2 flex items-center justify-between gap-2 rounded-xl border-glass shadow-glass backdrop-glass bg-[rgba(255,230,120,0.22)] px-4 py-2 shrink-0">
           <span className="text-xs text-(--text)">
             Хочешь аккуратно напомнить {partnerName}?
           </span>
           <button
             type="button"
             onClick={() => sendMutation.mutate('Привет! Интересно, как дела 🙂')}
-            className="rounded-full border-2 border-black bg-accent px-3 py-1 text-xs font-black text-[#14140f] active:scale-95 transition-transform duration-100"
+            className="rounded-full border-glass bg-accent-glass backdrop-glass px-3 py-1 text-xs font-black text-[#14140f] active:scale-95 transition-transform duration-100"
           >
             Напомнить
           </button>
@@ -157,7 +158,7 @@ export function ChatConversation({
       )}
 
       {/* Input area */}
-      <div className="flex items-center gap-2 border-t-2 border-black px-3 py-2 shrink-0">
+      <div className="flex items-center gap-2 border-t border-white/15 px-3 py-2 shrink-0">
         <button
           type="button"
           onClick={onOpenProposeCall}
@@ -184,13 +185,13 @@ export function ChatConversation({
             }
           }}
           placeholder="Сообщение..."
-          className="flex-1 rounded-full border-2 border-black bg-white px-4 py-2 text-sm outline-none"
+          className="flex-1 rounded-full bg-glass backdrop-glass border-glass px-4 py-2 text-sm text-(--text) outline-none"
         />
         <button
           type="button"
           onClick={handleSend}
           disabled={!inputText.trim() || sendMutation.isPending}
-          className="rounded-full border-2 border-black bg-accent px-4 py-2 text-sm font-black text-[#14140f] disabled:opacity-50 active:scale-95 transition-transform duration-100"
+          className="rounded-full border-glass bg-accent-glass backdrop-glass px-4 py-2 text-sm font-black text-[#14140f] disabled:opacity-50 active:scale-95 transition-transform duration-100"
           aria-label="Отправить"
         >
           →

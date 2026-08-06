@@ -1,5 +1,6 @@
 'use client';
 
+import { Glass } from '@samasante/liquid-glass';
 import { useRespondAgreement } from '@/features/chat';
 import type { AgreementData } from '@/shared/lib/api';
 import { Button } from '@/shared/ui/Button';
@@ -20,7 +21,14 @@ export function AgreementCard({
   const isRecipient = currentUserId !== agreement.createdById;
 
   return (
-    <div className="w-full rounded-2xl border-2 border-black bg-white p-4 my-1 shadow-[3px_3px_0_rgba(20,20,15,0.7)]">
+    <Glass
+      className="w-full rounded-2xl p-4 my-1"
+      style={{
+        background:
+          'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+      }}
+      optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+    >
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
         <span>🤝</span>
@@ -67,7 +75,7 @@ export function AgreementCard({
               })
             }
             disabled={respondAgreement.isPending}
-            className="flex-1 rounded-full border-2 border-black bg-white py-2 text-sm font-black text-muted active:scale-95 transition-transform duration-100 disabled:opacity-50"
+            className="flex-1 rounded-full border-glass bg-glass backdrop-glass py-2 text-sm font-black text-muted active:scale-95 transition-transform duration-100 disabled:opacity-50"
           >
             Отклонить
           </button>
@@ -100,6 +108,6 @@ export function AgreementCard({
       {agreement.status === 'declined' && (
         <p className="text-xs text-muted italic mt-2">Отклонено</p>
       )}
-    </div>
+    </Glass>
   );
 }

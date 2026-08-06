@@ -5,57 +5,75 @@ export interface ActionButtonsProps {
   onLike: () => void;
   onSave?: () => void;
   onSuperLike?: () => void;
+  /** Открыть карточку кандидата целиком (тот же переход, что и тап по карте). */
+  onDetails?: () => void;
 }
 
-export function ActionButtons({ onPass, onLike, onSave, onSuperLike }: ActionButtonsProps) {
+// Тинты pass/like — из общей палитры (--tint-* в globals.css), вид прежний:
+// раньше те же значения стояли здесь хардкодом.
+const GLASS_CIRCLE = 'border-glass shadow-glass backdrop-glass transition-transform active:scale-90 disabled:opacity-40';
+
+// Та же стеклянная семья, что и GLASS_CIRCLE, но без bg-glass (убирает
+// диагональный блик) и с одним мягким inset-хайлайтом вместо двух из
+// shadow-glass — на нейтральном (нецветном) фоне пилюли три блика разом
+// читались как "залипание" света, кругам Pass/Like это не мешает, потому
+// что там поверх цветной заливки.
+const DETAILS_PILL =
+  'rounded-full border-glass backdrop-glass bg-white/14 px-4 py-2.5 text-sm font-bold text-white ' +
+  'shadow-[0_10px_26px_-10px_rgba(20,20,60,0.45),inset_0_1px_0_rgba(255,255,255,0.5)] ' +
+  'transition-transform active:scale-90';
+
+export function ActionButtons({ onPass, onLike, onSave, onSuperLike, onDetails }: ActionButtonsProps) {
   return (
-    <div className="flex items-center justify-center gap-3 pb-2 pt-1">
+    <div className="flex items-end justify-center gap-5 pb-2 pt-1">
+      {/* Pass — стеклянный круг с розовым оттенком, спутник Save сверху-слева */}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={onPass}
+          aria-label="Пропустить"
+          className={`flex h-15 w-15 items-center justify-center rounded-full bg-(--tint-rose) text-[#14140f] ${GLASS_CIRCLE}`}
+        >
+          <XIcon />
+        </button>
+        <button
+          type="button"
+          onClick={onSave}
+          aria-label="Сохранить"
+          disabled={!onSave}
+          className={`absolute -left-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-glass text-[#14140f] ${GLASS_CIRCLE}`}
+        >
+          <BookmarkIcon />
+        </button>
+      </div>
 
-      {/* Pass — белый круг с лицом */}
-      <button
-        type="button"
-        onClick={onPass}
-        aria-label="Пропустить"
-        className="flex h-[60px] w-[60px] items-center justify-center rounded-full border-2 border-black bg-white transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95"
-        style={{ boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
-      >
-        <FacePassIcon />
-      </button>
+      {/* Подробнее — стеклянная пилюля, тот же переход, что и тап по карте */}
+      {onDetails && (
+        <button type="button" onClick={onDetails} className={DETAILS_PILL}>
+          подробнее
+        </button>
+      )}
 
-      {/* Save — закладка, персиковый */}
-      <button
-        type="button"
-        onClick={onSave}
-        aria-label="Сохранить"
-        disabled={!onSave}
-        className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-2 border-black transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95 disabled:opacity-40"
-        style={{ background: '#ffd7a8', boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
-      >
-        <BookmarkIcon />
-      </button>
-
-      {/* SuperLike — звезда, небесно-голубой */}
-      <button
-        type="button"
-        onClick={onSuperLike}
-        aria-label="Супер лайк"
-        disabled={!onSuperLike}
-        className="flex h-[52px] w-[52px] items-center justify-center rounded-full border-2 border-black transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95 disabled:opacity-40"
-        style={{ background: '#a8d8ff', boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
-      >
-        <StarIcon />
-      </button>
-
-      {/* Like — лаймовый круг, жест рукой */}
-      <button
-        type="button"
-        onClick={onLike}
-        aria-label="Лайк"
-        className="flex h-[60px] w-[60px] items-center justify-center rounded-full border-2 border-black transition-transform active:translate-x-[2px] active:translate-y-[2px] active:scale-95"
-        style={{ background: '#c8f36a', boxShadow: '4px 4px 0 rgba(20,20,15,0.9)' }}
-      >
-        <RockOnIcon />
-      </button>
+      {/* Like — стеклянный круг с мятным оттенком, спутник SuperLike сверху-справа */}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={onLike}
+          aria-label="Лайк"
+          className={`flex h-15 w-15 items-center justify-center rounded-full bg-(--tint-mint) text-[#14140f] ${GLASS_CIRCLE}`}
+        >
+          <CheckIcon />
+        </button>
+        <button
+          type="button"
+          onClick={onSuperLike}
+          aria-label="Супер лайк"
+          disabled={!onSuperLike}
+          className={`absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-glass text-[#14140f] ${GLASS_CIRCLE}`}
+        >
+          <StarIcon />
+        </button>
+      </div>
     </div>
   );
 }
@@ -76,31 +94,19 @@ function StarIcon() {
   );
 }
 
-function FacePassIcon() {
+function XIcon() {
   return (
-    <svg width="34" height="30" viewBox="0 0 34 30" fill="none" aria-hidden>
-      {/* X-глаза */}
-      <text x="3" y="16" fontSize="13" fontWeight="900" fill="#222">×</text>
-      <text x="19" y="16" fontSize="13" fontWeight="900" fill="#222">×</text>
-      {/* Радуга */}
-      <path d="M5,24 Q17,14 29,24" stroke="#f87171" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-      <path d="M7,26 Q17,17 27,26" stroke="#fb923c" strokeWidth="1.8" fill="none" strokeLinecap="round" />
-      <path d="M9,28 Q17,20 25,28" stroke="#facc15" strokeWidth="1.4" fill="none" strokeLinecap="round" />
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
+      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" />
     </svg>
   );
 }
 
-function RockOnIcon() {
+function CheckIcon() {
   return (
-    <svg width="30" height="30" viewBox="0 0 100 100" fill="#222" aria-hidden>
-      {/* Ладонь */}
-      <rect x="28" y="44" width="44" height="40" rx="12" />
-      {/* Большой палец */}
-      <rect x="12" y="52" width="22" height="15" rx="7" />
-      {/* Указательный палец */}
-      <rect x="31" y="12" width="15" height="40" rx="7" />
-      {/* Мизинец */}
-      <rect x="54" y="12" width="15" height="40" rx="7" />
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#222" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <polyline points="20 6 9 17 4 12" />
     </svg>
   );
 }

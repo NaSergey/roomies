@@ -5,10 +5,19 @@ import { PrismaClient, ScenarioType } from '@prisma/client';
 const adapter = new PrismaPg({ connectionString: process.env['DATABASE_URL']! });
 const prisma = new PrismaClient({ adapter });
 
-// Сколько пользователей сгенерировать и с какого telegramId начинать
-// (1100000001–1100000100 уже заняты основным seed.ts).
-const COUNT = 1000;
+// Сколько пользователей генерируем НА КАЖДЫЙ город и с какого telegramId начинать
+// (1100000001–1100000100 уже заняты основным seed.ts). Диапазон на город:
+// TELEGRAM_ID_START + cityIndex*COUNT_PER_CITY .. +COUNT_PER_CITY-1.
+const COUNT_PER_CITY = 1000;
 const TELEGRAM_ID_START = 1_200_000_001n;
+
+// Postgres ограничивает запрос 65535 параметрами — берём запас на самую
+// «широкую» таблицу (users, ~16 колонок) и используем один размер чанка везде.
+const CHUNK_SIZE = 2000;
+
+// Заглушки для фото — «человеческие» аватарки, контент не важен (тестовые данные),
+// pravatar.cc отдаёт ограниченный, но стабильный набор (img=1..70) без API-ключа.
+const PRAVATAR_COUNT = 70;
 
 const FIRST_NAMES_M = [
   'Александр', 'Дмитрий', 'Максим', 'Сергей', 'Андрей', 'Алексей', 'Артём',
@@ -63,6 +72,23 @@ function round2(n: number): number {
   return Math.round(n * 100) / 100;
 }
 
+function chunk<T>(arr: T[], size: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+  return chunks;
+}
+
+async function insertChunked<T>(
+  label: string,
+  rows: T[],
+  insert: (batch: T[]) => Promise<unknown>,
+): Promise<void> {
+  for (const batch of chunk(rows, CHUNK_SIZE)) {
+    await insert(batch);
+  }
+  console.log(`  ${label}: ${rows.length}`);
+}
+
 // Случайная дата рождения 18–30 лет (целевая аудитория проекта).
 function randomBirthDate(): Date {
   const ageYears = 18 + Math.floor(Math.random() * 13);
@@ -104,9 +130,15 @@ interface GeneratedUser {
   workFromHome: number;
   districtIdxs: [number, number];
   tagIdxs: [number, number, number];
+  photoSeed: number;
 }
 
-function generateUsers(count: number): GeneratedUser[] {
+function generateUsers(
+  count: number,
+  telegramIdStart: bigint,
+  districtCount: number,
+  photoSeedStart: number,
+): GeneratedUser[] {
   const users: GeneratedUser[] = [];
   for (let i = 0; i < count; i++) {
     const isMale = Math.random() < 0.5;
@@ -118,7 +150,7 @@ function generateUsers(count: number): GeneratedUser[] {
     const budgetMax = budgetMin + 10000 + Math.floor(Math.random() * 20) * 1000;
 
     users.push({
-      telegramId: TELEGRAM_ID_START + BigInt(i),
+      telegramId: telegramIdStart + BigInt(i),
       name: `${first} ${last}`,
       birthDate: randomBirthDate(),
       scenario: pick(SCENARIOS),
@@ -131,26 +163,22 @@ function generateUsers(count: number): GeneratedUser[] {
       sleepSchedule: round2(Math.random()),
       socialLevel: round2(Math.random()),
       workFromHome: round2(Math.random()),
-      districtIdxs: pickTwoDistinct(5),
+      districtIdxs: pickTwoDistinct(districtCount),
       tagIdxs: pickThreeDistinct(22),
+      photoSeed: (photoSeedStart + i) % PRAVATAR_COUNT,
     });
   }
   return users;
 }
 
-async function main(): Promise<void> {
-  console.log(`Генерируем ${COUNT} тестовых пользователей...`);
-
-  const moscowCity = await prisma.city.findFirst({ where: { name: 'Москва' } });
-  if (!moscowCity) throw new Error('City "Москва" not found — run `npx prisma db seed` first');
-  const moscowId = moscowCity.id;
-
-  const moscowDistricts = await prisma.district.findMany({
-    where: { cityId: moscowId },
+async function seedCity(cityId: number, cityName: string, telegramIdStart: bigint): Promise<number> {
+  const districts = await prisma.district.findMany({
+    where: { cityId },
     orderBy: { id: 'asc' },
   });
-  if (moscowDistricts.length < 5) {
-    throw new Error(`Expected >=5 Moscow districts, found ${moscowDistricts.length}`);
+  if (districts.length < 2) {
+    console.warn(`  Пропускаем ${cityName}: меньше 2 районов (${districts.length})`);
+    return 0;
   }
 
   const allTags = await prisma.vibeTag.findMany({
@@ -161,57 +189,53 @@ async function main(): Promise<void> {
     throw new Error(`Expected >=22 vibe tags, found ${allTags.length}`);
   }
 
-  const generated = generateUsers(COUNT);
+  const generated = generateUsers(COUNT_PER_CITY, telegramIdStart, districts.length, Number(telegramIdStart % 1000n));
 
-  // 1. Bulk-вставка пользователей
-  await prisma.user.createMany({
-    data: generated.map((u) => ({
-      telegramId: u.telegramId,
-      name: u.name,
-      birthDate: u.birthDate,
-      scenario: u.scenario,
-      cityId: moscowId,
-      budgetMin: u.budgetMin,
-      budgetMax: u.budgetMax,
-      smokingOk: u.smokingOk,
-      petsOk: u.petsOk,
-      noiseLevel: u.noiseLevel,
-      cleanliness: u.cleanliness,
-      sleepSchedule: u.sleepSchedule,
-      socialLevel: u.socialLevel,
-      workFromHome: u.workFromHome,
-      onboardingCompleted: true,
-      quizCompleted: true,
-      onboardingStep: 6,
-      isActive: true,
-    })),
-    skipDuplicates: true,
-  });
-  console.log('  Пользователи вставлены, подтягиваем их id...');
+  await insertChunked('Пользователи вставлены', generated, (batch) =>
+    prisma.user.createMany({
+      data: batch.map((u) => ({
+        telegramId: u.telegramId,
+        name: u.name,
+        birthDate: u.birthDate,
+        scenario: u.scenario,
+        cityId,
+        budgetMin: u.budgetMin,
+        budgetMax: u.budgetMax,
+        smokingOk: u.smokingOk,
+        petsOk: u.petsOk,
+        noiseLevel: u.noiseLevel,
+        cleanliness: u.cleanliness,
+        sleepSchedule: u.sleepSchedule,
+        socialLevel: u.socialLevel,
+        workFromHome: u.workFromHome,
+        onboardingCompleted: true,
+        quizCompleted: true,
+        onboardingStep: 5,
+        isActive: true,
+      })),
+      skipDuplicates: true,
+    }),
+  );
 
-  // 2. Подтягиваем id только что вставленных пользователей по диапазону telegramId
   const inserted = await prisma.user.findMany({
     where: {
-      telegramId: {
-        gte: TELEGRAM_ID_START,
-        lt: TELEGRAM_ID_START + BigInt(COUNT),
-      },
+      telegramId: { gte: telegramIdStart, lt: telegramIdStart + BigInt(COUNT_PER_CITY) },
     },
     select: { id: true, telegramId: true },
   });
-  const idByTelegramId = new Map(inserted.map((u) => [u.telegramId.toString(), u.id]));
+  const idByTelegramId = new Map(inserted.map((u) => [u.telegramId!.toString(), u.id]));
 
-  // 3. Bulk-вставка районов, тегов и ответов квиза
   const districtRows: { userId: number; districtId: number }[] = [];
   const tagRows: { userId: number; tagId: number }[] = [];
   const quizRows: { userId: number; questionId: number; optionCode: string; answerValue: number }[] = [];
+  const photoRows: { userId: number; url: string; displayOrder: number }[] = [];
 
   for (const u of generated) {
     const userId = idByTelegramId.get(u.telegramId.toString());
     if (userId == null) continue; // skipDuplicates пропустил — telegramId уже существовал
 
     for (const idx of u.districtIdxs) {
-      districtRows.push({ userId, districtId: moscowDistricts[idx].id });
+      districtRows.push({ userId, districtId: districts[idx].id });
     }
     for (const idx of u.tagIdxs) {
       tagRows.push({ userId, tagId: allTags[idx].id });
@@ -219,18 +243,45 @@ async function main(): Promise<void> {
     for (const a of makeQuizAnswers(u.noiseLevel, u.cleanliness, u.sleepSchedule, u.socialLevel, u.workFromHome)) {
       quizRows.push({ userId, ...a });
     }
+    photoRows.push({
+      userId,
+      url: `https://i.pravatar.cc/500?img=${u.photoSeed + 1}`,
+      displayOrder: 0,
+    });
   }
 
-  await prisma.userDistrict.createMany({ data: districtRows, skipDuplicates: true });
-  console.log(`  Районы привязаны: ${districtRows.length}`);
+  await insertChunked('Районы привязаны', districtRows, (batch) =>
+    prisma.userDistrict.createMany({ data: batch, skipDuplicates: true }),
+  );
+  await insertChunked('Теги привязаны', tagRows, (batch) =>
+    prisma.userVibeTag.createMany({ data: batch, skipDuplicates: true }),
+  );
+  await insertChunked('Ответы квиза вставлены', quizRows, (batch) =>
+    prisma.userQuizAnswer.createMany({ data: batch, skipDuplicates: true }),
+  );
+  await insertChunked('Фото вставлены', photoRows, (batch) =>
+    prisma.userPhoto.createMany({ data: batch, skipDuplicates: true }),
+  );
 
-  await prisma.userVibeTag.createMany({ data: tagRows, skipDuplicates: true });
-  console.log(`  Теги привязаны: ${tagRows.length}`);
+  return inserted.length;
+}
 
-  await prisma.userQuizAnswer.createMany({ data: quizRows, skipDuplicates: true });
-  console.log(`  Ответы квиза вставлены: ${quizRows.length}`);
+async function main(): Promise<void> {
+  const cities = await prisma.city.findMany({ orderBy: { id: 'asc' } });
+  if (cities.length === 0) {
+    throw new Error('Города не найдены — сначала запусти `npx prisma db seed`');
+  }
 
-  console.log(`Готово: добавлено ${inserted.length} пользователей.`);
+  console.log(`Генерируем по ${COUNT_PER_CITY} тестовых пользователей на каждый из ${cities.length} городов...`);
+
+  let total = 0;
+  for (const [i, city] of cities.entries()) {
+    const telegramIdStart = TELEGRAM_ID_START + BigInt(i) * BigInt(COUNT_PER_CITY);
+    console.log(`Город: ${city.name}`);
+    total += await seedCity(city.id, city.name, telegramIdStart);
+  }
+
+  console.log(`Готово: добавлено ${total} пользователей.`);
 }
 
 main()

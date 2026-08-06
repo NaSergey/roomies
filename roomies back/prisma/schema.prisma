@@ -122,17 +122,30 @@ model District {
 model User {
   id        Int       @id @default(autoincrement())
 
+  // Непрозрачный случайный идентификатор аккаунта — именно он лежит в `sub` JWT,
+  // а НЕ автоинкрементный id. Иначе токен, выписанный до пересоздания базы
+  // (или до удаления аккаунта), после сброса последовательности id указывал бы
+  // на другого человека — реальный инцидент «зашёл на чужой аккаунт».
+  publicId String @unique @default(uuid()) @map("public_id")
+
+  // Счётчик-«эпоха» выданных токенов. Инкремент обесценивает ВСЕ ранее выданные
+  // JWT этого пользователя (смена пароля, «выйти со всех устройств», утечка токена).
+  // Без него отозвать stateless-токен до истечения 7 суток невозможно.
+  tokenVersion Int @default(0) @map("token_version")
+
   // Telegram-аккаунт (основной идентификатор для входа через Mini App).
   // BigInt — Telegram user id может превышать диапазон Int32.
-  telegramId       BigInt  @unique @map("telegram_id")
+  // Nullable — аккаунты, созданные через email/пароль в браузере, его не имеют.
+  telegramId       BigInt? @unique @map("telegram_id")
   telegramUsername String? @map("telegram_username") @db.VarChar(64)
   telegramPhotoUrl String? @map("telegram_photo_url")
   languageCode     String? @map("language_code") @db.VarChar(10)
 
-  email     String?   @unique @db.VarChar(255)
-  phone     String?   @unique @db.VarChar(20)
-  name      String    @db.VarChar(100)
-  birthDate DateTime? @map("birth_date") @db.Date
+  email        String?   @unique @db.VarChar(255)
+  passwordHash String?   @map("password_hash")
+  phone        String?   @unique @db.VarChar(20)
+  name         String    @db.VarChar(100)
+  birthDate    DateTime? @map("birth_date") @db.Date
 
   scenario ScenarioType
   cityId   Int?         @map("city_id")
@@ -166,6 +179,16 @@ model User {
   onboardingStep      Int     @default(0)     @map("onboarding_step") @db.SmallInt
   onboardingCompleted Boolean @default(false) @map("onboarding_completed")
   quizCompleted       Boolean @default(false) @map("quiz_completed")
+
+  // Кто пригласил этого пользователя. Проставляется ОДИН раз, при создании
+  // аккаунта: реферальный код прилетает в start_param ссылки Mini App
+  // (t.me/<bot>?startapp=ref_<publicId>) и разбирается в AuthService.
+  // Код — publicId пригласившего, а не автоинкрементный id: он и так публичный
+  // и не выдаёт ни размер базы, ни порядок регистраций.
+  // onDelete: SetNull — удаление пригласившего не должно уносить приглашённых.
+  referredById Int?  @map("referred_by_id")
+  referredBy   User? @relation("UserReferrals", fields: [referredById], references: [id], onDelete: SetNull)
+  referrals    User[] @relation("UserReferrals")
 
   boostedUntil DateTime? @map("boosted_until")
   isActive     Boolean   @default(true) @map("is_active")
@@ -210,6 +233,8 @@ model User {
   @@index([moveInDate])
   @@index([isActive, lastSeenAt(sort: Desc)])
   @@index([smokingOk, petsOk, guestsPref])
+  // Счётчик приглашённых на экране профиля читает именно по этому полю.
+  @@index([referredById])
   @@map("users")
 }
 

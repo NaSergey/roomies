@@ -4,24 +4,25 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 export type ButtonVariant = 'accent' | 'white';
 
+// Оба варианта — одно и то же стекло, разница только в тинте: accent — брендовый
+// розовый (bg-accent-glass), white — без тинта (bg-glass). Тинт низкоальфовый,
+// фон сквозь кнопку виден: плотная заливка выпадала бы из стеклянного языка
+// остального интерфейса.
 const VARIANT: Record<ButtonVariant, string> = {
-  accent: 'bg-accent text-(--text-on-accent)',
-  white: 'bg-white text-(--text)',
+  accent: 'bg-accent-glass backdrop-glass border-glass text-(--text-on-accent)',
+  white: 'bg-glass backdrop-glass border-glass text-(--text)',
 };
 
-// Необруталистская кнопка: единый бордер + цвет варианта. Размер/ширину/отступы
-// прокидываем через className (намеренно НЕ в базе — иначе Tailwind-классы паддинга
-// конфликтовали бы и переопределение работало бы непредсказуемо).
-const BASE = 'rounded-full border-2 border-black font-black disabled:opacity-60';
+// Единая база + цвет варианта. Размер/ширину/отступы прокидываем через className
+// (намеренно НЕ в базе — иначе Tailwind-классы паддинга конфликтовали бы и
+// переопределение работало бы непредсказуемо).
+const BASE = 'rounded-full font-black disabled:opacity-60';
 
-// Два стиля «нажатия»: raised — жёсткая тень + вдавливание (основные CTA);
-// flat — без тени, scale при нажатии (вторичные кнопки внутри карточек, напр. чат).
+// Два стиля «нажатия»: raised — с тенью-стеклом, приподнят над фоном (основные CTA);
+// flat — без тени, просто scale при нажатии (вторичные кнопки внутри карточек, напр. чат).
 const PRESS = {
-  raised:
-    'shadow-[2px_2px_0_rgba(20,20,15,0.9)] ' +
-    'active:translate-x-px active:translate-y-px active:shadow-[1px_1px_0_rgba(20,20,15,0.9)] ' +
-    'transition-all duration-100',
-  flat: 'active:scale-95 transition-transform duration-100',
+  raised: 'shadow-glass active:scale-95 transition-transform duration-150',
+  flat: 'active:scale-95 transition-transform duration-150',
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

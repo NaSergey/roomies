@@ -12,9 +12,11 @@ interface ChipProps {
 
 // Переключаемый «чип» (фильтры, правила в анкете). Раньше дублировался как
 // локальные Chip (FilterSheet) и ToggleChip (ProfileEditSheet) — один в один.
-const BASE = 'rounded-full border-2 border-black text-sm font-bold transition-all active:scale-95';
-const ACTIVE = 'bg-accent text-(--text-on-accent) shadow-[2px_2px_0_rgba(20,20,15,0.9)]';
-const INACTIVE = 'bg-white text-muted';
+const BASE = 'rounded-full border-glass text-sm font-bold transition-all active:scale-95';
+// Активный и неактивный — одно стекло, разница в тинте и в контрасте текста:
+// плотной заливкой активный чип вываливался бы из стеклянного языка.
+const ACTIVE = 'bg-accent-glass backdrop-glass text-(--text-on-accent) shadow-glass';
+const INACTIVE = 'bg-glass backdrop-glass text-muted';
 
 export function Chip({ active, onClick, children, className = 'px-3 py-1' }: ChipProps) {
   return (

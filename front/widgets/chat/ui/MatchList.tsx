@@ -1,6 +1,7 @@
 'use client';
 
 import { useMatchesQuery } from '@/features/chat';
+import { mediaUrl } from '@/shared/lib/api';
 import type { MatchListItem } from '@/shared/lib/api';
 
 export interface MatchListProps {
@@ -49,14 +50,14 @@ function MatchRow({
   return (
     <button
       type="button"
-      className="flex w-full items-center gap-3 border-b border-[#f0efe9] p-3 active:bg-[#f8f8f5]"
+      className="flex w-full items-center gap-3 border-b border-white/10 p-3 active:bg-white/10"
       onClick={() => onSelect(item.chatId, partner.id, partner.name, partner.photo)}
     >
       {/* Avatar */}
-      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-2 border-black bg-accent flex items-center justify-center shadow-[2px_2px_0_rgba(20,20,15,0.7)]">
+      <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full border-glass shadow-glass bg-accent-glass backdrop-glass flex items-center justify-center">
         {partner.photo ? (
           <img
-            src={partner.photo}
+            src={mediaUrl(partner.photo)}
             alt={partner.name}
             className="h-12 w-12 rounded-full object-cover"
           />
@@ -97,7 +98,7 @@ export function MatchList({ onSelect }: MatchListProps) {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-16 animate-pulse rounded-xl bg-[#f0efe9] mx-3 mb-2"
+            className="h-16 animate-pulse rounded-xl bg-white/10 mx-3 mb-2"
           />
         ))}
       </div>
@@ -126,7 +127,7 @@ export function MatchList({ onSelect }: MatchListProps) {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-0 overflow-y-auto">
+    <div className="flex flex-1 flex-col gap-0 overflow-y-auto px-3 pb-(--nav-space) pt-3">
       {matches.map((item) => (
         <MatchRow key={item.chatId} item={item} onSelect={onSelect} />
       ))}
