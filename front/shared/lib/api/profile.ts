@@ -11,6 +11,8 @@ export interface MyProfile {
   budgetMax: number | null;
   smokingOk: boolean;
   petsOk: boolean;
+  smokes: boolean;
+  hasPets: boolean;
   guestsPref: 'rarely' | 'sometimes' | 'often';
   photos: string[];
   vibeTags: { id: number; label: string }[];
@@ -40,6 +42,8 @@ export interface UpdateProfilePayload {
   districtIds?: number[];
   smokingOk?: boolean;
   petsOk?: boolean;
+  smokes?: boolean;
+  hasPets?: boolean;
   guestsPref?: 'rarely' | 'sometimes' | 'often';
 }
 

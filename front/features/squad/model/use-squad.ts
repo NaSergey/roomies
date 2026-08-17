@@ -21,11 +21,15 @@ export const squadKeys = {
 
 // --- Queries ---
 
-export function useMySquadQuery() {
+// enabled — чтобы экран, на котором squad-блок скрыт флагом, не тянул данные
+// «в стол»: ProfileView держит SHOW_SQUAD = false, но оба запроса уходили на
+// каждый вход в профиль и их результат никуда не рендерился.
+export function useMySquadQuery(enabled = true) {
   return useQuery({
     queryKey: squadKeys.mySquad,
     queryFn: getMySquad,
     staleTime: 30_000,
+    enabled,
   });
 }
 
@@ -37,11 +41,12 @@ export function useSquadFeedQuery() {
   });
 }
 
-export function usePendingInvitesQuery() {
+export function usePendingInvitesQuery(enabled = true) {
   return useQuery({
     queryKey: squadKeys.pendingInvites,
     queryFn: getPendingInvites,
     staleTime: 30_000,
+    enabled,
   });
 }
 

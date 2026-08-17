@@ -1,10 +1,13 @@
 'use client';
 
 import { AnimatedGradientBackground } from '@/shared/ui/AnimatedGradientBackground';
+import { useStableViewportHeight } from './use-stable-viewport-height';
 import { useTelegramWebApp } from './use-telegram-web-app';
 
 export function TelegramProvider({ children }: { children: React.ReactNode }) {
   useTelegramWebApp();
+  // Держит --app-height (высота экрана без клавиатуры) — по ней рисуется фон.
+  useStableViewportHeight();
   // Контейнер на высоту экрана. Safe-area (вырез/шапка TG сверху, домашняя
   // полоса снизу) — это padding ВНУТРИ h-dvh (border-box), поэтому контент не
   // вылезает за экран в fullscreen. Вьюхи внутри занимают h-full.

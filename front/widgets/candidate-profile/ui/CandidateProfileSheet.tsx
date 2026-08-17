@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { VibeScaleBar } from '@/shared/ui/VibeScaleBar';
 import { RulesSection } from '@/shared/ui/RulesSection';
 import { MatchReasonsList } from '@/shared/ui/MatchReasonsList';
-import { TAG_TINTS, SCENARIO_LABELS } from '@/shared/config';
+import { TAG_TINTS, SCENARIO_LABELS, GLASS_OPTICS } from '@/shared/config';
 import { ActionButtons } from '@/features/swipe-profile';
 import type { ActionButtonsProps } from '@/features/swipe-profile';
 import { mediaUrl } from '@/shared/lib/api';
@@ -20,7 +20,7 @@ export interface CandidateProfileSheetProps extends ActionButtonsProps {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-3">
-      <span className="text-[10px] font-black uppercase tracking-widest text-muted">{title}</span>
+      <span className="text-[10px] font-black uppercase tracking-widest text-white">{title}</span>
       {children}
     </div>
   );
@@ -135,7 +135,7 @@ export function CandidateProfileSheet({
             <Glass
               className="shrink-0 rounded-xl px-2 py-1 text-sm font-black text-[#14140f]"
               style={{ background: 'var(--tint-pink)' }}
-              optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+              optics={GLASS_OPTICS}
             >
               ★ {matchPct}%
             </Glass>
@@ -144,7 +144,7 @@ export function CandidateProfileSheet({
 
         {/* Scrollable content */}
         {displayCandidate && (
-          <div className="flex-1 overflow-y-auto px-5 py-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex-1 overflow-y-auto px-5 py-4 no-scrollbar">
             <div className="flex flex-col gap-5 pb-2">
 
               {/* ВАЙБ ДОМА */}
@@ -174,6 +174,8 @@ export function CandidateProfileSheet({
                 <RulesSection
                   smokingOk={displayCandidate.smokingOk}
                   petsOk={displayCandidate.petsOk}
+                  smokes={displayCandidate.smokes}
+                  hasPets={displayCandidate.hasPets}
                   guestsPref={displayCandidate.guestsPref}
                 />
               </Section>
@@ -199,7 +201,7 @@ export function CandidateProfileSheet({
                         <Glass
                           key={t.id}
                           className={`rounded-full px-2.5 py-0.5 text-xs font-bold text-[#14140f] ${TAG_TINTS[i % TAG_TINTS.length]}`}
-                          optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+                          optics={GLASS_OPTICS}
                         >
                           {t.label}
                         </Glass>

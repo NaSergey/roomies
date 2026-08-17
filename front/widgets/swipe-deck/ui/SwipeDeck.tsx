@@ -161,10 +161,10 @@ export function SwipeDeck() {
 
       {visibleSquads.length > 0 && (
         <div className="flex flex-col gap-2 pt-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted px-1">
+          <span className="text-[10px] font-black uppercase tracking-widest text-white px-1">
             Сквады в поиске 👥
           </span>
-          <div className="flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
             {visibleSquads.map((squad) => (
               <SquadCard
                 key={squad.id}

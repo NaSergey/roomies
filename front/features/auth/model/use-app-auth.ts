@@ -9,13 +9,13 @@ import {
   getAccessToken,
   loginWithEmail,
   loginWithTelegram,
+  onAccessTokenCleared,
   registerWithEmail,
   setAccessToken,
 } from '@/shared/lib/api';
 import { getWebApp } from '@/shared/lib/telegram';
 
 export type AuthStatus =
-  | 'idle'
   | 'authenticating'
   | 'authenticated'
   | 'unauthenticated'
@@ -37,8 +37,12 @@ export type AuthState = {
 //  - открыто из Telegram Mini App (есть initData) → логинимся через /auth/telegram;
 //  - иначе (обычный браузер) → unauthenticated, экран показывает форму входа/регистрации.
 export function useAppAuth() {
+  // Стартуем сразу в 'authenticating': на маунте приложение в любом случае идёт
+  // проверять сессию, и отдельного «ничего не происходит» состояния не бывает.
+  // Раньше здесь было 'idle', а эффект синхронно переключал статус — лишний
+  // каскадный рендер на каждом запуске (и ошибка react-hooks/set-state-in-effect).
   const [state, setState] = useState<AuthState>({
-    status: 'idle',
+    status: 'authenticating',
     tokens: null,
     error: null,
     submitting: false,
@@ -56,7 +60,6 @@ export function useAppAuth() {
         return;
       }
 
-      setState((s) => ({ ...s, status: 'authenticating', error: null }));
       loginWithTelegram(initData)
         .then((tokens) => {
           if (cancelled) return;
@@ -73,7 +76,6 @@ export function useAppAuth() {
     // быть отозванным (logout-all / смена пароля) или относиться к пересозданной
     // базе. Единственный источник истины — сервер.
     if (getAccessToken()) {
-      setState((s) => ({ ...s, status: 'authenticating', error: null }));
       fetchMe()
         .then(() => {
           if (cancelled) return;
@@ -93,6 +95,30 @@ export function useAppAuth() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Токен мог быть вычищен из любого места приложения: apiFetch делает это на
+  // каждом 401 (истёк, отозван через logout-all, база пересоздана). Раньше об
+  // этом никто не узнавал, и состояние залипало в 'authenticated' — человек
+  // оставался на экране опросника, а каждый следующий шаг уходил на сервер уже
+  // без заголовка и возвращал «Missing bearer token» прямо в UI. Теперь сессия
+  // честно считается закрытой, и показывается экран входа.
+  //
+  // Только из 'authenticated': на старте apiFetch тоже чистит токен (провалился
+  // /auth/me), но там уже идёт свой переход к автологину через initData.
+  useEffect(() => {
+    return onAccessTokenCleared(() => {
+      setState((s) =>
+        s.status === 'authenticated'
+          ? {
+              ...s,
+              status: 'unauthenticated',
+              tokens: null,
+              error: 'Сессия истекла. Войди снова.',
+            }
+          : s,
+      );
+    });
   }, []);
 
   const login = useCallback((email: string, password: string) => {

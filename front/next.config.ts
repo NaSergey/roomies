@@ -25,6 +25,13 @@ function apiRemotePattern(): RemotePattern[] {
 }
 
 const nextConfig: NextConfig = {
+  // Экранный индикатор Next в dev выключен: приложение открывают в вебвью
+  // Telegram, где он ложится поверх интерфейса и мешает смотреть вёрстку с
+  // телефона. Ошибки сборки и рантайма Next продолжает показывать — гасится
+  // только сам значок (см. node_modules/next/dist/docs → devIndicators;
+  // в Next 16 под-опции appIsrStatus/buildActivity удалены, остался булев флаг).
+  devIndicators: false,
+
   // Разрешаем dev-серверу принимать запросы через Cloudflare-туннель.
   // URL эфемерный (territory-view-align-linda.trycloudflare.com и т.п.),
   // поэтому wildcard на весь домен.

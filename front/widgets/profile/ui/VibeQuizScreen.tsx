@@ -35,10 +35,14 @@ export function VibeQuizScreen({ open, onClose }: VibeQuizScreenProps) {
     },
   });
 
+  // Сторона, с которой выезжает вопрос: вперёд — справа, назад — слева.
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+
   useEffect(() => {
     if (open) {
       setIndex(0);
       setAnswers({});
+      setDirection('forward');
       mutation.reset();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -73,13 +77,25 @@ export function VibeQuizScreen({ open, onClose }: VibeQuizScreenProps) {
           totalSteps={TOTAL}
           title={question.text}
           // На первом вопросе «назад» выходит из квиза — иначе с экрана не выбраться.
-          onBack={() => (index === 0 ? onClose() : setIndex((i) => i - 1))}
+          onBack={() => {
+            if (index === 0) {
+              onClose();
+              return;
+            }
+            setDirection('back');
+            setIndex((i) => i - 1);
+          }}
           onNext={() => {
-            if (isLast) mutation.mutate({ answers: Object.values(answers) });
-            else setIndex((i) => i + 1);
+            if (isLast) {
+              mutation.mutate({ answers: Object.values(answers) });
+              return;
+            }
+            setDirection('forward');
+            setIndex((i) => i + 1);
           }}
           canGoNext={Boolean(selected)}
           loading={mutation.isPending}
+          direction={direction}
         >
           <div role="radiogroup" className="flex flex-col gap-2">
             {[question.optionA, question.optionB].map((opt) => (

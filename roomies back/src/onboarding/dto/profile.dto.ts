@@ -6,10 +6,10 @@ import {
   IsInt,
   IsOptional,
   IsString,
-  IsUrl,
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { IsPhotoUrl } from '../../common/is-photo-url.validator';
 
 export class ProfileDto {
   @ApiProperty()
@@ -20,8 +20,8 @@ export class ProfileDto {
 
   @ApiProperty({ required: false, type: [String] })
   @IsArray()
-  @IsString({ each: true })
-  @IsUrl({}, { each: true })
+  @ArrayMaxSize(5)
+  @IsPhotoUrl({ each: true })
   @IsOptional()
   photoUrls!: string[];
 

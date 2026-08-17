@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import { Glass } from '@samasante/liquid-glass';
 import { memo, type ReactNode } from 'react';
-import { GLASS_TAG_TINTS, SCENARIO_LABELS } from '@/shared/config';
+import { GLASS_TAG_TINTS, SCENARIO_LABELS, GLASS_OPTICS } from '@/shared/config';
 import { mediaUrl } from '@/shared/lib/api';
 import type { RoomieProfile } from '../model/types';
 
@@ -55,10 +55,10 @@ function ProfileCardBase({ profile, priority, overlay }: ProfileCardProps) {
     : [];
 
   return (
-    <div className="relative flex h-full w-full flex-col items-center gap-4 overflow-y-auto px-4 pb-4 pt-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="relative flex h-full w-full flex-col items-center gap-4 overflow-y-auto px-4 pb-4 pt-2 no-scrollbar">
       {/* ── Круглое фото + повёрнутые подписи вокруг ── */}
       <div className="relative mx-auto mt-8 mb-6 w-[92%] max-w-84 shrink-0">
-        <div className="relative aspect-square w-full overflow-hidden rounded-full border-glass shadow-glass">
+        <div className="relative aspect-square w-full overflow-hidden rounded-full border-glass-xl shadow-glass">
           {mainPhoto ? (
             <Image
               src={mediaUrl(mainPhoto)}
@@ -170,7 +170,7 @@ function ProfileCardBase({ profile, priority, overlay }: ProfileCardProps) {
                 borderRadius: 9999,
                 padding: '4px 12px',
               }}
-              optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+              optics={GLASS_OPTICS}
             >
               {label}
             </Glass>

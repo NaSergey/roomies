@@ -4,17 +4,13 @@ import { useState } from 'react';
 import type {
   DealbreakersPayload,
   GuestsPreference,
-  OnboardingState,
+  StepChromeProps,
 } from '../../model/types';
 import { OnboardingLayout } from '../OnboardingLayout';
 import { RadioRow } from '../RadioRow';
 
-interface DealbreakersStepProps {
-  state: OnboardingState;
-  step: number;
-  totalSteps: number;
+interface DealbreakersStepProps extends StepChromeProps {
   onSubmit: (payload: DealbreakersPayload) => void;
-  onBack?: () => void;
 }
 
 const GUESTS_OPTIONS: { value: GuestsPreference; label: string; hint: string }[] = [
@@ -29,12 +25,26 @@ export function DealbreakersStep({
   totalSteps,
   onSubmit,
   onBack,
+  onDraft,
+  direction,
 }: DealbreakersStepProps) {
+  // Про себя и про соседа — РАЗНЫЕ вопросы. Пока это была одна галочка,
+  // «отношусь спокойно» уезжало на бэк как «курю», и матчинг разводил двоих
+  // некурящих только потому, что один из них терпимее другого.
+  const [smokes, setSmokes] = useState(state.answers.smokes);
   const [smokingOk, setSmokingOk] = useState(state.answers.smokingOk);
+  const [hasPets, setHasPets] = useState(state.answers.hasPets);
   const [petsOk, setPetsOk] = useState(state.answers.petsOk);
   const [guestsPref, setGuestsPref] = useState<GuestsPreference>(
     state.answers.guestsPref,
   );
+
+  const handleBack =
+    onBack &&
+    (() => {
+      onDraft?.({ smokingOk, petsOk, smokes, hasPets, guestsPref });
+      onBack();
+    });
 
   return (
     <OnboardingLayout
@@ -42,37 +52,64 @@ export function DealbreakersStep({
       totalSteps={totalSteps}
       title="Что для тебя важно?"
       subtitle="Это влияет на совместимость"
-      onBack={onBack}
-      onNext={() => onSubmit({ smokingOk, petsOk, guestsPref })}
+      onBack={handleBack}
+      direction={direction}
+      onNext={() => onSubmit({ smokingOk, petsOk, smokes, hasPets, guestsPref })}
       loading={state.loading}
     >
-      <Group label="Курение">
+      <Group label="Куришь?">
         <RadioRow
-          selected={!smokingOk}
-          onSelect={() => setSmokingOk(false)}
+          selected={!smokes}
+          onSelect={() => setSmokes(false)}
           label="Не курю"
-          hint="(и рядом тоже не хочу)"
         />
         <RadioRow
-          selected={smokingOk}
-          onSelect={() => setSmokingOk(true)}
-          label="Курение ок"
-          hint="(отношусь спокойно)"
+          selected={smokes}
+          onSelect={() => setSmokes(true)}
+          label="Курю"
         />
       </Group>
 
-      <Group label="Питомцы">
+      <Group label="А если курит сосед?">
+        <RadioRow
+          selected={smokingOk}
+          onSelect={() => setSmokingOk(true)}
+          label="Нормально"
+          hint="(отношусь спокойно)"
+        />
+        <RadioRow
+          selected={!smokingOk}
+          onSelect={() => setSmokingOk(false)}
+          label="Не хочу"
+          hint="(ищу некурящего)"
+        />
+      </Group>
+
+      <Group label="Есть питомец?">
+        <RadioRow
+          selected={hasPets}
+          onSelect={() => setHasPets(true)}
+          label="Есть"
+        />
+        <RadioRow
+          selected={!hasPets}
+          onSelect={() => setHasPets(false)}
+          label="Нет"
+        />
+      </Group>
+
+      <Group label="А если питомец у соседа?">
         <RadioRow
           selected={petsOk}
           onSelect={() => setPetsOk(true)}
-          label="Питомцы ок"
-          hint="(есть свои или не против)"
+          label="Нормально"
+          hint="(люблю животных)"
         />
         <RadioRow
           selected={!petsOk}
           onSelect={() => setPetsOk(false)}
-          label="Без питомцев"
-          hint="(аллергия или не хочу)"
+          label="Не хочу"
+          hint="(аллергия или не готов)"
         />
       </Group>
 

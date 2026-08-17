@@ -1,4 +1,5 @@
 export { getWebApp, useTelegramWebApp, isMobilePlatform } from './use-telegram-web-app';
+export { useKeyboardOpen } from './use-keyboard-open';
 export { haptic, hapticNotify } from './haptic';
 export { TelegramProvider } from './telegram-provider';
 export { TELEGRAM_APP_URL } from './app-link';

@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  ArrayMaxSize,
   IsArray,
   IsBoolean,
   IsEnum,
@@ -8,6 +9,7 @@ import {
   IsString,
 } from 'class-validator';
 import { GuestsPreference } from '@prisma/client';
+import { IsPhotoUrl } from '../../common/is-photo-url.validator';
 
 export class UpdateProfileDto {
   @ApiProperty({ required: false })
@@ -17,7 +19,8 @@ export class UpdateProfileDto {
 
   @ApiProperty({ required: false, type: [String] })
   @IsArray()
-  @IsString({ each: true })
+  @ArrayMaxSize(5)
+  @IsPhotoUrl({ each: true })
   @IsOptional()
   photoUrls?: string[];
 
@@ -52,6 +55,18 @@ export class UpdateProfileDto {
   @IsBoolean()
   @IsOptional()
   petsOk?: boolean;
+
+  // Собственное поведение, отдельно от терпимости выше — см. комментарий у
+  // smokes/hasPets в schema.prisma.
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  smokes?: boolean;
+
+  @ApiProperty({ required: false })
+  @IsBoolean()
+  @IsOptional()
+  hasPets?: boolean;
 
   @ApiProperty({ required: false, enum: GuestsPreference })
   @IsEnum(GuestsPreference)

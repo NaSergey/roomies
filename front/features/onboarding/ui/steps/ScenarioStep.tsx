@@ -1,16 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import type { OnboardingState, ScenarioType } from '../../model/types';
+import type { ScenarioType, StepChromeProps } from '../../model/types';
 import { OnboardingLayout } from '../OnboardingLayout';
 import { RadioRow } from '../RadioRow';
 
-interface ScenarioStepProps {
-  state: OnboardingState;
-  step: number;
-  totalSteps: number;
+interface ScenarioStepProps extends StepChromeProps {
   onSubmit: (scenario: ScenarioType) => void;
-  onBack?: () => void;
 }
 
 const SCENARIOS: { scenario: ScenarioType; title: string; hint: string }[] = [
@@ -42,17 +38,27 @@ export function ScenarioStep({
   totalSteps,
   onSubmit,
   onBack,
+  onDraft,
+  direction,
 }: ScenarioStepProps) {
   const [selected, setSelected] = useState<ScenarioType | null>(
     state.answers.scenario,
   );
+
+  const handleBack =
+    onBack &&
+    (() => {
+      onDraft?.({ scenario: selected });
+      onBack();
+    });
 
   return (
     <OnboardingLayout
       step={step}
       totalSteps={totalSteps}
       title="Ты ищешь или уже нашёл жильё?"
-      onBack={onBack}
+      onBack={handleBack}
+      direction={direction}
       onNext={() => selected && onSubmit(selected)}
       canGoNext={Boolean(selected)}
       loading={state.loading}

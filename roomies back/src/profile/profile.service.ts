@@ -49,6 +49,8 @@ export class ProfileService {
         budgetMax: true,
         smokingOk: true,
         petsOk: true,
+        smokes: true,
+        hasPets: true,
         guestsPref: true,
         noiseLevel: true,
         cleanliness: true,
@@ -88,6 +90,8 @@ export class ProfileService {
       budgetMax: user.budgetMax,
       smokingOk: user.smokingOk,
       petsOk: user.petsOk,
+      smokes: user.smokes,
+      hasPets: user.hasPets,
       guestsPref: user.guestsPref,
       photos: user.photos.map((p) => p.url),
       vibeTags: user.vibeTags.map((vt) => ({
@@ -125,6 +129,8 @@ export class ProfileService {
     if (dto.budgetMax !== undefined) scalarData['budgetMax'] = dto.budgetMax;
     if (dto.smokingOk !== undefined) scalarData['smokingOk'] = dto.smokingOk;
     if (dto.petsOk !== undefined) scalarData['petsOk'] = dto.petsOk;
+    if (dto.smokes !== undefined) scalarData['smokes'] = dto.smokes;
+    if (dto.hasPets !== undefined) scalarData['hasPets'] = dto.hasPets;
     if (dto.guestsPref !== undefined) scalarData['guestsPref'] = dto.guestsPref;
 
     // Build transaction operations

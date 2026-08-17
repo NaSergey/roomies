@@ -44,18 +44,6 @@ export default function RootLayout({
             Next 16 + React 19 ругаются на <Script> в клиентском рендере, а серверный
             тег просто уйдёт в HTML и выполнится до гидрации. */}
         <script src="https://telegram.org/js/telegram-web-app.js" async />
-        {process.env.NODE_ENV === 'development' && (
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                var s=document.createElement('script');
-                s.src='//cdn.jsdelivr.net/npm/eruda';
-                s.onload=function(){eruda.init()};
-                document.head.appendChild(s);
-              `,
-            }}
-          />
-        )}
       </head>
       <body><ReactQueryProvider><TelegramProvider>{children}</TelegramProvider></ReactQueryProvider></body>
     </html>

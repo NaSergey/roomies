@@ -16,8 +16,12 @@ export interface RoomieProfile {
     workFromHome: number | null;
   } | null;
   matchScore: number;
+  /** Терпимость к чужому курению / питомцам. */
   smokingOk: boolean;
   petsOk: boolean;
+  /** Собственное поведение — именно это показывает карточка. */
+  smokes: boolean;
+  hasPets: boolean;
   guestsPref: 'rarely' | 'sometimes' | 'often';
   matchReasons: string[];
   matchRisks?: string[];

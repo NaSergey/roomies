@@ -2,14 +2,24 @@
 
 import type { ComponentType } from 'react';
 import { haptic } from '@/shared/lib/telegram';
-import { CardsIcon, ChatIcon, ProfileIcon } from '@/shared/ui/NavIcons';
+import { ChatIcon } from '@/shared/ui/icon/ChatIcon';
+import { ProfileIcon } from '@/shared/ui/icon/ProfileIcon';
+import { SearchIcon } from '@/shared/ui/icon/SearchIcon';
 
 export type NavTab = 'chat' | 'deck' | 'profile';
 
-const ITEMS: { id: NavTab; label: string; Icon: ComponentType<{ className?: string }> }[] = [
-  { id: 'chat',    label: 'Чат',      Icon: ChatIcon },
-  { id: 'deck',    label: 'Карточки', Icon: CardsIcon },
-  { id: 'profile', label: 'Профиль',  Icon: ProfileIcon },
+// iconClass — оптическая подгонка размера. Все три иконки рисованные, viewBox
+// у каждой неквадратный (ChatIcon 76×52, SearchIcon 68×51, ProfileIcon 64×49),
+// и в квадратной ячейке по умолчанию (20×20) они дают всего ~14–15px по высоте.
+const ITEMS: {
+  id: NavTab;
+  label: string;
+  Icon: ComponentType<{ className?: string }>;
+  iconClass?: string;
+}[] = [
+  { id: 'chat',    label: 'Чат',      Icon: ChatIcon,    iconClass: 'h-8 w-8' },
+  { id: 'deck',    label: 'Карточки', Icon: SearchIcon,  iconClass: 'h-8 w-8' },
+  { id: 'profile', label: 'Профиль',  Icon: ProfileIcon, iconClass: 'h-8 w-8' },
 ];
 
 const TAB_INDEX: Record<NavTab, number> = { chat: 0, deck: 1, profile: 2 };
@@ -50,7 +60,7 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
           <div className="flex-1 rounded-full bg-white/45 shadow-[inset_0_1px_1px_rgba(255,255,255,0.8)]" />
         </div>
 
-        {ITEMS.map(({ id, label, Icon }) => {
+        {ITEMS.map(({ id, label, Icon, iconClass }) => {
           const isActive = active === id;
           return (
             <button
@@ -64,7 +74,7 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
               aria-label={label}
               aria-current={isActive ? 'page' : undefined}
               className={`relative z-10 flex h-11 flex-1 items-center justify-center transition-colors duration-200 ${
-                isActive ? 'text-[#14140f]' : 'text-[#9a9a93]'
+                isActive ? 'text-[#14140f]' : 'text-white'
               }`}
             >
               <span
@@ -74,7 +84,7 @@ export function BottomNav({ active, onChange }: BottomNavProps) {
                   transition: 'transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
                 }}
               >
-                <Icon className="h-5 w-5" />
+                <Icon className={iconClass ?? 'h-5 w-5'} />
               </span>
             </button>
           );

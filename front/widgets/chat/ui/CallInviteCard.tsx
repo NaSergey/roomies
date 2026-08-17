@@ -4,6 +4,7 @@ import { Glass } from '@samasante/liquid-glass';
 import { useRespondCall } from '@/features/chat';
 import type { CallInviteData } from '@/shared/lib/api';
 import { Button } from '@/shared/ui/Button';
+import { GLASS_OPTICS, GLASS_SURFACE_BG } from '@/shared/config';
 
 export interface CallInviteCardProps {
   invite: CallInviteData;
@@ -38,9 +39,9 @@ export function CallInviteCard({
       className={`w-full rounded-2xl p-4 my-1 ${isDeclinedOrExpired ? 'opacity-50' : ''}`}
       style={{
         background:
-          'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+          GLASS_SURFACE_BG,
       }}
-      optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+      optics={GLASS_OPTICS}
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">

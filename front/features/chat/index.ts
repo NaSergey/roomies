@@ -9,6 +9,7 @@ export {
   useMarkChatRead,
   useCallInvitesQuery,
   useAgreementsQuery,
+  usePrefetchChats,
   chatKeys,
 } from './model/use-chat';
 export type {

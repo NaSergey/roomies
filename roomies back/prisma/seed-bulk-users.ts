@@ -123,6 +123,8 @@ interface GeneratedUser {
   budgetMax: number;
   smokingOk: boolean;
   petsOk: boolean;
+  smokes: boolean;
+  hasPets: boolean;
   noiseLevel: number;
   cleanliness: number;
   sleepSchedule: number;
@@ -149,6 +151,14 @@ function generateUsers(
     const budgetMin = 18000 + Math.floor(Math.random() * 18) * 1000;
     const budgetMax = budgetMin + 10000 + Math.floor(Math.random() * 20) * 1000;
 
+    // Терпимость и своё поведение — разные вопросы, но не независимые:
+    // курящий почти всегда спокойно относится к курению, а владелец питомца —
+    // к питомцам. Поэтому сначала бросаем терпимость, а «своё» разыгрываем
+    // только внутри терпимых: обратная пара (курю, но курения не терплю)
+    // засоряла бы ленту людьми, несовместимыми вообще ни с кем.
+    const smokingOk = Math.random() < 0.2;
+    const petsOk = Math.random() < 0.4;
+
     users.push({
       telegramId: telegramIdStart + BigInt(i),
       name: `${first} ${last}`,
@@ -156,8 +166,10 @@ function generateUsers(
       scenario: pick(SCENARIOS),
       budgetMin,
       budgetMax,
-      smokingOk: Math.random() < 0.2,
-      petsOk: Math.random() < 0.4,
+      smokingOk,
+      petsOk,
+      smokes: smokingOk && Math.random() < 0.5,
+      hasPets: petsOk && Math.random() < 0.35,
       noiseLevel: round2(Math.random()),
       cleanliness: round2(Math.random()),
       sleepSchedule: round2(Math.random()),
@@ -203,6 +215,8 @@ async function seedCity(cityId: number, cityName: string, telegramIdStart: bigin
         budgetMax: u.budgetMax,
         smokingOk: u.smokingOk,
         petsOk: u.petsOk,
+        smokes: u.smokes,
+        hasPets: u.hasPets,
         noiseLevel: u.noiseLevel,
         cleanliness: u.cleanliness,
         sleepSchedule: u.sleepSchedule,

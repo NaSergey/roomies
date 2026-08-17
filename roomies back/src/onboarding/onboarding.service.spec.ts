@@ -189,6 +189,8 @@ describe('OnboardingService', () => {
       await service.saveDealbreakers(1, {
         smokingOk: true,
         petsOk: false,
+        smokes: true,
+        hasPets: false,
         guestsPref: 'sometimes',
       });
 
@@ -197,6 +199,8 @@ describe('OnboardingService', () => {
         data: {
           smokingOk: true,
           petsOk: false,
+          smokes: true,
+          hasPets: false,
           guestsPref: 'sometimes',
           onboardingStep: 4,
         },

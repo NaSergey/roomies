@@ -1,6 +1,7 @@
 'use client';
 
 import { Glass } from '@samasante/liquid-glass';
+import { GLASS_OPTICS } from '@/shared/config';
 
 interface MatchReasonsListProps {
   matchReasons: string[];
@@ -22,7 +23,7 @@ export function MatchReasonsList({ matchReasons, matchRisks }: MatchReasonsListP
         <Glass
           className="rounded-full px-3 py-2 text-xs font-black text-[#14140f]"
           style={{ background: 'rgba(255,217,224,0.3)' }}
-          optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+          optics={GLASS_OPTICS}
         >
           ⚠️ {matchRisks[0]}
         </Glass>

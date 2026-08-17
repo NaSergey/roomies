@@ -6,19 +6,24 @@ import { EmailAuthForm, useAppAuth } from '@/features/auth';
 import {
   OnboardingFlow,
   getOnboardingStatus,
+  onboardingKeys,
   type OnboardingStatus,
 } from '@/features/onboarding';
-import { feedKeys } from '@/features/swipe-profile';
+import { useFeedQuery } from '@/features/swipe-profile';
 import { profileKeys } from '@/features/profile';
 import { chatKeys } from '@/features/chat';
-import { getFeed, getMe, getMatches } from '@/shared/lib/api';
+import { squadKeys } from '@/features/squad';
+import { getDistricts, getMe, getMatches, getSquadFeed } from '@/shared/lib/api';
+import { geoKeys, DEFAULT_CITY_ID } from '@/shared/lib/query';
 import { Loader } from '@/shared/ui/Loader';
 import { BottomNav, type NavTab } from '@/widgets/bottom-nav';
 import { ChatView } from '@/widgets/chat';
 import { ProfileView } from '@/widgets/profile';
 import { SwipeDeck } from '@/widgets/swipe-deck';
 
-const ONBOARDING_STATUS_KEY = ['onboarding-status'] as const;
+// Ключ общий с самой анкетой: она восстанавливает прогресс из этого же кэша,
+// поэтому литерал вынесен в features/onboarding (см. onboardingKeys).
+const ONBOARDING_STATUS_KEY = onboardingKeys.status;
 
 export function HomeView() {
   const auth = useAppAuth();
@@ -44,17 +49,18 @@ export function HomeView() {
     void queryClient.invalidateQueries({ queryKey: ONBOARDING_STATUS_KEY });
   }, [queryClient]);
 
-  // Прогреваем ленту СРАЗУ после авторизации — параллельно с запросом
-  // onboarding-status. К моменту, когда отрисуется SwipeDeck, карточки уже
-  // в кэше: пользователь не видит второй спиннер «загрузка карточек».
-  useEffect(() => {
-    if (auth.status !== 'authenticated') return;
-    void queryClient.prefetchQuery({
-      queryKey: feedKeys.all,
-      queryFn: () => getFeed(),
-      staleTime: 5 * 60 * 1000,
-    });
-  }, [auth.status, queryClient]);
+  // Лента грузится сразу, как только известно, что онбординг пройден — и это не
+  // prefetch, а полноценный запрос: его статус нужен прямо здесь, чтобы не
+  // снимать заставку раньше времени (см. ниже про два спиннера). Ключ тот же,
+  // что у SwipeDeck (feedKeys.all), поэтому там данные уже в кэше.
+  //
+  // Ждём именно onboardingCompleted, а не только авторизацию: до конца анкеты
+  // GET /feed отвечает 403 («Complete onboarding to access the feed»), и
+  // новичок гарантированно получал два провальных запроса на старте.
+  const feed = useFeedQuery(
+    undefined,
+    auth.status === 'authenticated' && onboardingStatus?.onboardingCompleted === true,
+  );
 
   if (auth.status === 'unauthenticated') {
     return (
@@ -105,6 +111,18 @@ export function HomeView() {
     return <OnboardingFlow onComplete={handleOnboardingComplete} />;
   }
 
+  // Держим ту же заставку, пока не приехали анкеты. Без этого пользователь видел
+  // ДВЕ загрузки подряд: onboarding-status — лёгкий запрос и возвращается заметно
+  // раньше ленты (та тянет сотню кандидатов и считает по ним скоринг), поэтому
+  // заставка снималась, показывался MainShell, и SwipeDeck тут же рисовал свой
+  // спиннер «загрузка карточек». Проверка стоит ПОСЛЕ ветки онбординга: новичку
+  // лента не нужна, ждать её на входе он не должен.
+  // isPending, а не isLoading: при ошибке ленты заставка снимается, и SwipeDeck
+  // покажет свой экран ошибки с кнопкой «Повторить», а не висит вечно.
+  if (feed.isPending) {
+    return <SplashScreen />;
+  }
+
   return <MainShell />;
 }
 
@@ -114,6 +132,8 @@ function MainShell() {
 
   // Пользователь на ленте карточек — в фоне прогреваем профиль и список чатов,
   // чтобы при переходе на эти вкладки данные были уже готовы (без спиннера).
+  // Справочник районов — сюда же: он нужен шторке фильтров, и без прогрева
+  // чипы районов приезжали уже после того, как панель выехала, толкая её вверх.
   useEffect(() => {
     void queryClient.prefetchQuery({
       queryKey: profileKeys.me,
@@ -124,6 +144,19 @@ function MainShell() {
       queryKey: chatKeys.matches,
       queryFn: getMatches,
       staleTime: 30_000,
+    });
+    void queryClient.prefetchQuery({
+      queryKey: geoKeys.districts(DEFAULT_CITY_ID),
+      queryFn: () => getDistricts(DEFAULT_CITY_ID),
+      staleTime: Infinity,
+    });
+    // Лента показывает сквады отдельной полосой ПОД колодой, условно по
+    // непустому списку: без прогрева полоса возникала уже после отрисовки
+    // экрана и сдвигала раскладку под собой.
+    void queryClient.prefetchQuery({
+      queryKey: squadKeys.feed,
+      queryFn: getSquadFeed,
+      staleTime: 60_000,
     });
   }, [queryClient]);
 

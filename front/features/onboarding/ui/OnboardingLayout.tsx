@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { haptic } from '@/shared/lib/telegram';
+import { haptic, useKeyboardOpen } from '@/shared/lib/telegram';
 import { KeyIcon } from '@/shared/ui/icon/KeyIcon';
 
 interface OnboardingLayoutProps {
@@ -17,6 +17,12 @@ interface OnboardingLayoutProps {
   /** Стрелка «вперёд» гаснет, пока шаг не заполнен. */
   canGoNext?: boolean;
   loading?: boolean;
+  /**
+   * Куда движется анкета. Вперёд вопрос приезжает справа, назад — слева:
+   * направление анимации должно совпадать с направлением движения, иначе
+   * возврат назад выглядит как ещё один шаг вперёд.
+   */
+  direction?: 'forward' | 'back';
 }
 
 // Единый каркас всех опросных экранов (шаги онбординга + вайб-квиз):
@@ -33,9 +39,18 @@ export function OnboardingLayout({
   onNext,
   canGoNext = true,
   loading = false,
+  direction = 'forward',
 }: OnboardingLayoutProps) {
   // Процент — заполненность анкеты: доля уже пройденных шагов.
   const percent = Math.round(((step - 1) / totalSteps) * 100);
+
+  // Пока человек печатает, нижнюю панель убираем целиком. iOS ужимает окно под
+  // клавиатуру, каркас (h-dvh) сжимается вместе с ним, и панель со стрелками
+  // садилась прямо на поле, которое заполняют, — на шаге с именем поле уходило
+  // под неё полностью. Прятать панель здесь честнее, чем городить отступы:
+  // с открытой клавиатурой стрелки всё равно не нужны, а как только фокус
+  // уходит, панель возвращается на место.
+  const keyboardOpen = useKeyboardOpen();
 
   return (
     <div
@@ -63,7 +78,20 @@ export function OnboardingLayout({
           overflow-y-auto обрезает содержимое и по горизонтали тоже, поэтому
           свечение кружков (box-shadow выходит за габарит) срезалось у левого
           края. Внутри padding-box скроллпорта оно помещается целиком. */}
-      <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-8 [-ms-overflow-style:none] scrollbar-none [&::-webkit-scrollbar]:hidden">
+      {/* key по номеру шага — чтобы анимация перезапускалась на каждом новом
+          вопросе. В онбординге шаг и так перемонтируется (у шагов разные типы
+          компонентов), а вот в вайб-квизе каркас один и тот же от вопроса к
+          вопросу: без key анимировать было бы нечего, менялся бы только текст.
+          Побочный эффект полезный: прокрутка нового вопроса начинается сверху.
+          Анимируется тело, а не весь экран — ключи, счётчик и стрелки при
+          движении вопроса остаются на месте. */}
+      <div
+        key={step}
+        className="step-stagger flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-8 [-ms-overflow-style:none] scrollbar-none [&::-webkit-scrollbar]:hidden"
+        // Сторона въезда — переменной, чтобы направление задавалось в одном
+        // месте, а keyframes остались одни на оба направления.
+        style={{ '--step-shift': direction === 'back' ? '-26px' : '26px' } as React.CSSProperties}
+      >
         <div className="shrink-0 text-center">
           <h1 className="text-2xl font-black leading-snug text-balance text-(--text-deep)">
             {title}
@@ -79,7 +107,11 @@ export function OnboardingLayout({
       {/* Низ: стрелки + заполненность. На стеклянной пилюле, потому что низ
           экрана приходится на тёмную часть фона (--bg) и тёмный текст там
           иначе не читается — тот же приём, что в BottomNav. */}
-      <div className="mx-6 flex shrink-0 items-center justify-between gap-4 rounded-full border-glass bg-glass backdrop-glass px-6 py-3 shadow-glass">
+      <div
+        className={`mx-6 shrink-0 items-center justify-between gap-4 rounded-full border-glass bg-glass backdrop-glass px-6 py-3 shadow-glass ${
+          keyboardOpen ? 'hidden' : 'flex'
+        }`}
+      >
         <button
           type="button"
           onClick={() => {

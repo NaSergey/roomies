@@ -1,17 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getCities, getDistricts, type City, type District } from '@/shared/lib/api';
-import type { LocationPayload, OnboardingState } from '../../model/types';
+import { useState } from 'react';
+import { useCitiesQuery, useDistrictsQuery } from '@/shared/lib/query';
+import type { LocationPayload, StepChromeProps } from '../../model/types';
 import { OnboardingLayout } from '../OnboardingLayout';
 import { RadioRow } from '../RadioRow';
 
-interface LocationStepProps {
-  state: OnboardingState;
-  step: number;
-  totalSteps: number;
+interface LocationStepProps extends StepChromeProps {
   onSubmit: (payload: LocationPayload) => void;
-  onBack?: () => void;
 }
 
 export function LocationStep({
@@ -20,12 +16,9 @@ export function LocationStep({
   totalSteps,
   onSubmit,
   onBack,
+  onDraft,
+  direction,
 }: LocationStepProps) {
-  const [cities, setCities] = useState<City[]>([]);
-  const [districts, setDistricts] = useState<District[]>([]);
-  const [loadingCities, setLoadingCities] = useState(true);
-  const [loadingDistricts, setLoadingDistricts] = useState(false);
-  const [citiesError, setCitiesError] = useState(false);
   const [selectedCityId, setSelectedCityId] = useState<number | null>(
     state.answers.cityId,
   );
@@ -33,40 +26,12 @@ export function LocationStep({
     state.answers.districtIds,
   );
 
-  function loadCities() {
-    setLoadingCities(true);
-    setCitiesError(false);
-    getCities()
-      .then(setCities)
-      .catch(() => setCitiesError(true))
-      .finally(() => setLoadingCities(false));
-  }
-
-  useEffect(() => {
-    loadCities();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedCityId) {
-      setDistricts([]);
-      return;
-    }
-    let cancelled = false;
-    setLoadingDistricts(true);
-    getDistricts(selectedCityId)
-      .then((data) => {
-        if (!cancelled) setDistricts(data);
-      })
-      .catch(() => {
-        if (!cancelled) setDistricts([]);
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingDistricts(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCityId]);
+  // Справочники через общий слой запросов (staleTime: Infinity), а не своим
+  // fetch: шаг размонтируется на каждом «назад», и раньше города с районами
+  // загружались заново при каждом возврате.
+  const { data: cities = [], isError: citiesError, refetch } = useCitiesQuery();
+  // Районы запрашиваются только когда город уже выбран.
+  const { data: districts = [] } = useDistrictsQuery(selectedCityId ?? 0);
 
   function toggleDistrict(districtId: number) {
     setSelectedDistrictIds((prev) =>
@@ -76,13 +41,26 @@ export function LocationStep({
     );
   }
 
+  // Уходя назад, складываем выбранное в общее состояние — иначе выбор города
+  // пропадал, стоило шагнуть назад и вернуться.
+  const handleBack =
+    onBack &&
+    (() => {
+      onDraft?.({
+        cityId: selectedCityId,
+        districtIds: selectedDistrictIds,
+      });
+      onBack();
+    });
+
   return (
     <OnboardingLayout
       step={step}
       totalSteps={totalSteps}
       title="Где ищешь?"
       subtitle="Город обязательно, районы — по желанию"
-      onBack={onBack}
+      onBack={handleBack}
+      direction={direction}
       onNext={() =>
         selectedCityId &&
         onSubmit({ cityId: selectedCityId, districtIds: selectedDistrictIds })
@@ -90,16 +68,16 @@ export function LocationStep({
       canGoNext={Boolean(selectedCityId)}
       loading={state.loading}
     >
-      {loadingCities ? (
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} className="h-8 w-full animate-pulse rounded-lg bg-white/15" />
-          ))}
-        </div>
-      ) : citiesError ? (
+      {/* Пока города едут — просто пусто: список короткий и приезжает быстро,
+          а плейсхолдеры на его месте успевали моргнуть и дёрнуть раскладку. */}
+      {citiesError ? (
         <p className="text-sm text-(--text-deep) opacity-75" role="alert">
           Не удалось загрузить города.{' '}
-          <button type="button" onClick={loadCities} className="underline text-(--text-deep)">
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="underline text-(--text-deep)"
+          >
             Обновить
           </button>
         </p>
@@ -111,7 +89,9 @@ export function LocationStep({
               selected={selectedCityId === city.id}
               onSelect={() => {
                 setSelectedCityId(city.id);
-                // Районы принадлежат городу — при смене города сбрасываем.
+                // Районы принадлежат городу — при смене города сбрасываем выбор.
+                // Сам список подменит useDistrictsQuery: у нового города свой
+                // ключ кэша, поэтому районы предыдущего под ним не задержатся.
                 setSelectedDistrictIds([]);
               }}
               label={city.name}
@@ -120,7 +100,7 @@ export function LocationStep({
         </div>
       )}
 
-      {selectedCityId && !loadingDistricts && districts.length > 0 && (
+      {selectedCityId && districts.length > 0 && (
         <div role="group" aria-label="Районы" className="flex flex-col gap-1">
           <span className="text-[10px] font-black uppercase tracking-widest text-(--text-deep) opacity-65">
             Районы

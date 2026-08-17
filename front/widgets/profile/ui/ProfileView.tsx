@@ -11,10 +11,11 @@ import { VibeScaleBar } from '@/shared/ui/VibeScaleBar';
 import { RulesSection } from '@/shared/ui/RulesSection';
 import { Loader } from '@/shared/ui/Loader';
 import { Button } from '@/shared/ui/Button';
-import { TAG_TINTS, SCENARIO_LABELS } from '@/shared/config';
+import { TAG_TINTS, SCENARIO_LABELS, GLASS_OPTICS, GLASS_SURFACE_BG } from '@/shared/config';
 import { RoomieScoreCard } from './RoomieScoreCard';
 import { ProfileEditSheet } from './ProfileEditSheet';
 import { VibeQuizScreen } from './VibeQuizScreen';
+import { FeedbackSheet } from './FeedbackSheet';
 import { CreateSquadSheet } from '@/widgets/squad';
 import { InviteMemberSheet } from '@/widgets/squad';
 import { PendingInviteCard } from '@/widgets/squad';
@@ -23,13 +24,14 @@ const SHOW_SQUAD = false;
 
 export function ProfileView() {
   const { data: profile, isLoading, isError, error } = useProfileQuery();
-  const { data: mySquad } = useMySquadQuery();
-  const { data: pendingInvites = [] } = usePendingInvitesQuery();
+  const { data: mySquad } = useMySquadQuery(SHOW_SQUAD);
+  const { data: pendingInvites = [] } = usePendingInvitesQuery(SHOW_SQUAD);
   const leaveSquad = useLeaveSquad();
   const [editOpen, setEditOpen] = useState(false);
   const [createSquadOpen, setCreateSquadOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [feedbackOpen, setFeedbackOpen] = useState(false);
   // Отклик на нажатие: в Telegram открывается нативный шеринг и подпись не
   // нужна, а в обычном браузере ссылка уходит в буфер — там без подтверждения
   // непонятно, произошло ли хоть что-то.
@@ -72,7 +74,7 @@ export function ProfileView() {
     <>
       {/* px-3/pt-3 внутри скролл-контейнера, а не на родителе: тени элементов
           падают в этот отступ и не срезаются краем прокрутки. */}
-      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 pb-(--nav-space) pt-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 pb-(--nav-space) pt-3 no-scrollbar">
 
         {/* Avatar + header */}
         <div className="flex items-center gap-4">
@@ -108,26 +110,12 @@ export function ProfileView() {
             )}
           </div>
 
-          {/* Колонка кнопок: «Изменить», под ней — приглашение друга. */}
-          <div className="flex shrink-0 flex-col items-stretch gap-2">
+          <div className="shrink-0">
             <Button variant="white" onClick={() => setEditOpen(true)} className="px-3 py-1.5 text-sm">
               Изменить
             </Button>
-            {referralLink && (
-              <Button onClick={handleInvite} className="px-3 py-1.5 text-sm whitespace-nowrap">
-                {inviteState === 'copied' ? 'Ссылка скопирована' : 'Пригласить друга'}
-              </Button>
-            )}
           </div>
         </div>
-
-        {/* Счётчик приглашённых — показываем, только когда есть чем похвастаться,
-            пустой «0 приглашено» на свежем аккаунте выглядит упрёком. */}
-        {profile.invitedCount > 0 && (
-          <p className="-mt-2 text-xs text-muted">
-            По твоей ссылке зарегистрировались: {profile.invitedCount}
-          </p>
-        )}
 
         {/* Additional photos */}
         {thumbPhotos.length > 0 && (
@@ -135,7 +123,7 @@ export function ProfileView() {
           // вертикальный запас внутри прокрутки, чтобы тени мини-фото падали
           // в него, а не срезались краем. Отрицательный margin гасит запас,
           // поэтому расстояние до соседних блоков остаётся прежним.
-          <div className="-my-3 flex gap-2 overflow-x-auto py-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="-my-3 flex gap-2 overflow-x-auto py-3 no-scrollbar">
             {thumbPhotos.map((src, i) => (
               <div
                 key={i}
@@ -161,7 +149,7 @@ export function ProfileView() {
               <Glass
                 key={t.id}
                 className={`rounded-full px-2.5 py-0.5 text-xs font-bold text-[#14140f] ${TAG_TINTS[i % TAG_TINTS.length]}`}
-                optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+                optics={GLASS_OPTICS}
               >
                 {t.label}
               </Glass>
@@ -172,10 +160,30 @@ export function ProfileView() {
         {/* Roomie Score */}
         <RoomieScoreCard profile={profile} />
 
+        {/* Приглашение друга. Стоит под Roomie Score, а не в шапке: реферальная
+            ссылка — это следующий шаг после того, как видишь свой счёт, а не
+            действие над самой анкетой (там осталось только «Изменить»).
+            Счётчик приглашённых переехал сюда же — он подпись к этой кнопке, у
+            аватара он читался как оторванная строка. */}
+        {referralLink && (
+          <div className="flex flex-col gap-1.5">
+            <Button onClick={handleInvite} className="w-full py-3 text-sm">
+              {inviteState === 'copied' ? 'Ссылка скопирована' : 'Пригласить друга'}
+            </Button>
+            {/* Показываем, только когда есть чем похвастаться: пустой
+                «0 приглашено» на свежем аккаунте выглядит упрёком. */}
+            {profile.invitedCount > 0 && (
+              <p className="text-center text-xs text-muted">
+                По твоей ссылке зарегистрировались: {profile.invitedCount}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Squad section — disabled, see feedback */}
         {SHOW_SQUAD && (
         <div className="flex flex-col gap-3">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted">Мой сквад</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white">Мой сквад</span>
 
           {/* Pending invites */}
           {pendingInvites.length > 0 && (
@@ -195,9 +203,9 @@ export function ProfileView() {
               style={{
                 display: 'flex',
                 background:
-                  'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+                  GLASS_SURFACE_BG,
               }}
-              optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+              optics={GLASS_OPTICS}
             >
               <div className="flex items-center justify-between">
                 <span className="text-sm font-black text-(--text)">
@@ -206,7 +214,7 @@ export function ProfileView() {
                 <Glass
                   className="rounded-full px-2 py-0.5 text-xs font-bold text-(--text)"
                   style={{ background: '#a8d8ff' }}
-                  optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+                  optics={GLASS_OPTICS}
                 >
                   {mySquad.memberCount}/{mySquad.maxMembers}
                 </Glass>
@@ -218,9 +226,9 @@ export function ProfileView() {
                     className="rounded-full px-2 py-0.5 text-xs font-bold text-(--text)"
                     style={{
                       background:
-                        'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+                        GLASS_SURFACE_BG,
                     }}
-                    optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+                    optics={GLASS_OPTICS}
                   >
                     {m.name}
                   </Glass>
@@ -251,14 +259,14 @@ export function ProfileView() {
         {/* Budget */}
         {(profile.budgetMin != null || profile.budgetMax != null) && (
           <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-black uppercase tracking-widest text-muted">Бюджет</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-white">Бюджет</span>
             <span className="text-sm font-bold text-(--text)">💸 {budgetStr} / мес.</span>
           </div>
         )}
 
         {/* Lifestyle scales / vibe quiz prompt */}
         <div className="flex flex-col gap-4">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted">Вайб дома</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white">Вайб дома</span>
           {profile.quizCompleted ? (
             <>
               <div className="flex items-center justify-between px-0.5 text-[10px] font-bold uppercase tracking-wide text-muted">
@@ -300,12 +308,32 @@ export function ProfileView() {
 
         {/* Rules */}
         <div className="flex flex-col gap-2">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted">Правила</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white">Правила</span>
           <RulesSection
             smokingOk={profile.smokingOk}
             petsOk={profile.petsOk}
+            smokes={profile.smokes}
+            hasPets={profile.hasPets}
             guestsPref={profile.guestsPref}
           />
+        </div>
+
+        {/* Обратная связь — над «Выйти»: это последнее, что человек ищет на
+            экране, и рядом с выходом его проще найти, чем в шапке. */}
+        <div className="mt-2 flex flex-col gap-2">
+          <Button
+            variant="white"
+            onClick={() => {
+              haptic('light');
+              setFeedbackOpen(true);
+            }}
+            className="w-full py-3 text-sm"
+          >
+            Написать нам
+          </Button>
+          <p className="text-center text-xs text-muted">
+            Что-то сломалось или есть идея — расскажи, мы читаем всё
+          </p>
         </div>
 
         {/* Выход: чистим токен и перезагружаемся — на старте useAppAuth заново
@@ -316,7 +344,7 @@ export function ProfileView() {
             clearAccessToken();
             window.location.reload();
           }}
-          className="mt-2 w-full py-3 text-sm"
+          className="w-full py-3 text-sm"
         >
           Выйти
         </Button>
@@ -330,6 +358,11 @@ export function ProfileView() {
         squadId={mySquad?.id}
       />
       <VibeQuizScreen open={quizOpen} onClose={() => setQuizOpen(false)} />
+      <FeedbackSheet
+        open={feedbackOpen}
+        onClose={() => setFeedbackOpen(false)}
+        screen="profile"
+      />
     </>
   );
 }

@@ -3,10 +3,7 @@
 import { Glass } from '@samasante/liquid-glass';
 import type { MyProfile } from '@/shared/lib/api';
 import { Card } from '@/shared/ui/Card';
-
-const CHIP_OPTICS = { frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 };
-const NEUTRAL_GLASS_BG =
-  'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)';
+import { GLASS_OPTICS, GLASS_SURFACE_BG } from '@/shared/config';
 
 const MAX_SCORE = 40;
 
@@ -26,7 +23,7 @@ export function RoomieScoreCard({ profile }: { profile: MyProfile }) {
       {/* Score header */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-[10px] font-black uppercase tracking-widest text-muted">Roomie Score</span>
+          <span className="text-[10px] font-black uppercase tracking-widest text-white">Roomie Score</span>
           <div className="flex items-baseline gap-1">
             <span className="text-3xl font-black text-(--text)">{score}</span>
             <span className="text-sm font-bold text-muted">/ {MAX_SCORE}</span>
@@ -45,7 +42,7 @@ export function RoomieScoreCard({ profile }: { profile: MyProfile }) {
             display: 'flex',
             background: pct >= 75 ? 'var(--tint-pink)' : pct >= 50 ? 'var(--tint-violet)' : 'var(--tint-sky)',
           }}
-          optics={CHIP_OPTICS}
+          optics={GLASS_OPTICS}
         >
           {pct}%
         </Glass>
@@ -75,9 +72,9 @@ export function RoomieScoreCard({ profile }: { profile: MyProfile }) {
                 }`}
                 style={{
                   display: 'flex',
-                  background: done ? 'var(--tint-pink)' : NEUTRAL_GLASS_BG,
+                  background: done ? 'var(--tint-pink)' : GLASS_SURFACE_BG,
                 }}
-                optics={CHIP_OPTICS}
+                optics={GLASS_OPTICS}
               >
                 {done ? '✓' : '○'}
               </Glass>

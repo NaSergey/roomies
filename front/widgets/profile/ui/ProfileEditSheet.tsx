@@ -24,7 +24,7 @@ function ToggleChip(props: {
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[10px] font-black uppercase tracking-widest text-muted">{children}</span>
+    <span className="text-[10px] font-black uppercase tracking-widest text-white">{children}</span>
   );
 }
 
@@ -36,6 +36,8 @@ export function ProfileEditSheet({ open, profile, onClose }: ProfileEditSheetPro
   const [budgetMax, setBudgetMax] = useState(String(profile.budgetMax ?? ''));
   const [smokingOk, setSmokingOk] = useState(profile.smokingOk);
   const [petsOk, setPetsOk] = useState(profile.petsOk);
+  const [smokes, setSmokes] = useState(profile.smokes);
+  const [hasPets, setHasPets] = useState(profile.hasPets);
   const [guestsPref, setGuestsPref] = useState<'rarely' | 'sometimes' | 'often'>(profile.guestsPref);
 
   // Sync form state when profile changes
@@ -45,6 +47,8 @@ export function ProfileEditSheet({ open, profile, onClose }: ProfileEditSheetPro
     setBudgetMax(String(profile.budgetMax ?? ''));
     setSmokingOk(profile.smokingOk);
     setPetsOk(profile.petsOk);
+    setSmokes(profile.smokes);
+    setHasPets(profile.hasPets);
     setGuestsPref(profile.guestsPref);
   }, [profile]);
 
@@ -64,6 +68,8 @@ export function ProfileEditSheet({ open, profile, onClose }: ProfileEditSheetPro
     if (!isNaN(maxNum) && maxNum !== profile.budgetMax) payload.budgetMax = maxNum;
     if (smokingOk !== profile.smokingOk) payload.smokingOk = smokingOk;
     if (petsOk !== profile.petsOk) payload.petsOk = petsOk;
+    if (smokes !== profile.smokes) payload.smokes = smokes;
+    if (hasPets !== profile.hasPets) payload.hasPets = hasPets;
     if (guestsPref !== profile.guestsPref) payload.guestsPref = guestsPref;
 
     if (Object.keys(payload).length > 0) {
@@ -118,21 +124,39 @@ export function ProfileEditSheet({ open, profile, onClose }: ProfileEditSheetPro
           </div>
         </div>
 
-        {/* Smoking */}
+        {/* Курение: сначала про себя, потом про соседа — те же две пары, что и
+            в анкете. Одной галочкой это не описывается: некурящий вполне может
+            спокойно относиться к курению соседа. */}
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Курение</FieldLabel>
           <div className="flex gap-2">
-            <ToggleChip active={!smokingOk} onClick={() => setSmokingOk(false)}>🚭 Не курю</ToggleChip>
-            <ToggleChip active={smokingOk} onClick={() => setSmokingOk(true)}>🚬 Курение ок</ToggleChip>
+            <ToggleChip active={!smokes} onClick={() => setSmokes(false)}>🚭 Не курю</ToggleChip>
+            <ToggleChip active={smokes} onClick={() => setSmokes(true)}>🚬 Курю</ToggleChip>
           </div>
         </div>
 
-        {/* Pets */}
+        <div className="flex flex-col gap-1.5">
+          <FieldLabel>Если курит сосед</FieldLabel>
+          <div className="flex gap-2">
+            <ToggleChip active={smokingOk} onClick={() => setSmokingOk(true)}>Нормально</ToggleChip>
+            <ToggleChip active={!smokingOk} onClick={() => setSmokingOk(false)}>Не хочу</ToggleChip>
+          </div>
+        </div>
+
+        {/* Питомцы */}
         <div className="flex flex-col gap-1.5">
           <FieldLabel>Питомцы</FieldLabel>
           <div className="flex gap-2">
-            <ToggleChip active={petsOk} onClick={() => setPetsOk(true)}>🐾 Есть питомцы</ToggleChip>
-            <ToggleChip active={!petsOk} onClick={() => setPetsOk(false)}>🚫 Без питомцев</ToggleChip>
+            <ToggleChip active={hasPets} onClick={() => setHasPets(true)}>🐾 Есть питомец</ToggleChip>
+            <ToggleChip active={!hasPets} onClick={() => setHasPets(false)}>🚫 Нет</ToggleChip>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <FieldLabel>Если питомец у соседа</FieldLabel>
+          <div className="flex gap-2">
+            <ToggleChip active={petsOk} onClick={() => setPetsOk(true)}>Нормально</ToggleChip>
+            <ToggleChip active={!petsOk} onClick={() => setPetsOk(false)}>Не хочу</ToggleChip>
           </div>
         </div>
 

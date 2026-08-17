@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ChatModule } from './chat/chat.module';
 import { SquadModule } from './squad/squad.module';
 import { FeedModule } from './feed/feed.module';
+import { FeedbackModule } from './feedback/feedback.module';
 import { GeoModule } from './geo/geo.module';
 import { OnboardingModule } from './onboarding/onboarding.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -32,6 +33,7 @@ import { VibeTagsModule } from './vibe-tags/vibe-tags.module';
     ProfileModule,
     ChatModule,
     SquadModule,
+    FeedbackModule,
   ],
   controllers: [AppController],
   providers: [

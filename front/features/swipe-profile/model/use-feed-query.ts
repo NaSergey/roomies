@@ -1,6 +1,11 @@
 'use client';
 
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { getFeed, postSwipe, type FeedQueryParams } from '@/shared/lib/api';
 
 export const feedKeys = {
@@ -8,12 +13,18 @@ export const feedKeys = {
   filtered: (params: FeedQueryParams) => ['feed', params] as const,
 };
 
-export function useFeedQuery(params?: FeedQueryParams) {
+export function useFeedQuery(params?: FeedQueryParams, enabled = true) {
   const hasParams = params && Object.keys(params).length > 0;
   return useQuery({
     queryKey: hasParams ? feedKeys.filtered(params) : feedKeys.all,
     queryFn: () => getFeed(params),
+    enabled,
     staleTime: 5 * 60 * 1000,
+    // Смена фильтров — это новый queryKey, под который кэша ещё нет, поэтому
+    // без этого лента уходила в isPending и SwipeDeck подменял всю колоду
+    // полноэкранным спиннером: применил фильтр — карточки исчезли, крутилка,
+    // новая колода. Держим на экране предыдущую выдачу, пока грузится новая.
+    placeholderData: keepPreviousData,
   });
 }
 

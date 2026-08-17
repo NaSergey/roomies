@@ -76,6 +76,8 @@ export class OnboardingService {
         stayDurationMonths: true,
         smokingOk: true,
         petsOk: true,
+        smokes: true,
+        hasPets: true,
         guestsPref: true,
         name: true,
         telegramPhotoUrl: true,
@@ -142,6 +144,8 @@ export class OnboardingService {
       data: {
         smokingOk: dto.smokingOk,
         petsOk: dto.petsOk,
+        smokes: dto.smokes,
+        hasPets: dto.hasPets,
         guestsPref: dto.guestsPref as GuestsPreference,
         onboardingStep: 4,
       },

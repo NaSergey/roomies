@@ -38,6 +38,12 @@ export class OnboardingStatusDto {
   petsOk!: boolean;
 
   @ApiProperty()
+  smokes!: boolean;
+
+  @ApiProperty()
+  hasPets!: boolean;
+
+  @ApiProperty()
   guestsPref!: string;
 
   @ApiProperty()

@@ -15,7 +15,7 @@ export function isMobilePlatform(): boolean {
 // Крайние тона фонового меша (--bg-mesh в globals.css). Дублируются здесь
 // строками, потому что уходят в Telegram SDK, а он принимает только готовый
 // hex — прочитать CSS-переменную на момент вызова нельзя.
-const MESH_TOP = '#d7cfff';
+const MESH_TOP = '#e2dcff';
 const MESH_BOTTOM = '#1f2064';
 
 // Инициализация SDK Telegram: разворачиваем Mini App и ФИКСИРУЕМ единый режим

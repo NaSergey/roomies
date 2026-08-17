@@ -5,8 +5,8 @@ import { Glass } from '@samasante/liquid-glass';
 import { mediaUrl } from '@/shared/lib/api';
 import type { SquadFeedCard } from '@/shared/lib/api';
 import { Button } from '@/shared/ui/Button';
+import { GLASS_OPTICS } from '@/shared/config';
 
-const CHIP_OPTICS = { frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 };
 
 interface SquadCardProps {
   squad: SquadFeedCard;
@@ -33,7 +33,7 @@ export function SquadCard({ squad, onDismiss }: SquadCardProps) {
       <Glass
         className="w-fit rounded-full px-2 py-0.5 text-xs font-bold text-(--text)"
         style={{ background: '#a8d8ff' }}
-        optics={CHIP_OPTICS}
+        optics={GLASS_OPTICS}
       >
         {squad.memberCount}/{squad.maxMembers} участника
       </Glass>
@@ -51,7 +51,7 @@ export function SquadCard({ squad, onDismiss }: SquadCardProps) {
               key={d.id}
               className="rounded-full px-2 py-0.5 text-xs font-bold text-(--text)"
               style={{ background: 'var(--tint-pink)' }}
-              optics={CHIP_OPTICS}
+              optics={GLASS_OPTICS}
             >
               {d.name}
             </Glass>
@@ -60,7 +60,7 @@ export function SquadCard({ squad, onDismiss }: SquadCardProps) {
             <Glass
               className="rounded-full px-2 py-0.5 text-xs font-bold text-(--text)"
               style={{ background: 'var(--tint-pink)' }}
-              optics={CHIP_OPTICS}
+              optics={GLASS_OPTICS}
             >
               +{extraDistricts} ещё
             </Glass>

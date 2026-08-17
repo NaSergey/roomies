@@ -6,6 +6,9 @@ export interface FeedQueryParams {
   budgetMin?: number;
   budgetMax?: number;
   districtIds?: number[];
+  // Это НЕ «показать курящих», а «моя терпимость на этот заход»: false
+  // ужесточает выдачу до некурящих, true снимает ограничение и пускает всех.
+  // Бэк подставляет их вместо моих smokingOk/petsOk из профиля.
   smokingOk?: boolean;
   petsOk?: boolean;
   guestsPref?: 'rarely' | 'sometimes' | 'often';
@@ -29,8 +32,12 @@ export interface FeedCandidate {
     workFromHome: number | null;
   };
   matchScore: number;
+  // smokingOk/petsOk — терпимость человека, smokes/hasPets — как он живёт.
+  // Карточка показывает второе: «не курит» должно означать именно это.
   smokingOk: boolean;
   petsOk: boolean;
+  smokes: boolean;
+  hasPets: boolean;
   guestsPref: 'rarely' | 'sometimes' | 'often';
   matchReasons: string[];
   matchRisks?: string[];

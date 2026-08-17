@@ -2,6 +2,7 @@
 
 import { Glass } from '@samasante/liquid-glass';
 import type { ChatMessage } from '@/shared/lib/api';
+import { GLASS_OPTICS, GLASS_SURFACE_BG } from '@/shared/config';
 
 export interface MessageBubbleProps {
   message: ChatMessage;
@@ -24,9 +25,9 @@ export function MessageBubble({ message, isOwn, callInviteSlot, agreementSlot }:
             className="rounded-xl px-4 py-2 text-sm text-(--text)"
             style={{
               background:
-                'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+                GLASS_SURFACE_BG,
             }}
-            optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+            optics={GLASS_OPTICS}
           >
             📞 Созвон
           </Glass>

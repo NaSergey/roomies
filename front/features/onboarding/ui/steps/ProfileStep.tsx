@@ -1,20 +1,17 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
-import { ApiError, getVibeTags, mediaUrl, uploadPhoto, type VibeTag } from '@/shared/lib/api';
+import { useRef, useState } from 'react';
+import { ApiError, mediaUrl, uploadPhoto } from '@/shared/lib/api';
+import { useVibeTagsQuery } from '@/shared/lib/query';
 import { getWebApp, haptic } from '@/shared/lib/telegram';
 import { Chip } from '@/shared/ui/Chip';
 import { TextInput } from '@/shared/ui/TextInput';
-import type { OnboardingState, ProfilePayload } from '../../model/types';
+import type { ProfilePayload, StepChromeProps } from '../../model/types';
 import { OnboardingLayout } from '../OnboardingLayout';
 
-interface ProfileStepProps {
-  state: OnboardingState;
-  step: number;
-  totalSteps: number;
+interface ProfileStepProps extends StepChromeProps {
   onSubmit: (payload: ProfilePayload) => void;
-  onBack?: () => void;
 }
 
 export function ProfileStep({
@@ -23,6 +20,8 @@ export function ProfileStep({
   totalSteps,
   onSubmit,
   onBack,
+  onDraft,
+  direction,
 }: ProfileStepProps) {
   const webApp = getWebApp();
   const telegramUser = webApp?.initDataUnsafe?.user;
@@ -34,29 +33,20 @@ export function ProfileStep({
   const [selectedTagIds, setSelectedTagIds] = useState<number[]>(
     state.answers.vibeTagIds ?? [],
   );
-  const [tags, setTags] = useState<VibeTag[]>([]);
-  const [loadingTags, setLoadingTags] = useState(true);
-  const [tagsError, setTagsError] = useState(false);
+  // Справочник тегов через общий слой запросов (staleTime: Infinity): шаг
+  // размонтируется на каждом «назад», и раньше теги грузились заново.
+  const { data: tags = [], isError: tagsError, refetch: refetchTags } =
+    useVibeTagsQuery();
 
   // Фото: у Telegram-пользователей стартуем с их аватаркой, но её (как и заглушку
   // для браузерных аккаунтов) можно заменить своей — реальная загрузка на сервер.
-  const [photoUrl, setPhotoUrl] = useState<string | null>(telegramPhotoUrl);
+  // Уже загруженное фото переживает уход назад — оно лежит в черновике ответов.
+  const [photoUrl, setPhotoUrl] = useState<string | null>(
+    state.answers.photoUrls[0] ?? telegramPhotoUrl,
+  );
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  function loadTags() {
-    setLoadingTags(true);
-    setTagsError(false);
-    getVibeTags()
-      .then(setTags)
-      .catch(() => setTagsError(true))
-      .finally(() => setLoadingTags(false));
-  }
-
-  useEffect(() => {
-    loadTags();
-  }, []);
 
   function toggleTag(id: number) {
     haptic('light');
@@ -86,13 +76,26 @@ export function ProfileStep({
 
   const canSubmit = name.trim().length >= 2 && selectedTagIds.length >= 1;
 
+  // Уходя назад, сохраняем набранное: имя, теги и уже загруженное фото.
+  const handleBack =
+    onBack &&
+    (() => {
+      onDraft?.({
+        name,
+        vibeTagIds: selectedTagIds,
+        photoUrls: photoUrl ? [photoUrl] : [],
+      });
+      onBack();
+    });
+
   return (
     <OnboardingLayout
       step={step}
       totalSteps={totalSteps}
       title="Расскажи о себе"
       subtitle="Имя, фото и три тега"
-      onBack={onBack}
+      onBack={handleBack}
+      direction={direction}
       onNext={() =>
         onSubmit({
           name: name.trim(),
@@ -163,7 +166,14 @@ export function ProfileStep({
         onChange={(e) => setName(e.target.value)}
         placeholder="Как тебя зовут?"
         aria-label="Имя"
-        className="h-14 w-full px-4 text-center text-base font-bold"
+        // shrink-0 обязателен: поле — прямой ребёнок flex-колонки шага, и на
+        // этом шаге контента больше всего (фото, имя, два десятка тегов).
+        // Без него flex-shrink съедал заданную высоту, и поле схлопывалось
+        // до высоты строки — 23px вместо 56.
+        // Цвет — как у остального текста анкеты (--text-deep), а не общий
+        // --text из базы TextInput: иначе поле выделялось чёрным на синем,
+        // и переход от плейсхолдера к набранному читался сменой цвета.
+        className="h-14 w-full shrink-0 px-4 text-center text-base font-bold text-(--text-deep)"
       />
 
       <div className="flex flex-col gap-2">
@@ -171,16 +181,16 @@ export function ProfileStep({
           Твои теги (до 3)
         </span>
 
-        {loadingTags ? (
-          <div className="flex flex-wrap gap-2">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="h-9 w-24 animate-pulse rounded-full bg-white/15" />
-            ))}
-          </div>
-        ) : tagsError ? (
+        {/* Пока теги едут — пусто, без плейсхолдеров: они успевали моргнуть
+            и перекроить сетку чипов под собой. */}
+        {tagsError ? (
           <p className="text-sm text-(--text-deep) opacity-75" role="alert">
             Не удалось загрузить теги.{' '}
-            <button type="button" onClick={loadTags} className="underline text-(--text-deep)">
+            <button
+              type="button"
+              onClick={() => refetchTags()}
+              className="underline text-(--text-deep)"
+            >
               Обновить
             </button>
           </p>

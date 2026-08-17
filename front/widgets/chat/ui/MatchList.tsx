@@ -1,8 +1,9 @@
 'use client';
 
-import { useMatchesQuery } from '@/features/chat';
+import { useMatchesQuery, usePrefetchChats } from '@/features/chat';
 import { mediaUrl } from '@/shared/lib/api';
 import type { MatchListItem } from '@/shared/lib/api';
+import { SkeletonGroup } from '@/shared/ui/Skeleton';
 
 export interface MatchListProps {
   onSelect: (
@@ -92,16 +93,18 @@ function MatchRow({
 export function MatchList({ onSelect }: MatchListProps) {
   const { data: matches, isPending, isError, error } = useMatchesQuery();
 
+  // Пока пользователь просматривает список, переписки уже подтягиваются в кэш —
+  // тап по мэтчу открывает готовый чат, а не пустой экран. Хук вызывается до
+  // всех ранних return: порядок хуков должен быть неизменным между рендерами.
+  usePrefetchChats((matches ?? []).map((m) => m.chatId));
+
   if (isPending) {
     return (
-      <div className="flex flex-col gap-0 flex-1">
-        {[0, 1, 2].map((i) => (
-          <div
-            key={i}
-            className="h-16 animate-pulse rounded-xl bg-white/10 mx-3 mb-2"
-          />
-        ))}
-      </div>
+      <SkeletonGroup
+        count={3}
+        wrapperClassName="flex flex-1 flex-col gap-0"
+        className="mx-3 mb-2 h-16 rounded-xl"
+      />
     );
   }
 

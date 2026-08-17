@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { getDistricts, type District } from '@/shared/lib/api';
+import { useEffect } from 'react';
+import { useDistrictsQuery, DEFAULT_CITY_ID } from '@/shared/lib/query';
 import { BottomSheet } from '@/shared/ui/BottomSheet';
 import { Button } from '@/shared/ui/Button';
 import { Chip } from '@/shared/ui/Chip';
@@ -36,29 +36,17 @@ interface FilterSheetProps {
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="flex flex-col gap-2">
-      <span className="text-xs font-black uppercase tracking-widest text-muted">{label}</span>
+      <span className="text-xs font-black uppercase tracking-widest text-white">{label}</span>
       <div className="flex flex-wrap gap-2">{children}</div>
     </div>
   );
 }
 
 export function FilterSheet({ open, filters, onChange, onApply, onClose }: FilterSheetProps) {
-  const [districts, setDistricts] = useState<District[]>([]);
-  const districtsRef = useRef<District[]>([]);
-
-  useEffect(() => {
-    if (!open) return;
-    if (districtsRef.current.length > 0) {
-      setDistricts(districtsRef.current);
-      return;
-    }
-    getDistricts(1)
-      .then((data) => {
-        districtsRef.current = data;
-        setDistricts(data);
-      })
-      .catch(() => {});
-  }, [open]);
+  // Намеренно БЕЗ привязки к open: шторка смонтирована всегда (закрытая — это
+  // translate-y-full, а не размонтирование), поэтому запрос уходит ещё при входе
+  // на ленту и к моменту открытия данные уже в кэше — панель не растёт рывком.
+  const { data: districts = [] } = useDistrictsQuery(DEFAULT_CITY_ID);
 
   useEffect(() => {
     if (!open) return;
@@ -111,16 +99,20 @@ export function FilterSheet({ open, filters, onChange, onApply, onClose }: Filte
           </Row>
         )}
 
+        {/* Фильтр подменяет мою терпимость на один заход, а не описывает
+            кандидата: «только некурящие» ужесточает выдачу, «можно курящих» —
+            снимает ограничение. Третий вариант не «всё равно», а возврат к
+            тому, что стоит у меня в профиле, — так и подписан. */}
         <Row label="Курение">
-          <Chip active={filters.smokingOk === false} onClick={() => set('smokingOk', false)}>🚭 Не курят</Chip>
-          <Chip active={filters.smokingOk === true}  onClick={() => set('smokingOk', true)}>🚬 Курение ок</Chip>
-          <Chip active={filters.smokingOk === null}  onClick={() => set('smokingOk', null)}>Всё равно</Chip>
+          <Chip active={filters.smokingOk === false} onClick={() => set('smokingOk', false)}>🚭 Только некурящие</Chip>
+          <Chip active={filters.smokingOk === true}  onClick={() => set('smokingOk', true)}>🚬 Можно курящих</Chip>
+          <Chip active={filters.smokingOk === null}  onClick={() => set('smokingOk', null)}>Как в профиле</Chip>
         </Row>
 
         <Row label="Питомцы">
-          <Chip active={filters.petsOk === true}  onClick={() => set('petsOk', true)}>🐾 Есть питомцы</Chip>
-          <Chip active={filters.petsOk === false} onClick={() => set('petsOk', false)}>🚫 Нет питомцев</Chip>
-          <Chip active={filters.petsOk === null}  onClick={() => set('petsOk', null)}>Всё равно</Chip>
+          <Chip active={filters.petsOk === true}  onClick={() => set('petsOk', true)}>🐾 Можно с питомцем</Chip>
+          <Chip active={filters.petsOk === false} onClick={() => set('petsOk', false)}>🚫 Только без питомцев</Chip>
+          <Chip active={filters.petsOk === null}  onClick={() => set('petsOk', null)}>Как в профиле</Chip>
         </Row>
 
         <Row label="Гости">

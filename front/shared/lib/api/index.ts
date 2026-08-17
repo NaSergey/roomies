@@ -5,6 +5,7 @@ export {
   getAccessToken,
   setAccessToken,
   clearAccessToken,
+  onAccessTokenCleared,
 } from './token-storage';
 export {
   loginWithTelegram,
@@ -38,6 +39,13 @@ export {
   type AgreementItem,
   type AgreementData,
 } from './chat';
+export {
+  sendFeedback,
+  getMyFeedback,
+  type FeedbackCategory,
+  type CreateFeedbackPayload,
+  type FeedbackItem,
+} from './feedback';
 export {
   createSquad,
   getMySquad,

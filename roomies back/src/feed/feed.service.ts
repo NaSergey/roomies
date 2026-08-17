@@ -23,6 +23,8 @@ type UserWithScores = {
   budgetMax: number | null;
   smokingOk: boolean;
   petsOk: boolean;
+  smokes: boolean;
+  hasPets: boolean;
   guestsPref: GuestsPreference;
   noiseLevel: object | null;
   cleanliness: object | null;
@@ -40,6 +42,8 @@ type UserScoreFields = {
   budgetMax: number | null;
   smokingOk: boolean;
   petsOk: boolean;
+  smokes: boolean;
+  hasPets: boolean;
   guestsPref: GuestsPreference;
   noiseLevel: object | null;
   cleanliness: object | null;
@@ -48,7 +52,10 @@ type UserScoreFields = {
   workFromHome: object | null;
 };
 
-function hasHardConflict(me: UserScoreFields, candidate: UserScoreFields): boolean {
+export function hasHardConflict(
+  me: UserScoreFields,
+  candidate: UserScoreFields,
+): boolean {
   // Budget non-overlap
   if (
     me.budgetMax != null &&
@@ -65,13 +72,15 @@ function hasHardConflict(me: UserScoreFields, candidate: UserScoreFields): boole
     return true;
   }
 
-  // Smoking conflict: one requires no smoking, the other is OK with smoking
-  if (!me.smokingOk && candidate.smokingOk) return true;
-  if (!candidate.smokingOk && me.smokingOk) return true;
+  // Курение: конфликт только когда чьё-то «я курю» встречает чужое «не хочу
+  // рядом». Двое некурящих совместимы независимо от того, как каждый из них
+  // относится к курению вообще — раньше их разводило именно это.
+  if (candidate.smokes && !me.smokingOk) return true;
+  if (me.smokes && !candidate.smokingOk) return true;
 
-  // Pets conflict
-  if (!me.petsOk && candidate.petsOk) return true;
-  if (!candidate.petsOk && me.petsOk) return true;
+  // Питомцы — та же пара: важно, есть ли животное у одного и терпит ли второй.
+  if (candidate.hasPets && !me.petsOk) return true;
+  if (me.hasPets && !candidate.petsOk) return true;
 
   return false;
 }
@@ -148,10 +157,15 @@ export function generateMatchReasons(
     reasons.push('Похожий режим работы');
   }
 
-  if (!me.smokingOk && !candidate.smokingOk) {
+  // Именно «не курят», а не «не терпят курение»: до разделения полей эта
+  // строчка стояла на smokingOk и показывалась двоим курящим, которые лишь
+  // одинаково относятся к курению.
+  if (!me.smokes && !candidate.smokes) {
     reasons.push('Оба не курят');
   }
 
+  // Здесь наоборот важна терпимость, а не наличие животного: «любят питомцев»
+  // верно и для двоих, кто пока никого не завёл.
   if (me.petsOk && candidate.petsOk) {
     reasons.push('Оба любят питомцев');
   }
@@ -195,6 +209,8 @@ export class FeedService {
         budgetMax: true,
         smokingOk: true,
         petsOk: true,
+        smokes: true,
+        hasPets: true,
         guestsPref: true,
         noiseLevel: true,
         cleanliness: true,
@@ -239,9 +255,20 @@ export class FeedService {
       budgetFilter.push({ OR: [{ budgetMax: null }, { budgetMax: { gte: effectiveBudgetMin } }] });
     }
 
-    // Dealbreaker filters: query params override me's preferences
+    // Дилбрейкеры. Фильтр шторки переопределяет мою терпимость (ужесточить
+    // выдачу на один заход), но НЕ моё собственное поведение: кто курит, тот
+    // курит, и скрывать это от тех, кто курения не терпит, нельзя.
     const effectiveSmokingOk = query.smokingOk !== undefined ? query.smokingOk : me.smokingOk;
     const effectivePetsOk = query.petsOk !== undefined ? query.petsOk : me.petsOk;
+
+    // Та же пара условий, что и в hasHardConflict, только на стороне SQL —
+    // иначе из базы тянутся заведомо несовместимые и молча отсеиваются уже в
+    // памяти, съедая лимит в 100 кандидатов.
+    const dealbreakerFilter: Prisma.UserWhereInput[] = [];
+    if (!effectiveSmokingOk) dealbreakerFilter.push({ smokes: false });
+    if (me.smokes) dealbreakerFilter.push({ smokingOk: true });
+    if (!effectivePetsOk) dealbreakerFilter.push({ hasPets: false });
+    if (me.hasPets) dealbreakerFilter.push({ petsOk: true });
 
     const whereClause: Prisma.UserWhereInput = {
       id: { not: userId, notIn: swipedIds },
@@ -249,9 +276,7 @@ export class FeedService {
       scenario: { in: compatibleScenarios },
       onboardingCompleted: true,
       isActive: true,
-      smokingOk: effectiveSmokingOk,
-      petsOk: effectivePetsOk,
-      AND: budgetFilter,
+      AND: [...budgetFilter, ...dealbreakerFilter],
     };
 
     // Optional guestsPref filter
@@ -275,6 +300,8 @@ export class FeedService {
         budgetMax: true,
         smokingOk: true,
         petsOk: true,
+        smokes: true,
+        hasPets: true,
         guestsPref: true,
         noiseLevel: true,
         cleanliness: true,
@@ -302,6 +329,8 @@ export class FeedService {
       budgetMax: me.budgetMax,
       smokingOk: me.smokingOk,
       petsOk: me.petsOk,
+      smokes: me.smokes,
+      hasPets: me.hasPets,
       guestsPref: me.guestsPref,
       noiseLevel: me.noiseLevel,
       cleanliness: me.cleanliness,
@@ -331,6 +360,8 @@ export class FeedService {
       budgetMax: c.budgetMax,
       smokingOk: c.smokingOk,
       petsOk: c.petsOk,
+      smokes: c.smokes,
+      hasPets: c.hasPets,
       guestsPref: c.guestsPref,
       photos: c.photos.map((p) => p.url),
       vibeTags: c.vibeTags.map((vt) => ({ id: vt.tag.id, label: vt.tag.label })),

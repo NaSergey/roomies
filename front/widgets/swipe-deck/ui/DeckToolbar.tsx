@@ -4,15 +4,16 @@ import { Glass } from '@samasante/liquid-glass';
 import { haptic } from '@/shared/lib/telegram';
 import type { DeckFilters } from './FilterSheet';
 import { DEFAULT_FILTERS } from './FilterSheet';
+import { GLASS_OPTICS, GLASS_SURFACE_BG } from '@/shared/config';
 
 const FILTER_LABELS: Partial<Record<string, string>> = {
   low: 'до 20 тыс.',
   mid: '20–35 тыс.',
   high: '35 тыс.+',
-  'smokingOk:false': '🚭 Не курят',
-  'smokingOk:true': '🚬 Курение ок',
-  'petsOk:true': '🐾 Питомцы',
-  'petsOk:false': '🚫 Без питомцев',
+  'smokingOk:false': '🚭 Только некурящие',
+  'smokingOk:true': '🚬 Можно курящих',
+  'petsOk:true': '🐾 Можно с питомцем',
+  'petsOk:false': '🚫 Только без питомцев',
   'guestsPref:often': 'Гости часто',
   'guestsPref:sometimes': 'Гости иногда',
   'guestsPref:rarely': 'Гости редко',
@@ -58,9 +59,9 @@ function ActiveChips({ filters }: { filters: DeckFilters }) {
           className="shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold text-white"
           style={{
             background:
-              'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+              GLASS_SURFACE_BG,
           }}
-          optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+          optics={GLASS_OPTICS}
         >
           {label}
         </Glass>
@@ -78,7 +79,7 @@ export function DeckToolbar({ filters, onOpenFilters }: DeckToolbarProps) {
       <button
         type="button"
         onClick={() => { haptic('light'); onOpenFilters(); }}
-        className="relative flex shrink-0 items-center gap-1.5 rounded-full bg-glass backdrop-glass border-glass px-3 py-1.5 text-sm font-black text-white shadow-glass transition-transform active:scale-95"
+        className="relative flex shrink-0 items-center gap-1.5 rounded-full bg-glass backdrop-glass border-glass px-3 py-1.5 text-sm font-black text-[#14140f] shadow-glass transition-transform active:scale-95"
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden>
           <line x1="4" y1="6" x2="20" y2="6" />
@@ -94,7 +95,7 @@ export function DeckToolbar({ filters, onOpenFilters }: DeckToolbarProps) {
       </button>
 
       {/* Активные чипы — горизонтальный скролл */}
-      <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto no-scrollbar">
         <ActiveChips filters={filters} />
       </div>
     </div>

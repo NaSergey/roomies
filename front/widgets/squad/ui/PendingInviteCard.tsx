@@ -4,6 +4,7 @@ import { Glass } from '@samasante/liquid-glass';
 import { useRespondInvite } from '@/features/squad';
 import type { SquadInvite } from '@/shared/lib/api';
 import { Button } from '@/shared/ui/Button';
+import { GLASS_OPTICS } from '@/shared/config';
 
 interface PendingInviteCardProps {
   invite: SquadInvite;
@@ -18,7 +19,7 @@ export function PendingInviteCard({ invite }: PendingInviteCardProps) {
       // display через style — <Glass> перебивает класс flex своим инлайновым
       // inline-block (см. Card.tsx).
       style={{ display: 'flex', background: 'var(--tint-sky)' }}
-      optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+      optics={GLASS_OPTICS}
     >
       <p className="text-sm font-bold text-(--text)">
         Вас приглашают в сквад {invite.squadName ?? 'без названия'} ({invite.memberCount} участника)

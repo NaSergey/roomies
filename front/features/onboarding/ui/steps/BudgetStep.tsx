@@ -3,17 +3,13 @@
 import { useState } from 'react';
 import { haptic } from '@/shared/lib/telegram';
 import { TextInput } from '@/shared/ui/TextInput';
-import type { BudgetPayload, OnboardingState } from '../../model/types';
+import type { BudgetPayload, StepChromeProps } from '../../model/types';
 import { DateField } from '../DateField';
 import { OnboardingLayout } from '../OnboardingLayout';
 import { RadioRow } from '../RadioRow';
 
-interface BudgetStepProps {
-  state: OnboardingState;
-  step: number;
-  totalSteps: number;
+interface BudgetStepProps extends StepChromeProps {
   onSubmit: (payload: BudgetPayload) => void;
-  onBack?: () => void;
 }
 
 const DURATION_OPTIONS: { value: string; label: string; hint: string }[] = [
@@ -29,6 +25,8 @@ export function BudgetStep({
   totalSteps,
   onSubmit,
   onBack,
+  onDraft,
+  direction,
 }: BudgetStepProps) {
   const [budgetMin, setBudgetMin] = useState<string>(
     state.answers.budgetMin !== null ? String(state.answers.budgetMin) : '',
@@ -52,13 +50,28 @@ export function BudgetStep({
       ? 'Минимум не может быть больше максимума'
       : null;
 
+  // Уходя назад, сохраняем набранное — включая незаконченный ввод. Пустые поля
+  // кладём как null, а не 0: ноль означал бы «бюджет нулевой».
+  const handleBack =
+    onBack &&
+    (() => {
+      onDraft?.({
+        budgetMin: budgetMin ? Number(budgetMin) : null,
+        budgetMax: budgetMax ? Number(budgetMax) : null,
+        moveInDate: moveInDate || null,
+        stayDurationMonths: stayDuration ? Number(stayDuration) : null,
+      });
+      onBack();
+    });
+
   return (
     <OnboardingLayout
       step={step}
       totalSteps={totalSteps}
       title="Какой у тебя бюджет?"
       subtitle="Аренда в месяц, ₽"
-      onBack={onBack}
+      onBack={handleBack}
+      direction={direction}
       onNext={() =>
         onSubmit({
           budgetMin: minVal,
@@ -157,7 +170,13 @@ function BudgetInput({
         onChange={(e) => onChange(e.target.value.replace(/\D/g, '').slice(0, 7))}
         placeholder={placeholder}
         aria-label={label}
-        className="h-14 w-full pl-4 pr-10 text-center text-base font-bold"
+        // Цвет тот же, что у всего текста анкеты. В базе TextInput зашит общий
+        // --text (почти чёрный) — на опросных экранах он выбивался из синего
+        // набора, а плейсхолдер тем же цветом с прозрачностью выглядел так,
+        // будто поле перекрашивается, стоит начать вводить.
+        // shrink-0 — по той же причине, что у поля имени: не дать flex-колонке
+        // съесть высоту, когда шаг не помещается в экран.
+        className="h-14 w-full shrink-0 pl-4 pr-10 text-center text-base font-bold text-(--text-deep)"
       />
 
       {/* Свои стрелки вместо системных: те рисуются движком и не поддаются

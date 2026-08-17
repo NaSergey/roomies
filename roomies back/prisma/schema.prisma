@@ -63,6 +63,13 @@ enum ReportStatus {
   resolved
 }
 
+// Отзыв о САМОМ приложении (не о человеке — на людей жалуются через Report).
+enum AppFeedbackCategory {
+  bug
+  idea
+  other
+}
+
 enum AgreementStatus {
   draft
   accepted
@@ -157,9 +164,19 @@ model User {
   moveInDate         DateTime? @map("move_in_date") @db.Date
   stayDurationMonths Int?      @map("stay_duration_months")
 
-  // Непереговорные условия
+  // Непереговорные условия.
+  //
+  // Терпимость и собственное поведение — РАЗНЫЕ поля, и путать их нельзя.
+  // smokingOk/petsOk отвечают на «мне ок, если сосед курит / держит питомца»,
+  // smokes/hasPets — на «я курю / у меня есть питомец». Пока это была одна
+  // галочка, лента фильтровалась на точное совпадение флага, и двое некурящих
+  // расходились только потому, что один из них спокойно относится к курению.
+  // Конфликт теперь считается по паре: он курит И я не терплю (или наоборот) —
+  // см. hasHardConflict в feed.service.ts.
   smokingOk  Boolean          @default(false) @map("smoking_ok")
   petsOk     Boolean          @default(false) @map("pets_ok")
+  smokes     Boolean          @default(false) @map("smokes")
+  hasPets    Boolean          @default(false) @map("has_pets")
   guestsPref GuestsPreference @default(sometimes) @map("guests_pref")
 
   // Шкалы образа жизни 0.0–1.0 (рассчитываются из Vibe Quiz)
@@ -217,6 +234,7 @@ model User {
   behavioralGiven    BehavioralEvent[]  @relation("BehavioralActor")
   behavioralReceived BehavioralEvent[]  @relation("BehavioralTarget")
   feedback           PostMatchFeedback[]
+  appFeedback        AppFeedback[]
   verifications      Verification[]
   reportsGiven       Report[]           @relation("ReportReporter")
   reportsReceived    Report[]           @relation("ReportReported")
@@ -695,6 +713,31 @@ model PushToken {
 
   @@index([userId])
   @@map("push_tokens")
+}
+
+// ============================================================
+// ОБРАТНАЯ СВЯЗЬ О ПРИЛОЖЕНИИ
+// ============================================================
+
+// Отличается от PostMatchFeedback: тот про конкретный мэтч и кормит алгоритм,
+// этот — сообщение команде о самом приложении.
+model AppFeedback {
+  id       Int                 @id @default(autoincrement())
+  userId   Int                 @map("user_id")
+  category AppFeedbackCategory
+  message  String              @db.VarChar(2000)
+  // Куда именно смотрел человек, когда писал — без этого «не работает» нечем
+  // локализовать. Заполняет клиент, поле необязательное.
+  screen   String?             @db.VarChar(50)
+  // Ответили ли уже. Админки нет, читаем через Prisma Studio.
+  handled  Boolean             @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([handled, createdAt(sort: Desc)])
+  @@map("app_feedback")
 }
 
 model NotificationPreference {

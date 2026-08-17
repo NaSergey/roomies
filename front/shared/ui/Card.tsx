@@ -2,14 +2,13 @@
 
 import { Glass } from '@samasante/liquid-glass';
 import type { CSSProperties, HTMLAttributes, ReactNode } from 'react';
+import { GLASS_OPTICS, GLASS_SURFACE_BG } from '@/shared/config';
 
 // Стеклянная карточка через <Glass> (@samasante/liquid-glass) — та же
 // нейтральная стеклянная подложка, что раньше давала CSS-утилита bg-glass
 // (диагональный блик поверх полупрозрачной заливки), плюс настоящая
 // SVG-рефракция библиотеки поверх неё.
 // Раскладку/паддинг/фон-отступы оставляем на месте вызова через className.
-const NEUTRAL_GLASS_BG =
-  'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)';
 
 // <Glass> проставляет СВОЙ инлайновый `display: inline-block`, а инлайн-стиль
 // сильнее класса — поэтому раскладочный класс в className (flex/grid) молча не
@@ -37,11 +36,11 @@ export function Card({
     <Glass
       className={`rounded-2xl ${className}`}
       style={{
-        background: NEUTRAL_GLASS_BG,
+        background: GLASS_SURFACE_BG,
         ...(display ? { display } : null),
         ...(style as CSSProperties),
       }}
-      optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+      optics={GLASS_OPTICS}
       {...rest}
     >
       {children}

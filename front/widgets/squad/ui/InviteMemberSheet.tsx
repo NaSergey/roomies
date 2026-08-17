@@ -6,6 +6,7 @@ import { Glass } from '@samasante/liquid-glass';
 import { useMatchesQuery } from '@/features/chat';
 import { mediaUrl } from '@/shared/lib/api';
 import { useInviteToSquad } from '@/features/squad';
+import { GLASS_OPTICS, GLASS_SURFACE_BG } from '@/shared/config';
 
 interface InviteMemberSheetProps {
   open: boolean;
@@ -50,7 +51,7 @@ export function InviteMemberSheet({ open, onClose, squadId }: InviteMemberSheetP
         </div>
 
         {/* Match list */}
-        <div className="overflow-y-auto flex-1 p-4 flex flex-col gap-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="overflow-y-auto flex-1 p-4 flex flex-col gap-2 no-scrollbar">
           {matches.length === 0 ? (
             <p className="text-sm text-muted text-center py-8">Нет матчей для приглашения</p>
           ) : (
@@ -66,9 +67,9 @@ export function InviteMemberSheet({ open, onClose, squadId }: InviteMemberSheetP
                   style={{
                     display: 'flex',
                     background:
-                      'linear-gradient(120deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.35) 12%, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.28) 100%), rgba(255,255,255,0.14)',
+                      GLASS_SURFACE_BG,
                   }}
-                  optics={{ frost: 2, sheen: 0.6, dispersion: 0.15, bend: 0.4 }}
+                  optics={GLASS_OPTICS}
                 >
                   {/* Avatar */}
                   <div className="h-10 w-10 shrink-0 rounded-full border-glass bg-white/10 flex items-center justify-center text-sm font-bold overflow-hidden">

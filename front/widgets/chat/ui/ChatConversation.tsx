@@ -116,7 +116,7 @@ export function ChatConversation({
       {/* Messages area */}
       <div
         ref={messagesContainerRef}
-        className="flex-1 overflow-y-auto px-3 py-2 flex flex-col"
+        className="flex-1 overflow-y-auto px-3 py-2 flex flex-col no-scrollbar"
       >
         {messages.length === 0 ? (
           <SmartChips onChipTap={(text) => sendMutation.mutate(text)} />
